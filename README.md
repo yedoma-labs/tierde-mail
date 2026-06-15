@@ -1,5 +1,17 @@
 # @yedoma-labs/tierde-mail
 
+<picture>
+  <source media="(max-width: 640px)" srcset="https://raw.githubusercontent.com/yedoma-labs/assets/main/resized/banner-resized-mobile.png">
+  <img src="https://raw.githubusercontent.com/yedoma-labs/assets/main/resized/banner-resized.png" alt="Project Header">
+</picture>
+
+[![CI](https://github.com/yedoma-labs/tierde-mail/actions/workflows/ci.yml/badge.svg)](https://github.com/yedoma-labs/tierde-mail/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/@yedoma-labs/tierde-mail.svg)](https://www.npmjs.com/package/@yedoma-labs/tierde-mail)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.4-blue.svg)](https://www.typescriptlang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+> **тиэрдэ** (*tierde*) — Yakutian (Sakha) for "deliver / forward"
+
 Modern email library for Node.js — JSX templates, multi-provider sending, TypeScript-first.
 
 ```
