@@ -21,16 +21,16 @@ describe('renderEmail', () => {
     expect(html).toContain('https://example.com');
   });
 
-  it('inlines CSS styles', () => {
+  it('inlines CSS styles and preserves media queries in style block', () => {
     const html = renderEmail(
       <EmailTemplate>
         <Heading>Test</Heading>
       </EmailTemplate>,
     );
-    // juice should inline the style attribute
     expect(html).toContain('style=');
-    // no <style> tag with our content left (juice removes them)
-    expect(html).not.toContain('<style>@media');
+    // @media at-rules preserved in <style> block for dark mode
+    expect(html).toContain('@media');
+    expect(html).toContain('prefers-color-scheme');
   });
 
   it('includes preview text when provided', () => {

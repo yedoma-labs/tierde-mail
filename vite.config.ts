@@ -66,7 +66,7 @@ export default defineConfig({
         '@yedoma-labs/suruk-logger',
         '@yedoma-labs/tuuru-chrono-tz',
         'pino',
-        'juice',
+        '@css-inline/css-inline',
         'html-to-text',
       ],
       output: {
