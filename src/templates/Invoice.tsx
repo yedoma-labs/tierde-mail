@@ -8,6 +8,36 @@ import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
 import type { CSSProperties } from 'react';
 
+export interface InvoiceStrings {
+  subject: (invoiceNumber: string, appName: string) => string;
+  heading: (invoiceNumber: string) => string;
+  greeting: (customerName: string) => string;
+  intro: string;
+  colItem: string;
+  colQty: string;
+  colPrice: string;
+  colTotal: string;
+  totalLabel: string;
+  supportNote: (supportEmail: string) => string;
+  replyNote: string;
+  footer: (year: string, appName: string) => string;
+}
+
+export const INVOICE_STRINGS: InvoiceStrings = {
+  subject: (invoiceNumber, appName) => `Invoice #${invoiceNumber} from ${appName}`,
+  heading: (invoiceNumber) => `Invoice #${invoiceNumber}`,
+  greeting: (customerName) => `Hi ${customerName},`,
+  intro: "Thank you for your business. Here's your invoice summary.",
+  colItem: 'Item',
+  colQty: 'Qty',
+  colPrice: 'Price',
+  colTotal: 'Total',
+  totalLabel: 'Total',
+  supportNote: (supportEmail) => `Questions about this invoice? Contact us at ${supportEmail}.`,
+  replyNote: 'Questions? Reply to this email.',
+  footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
+};
+
 export interface InvoiceLineItem {
   name: string;
   description?: string;
@@ -22,6 +52,9 @@ export interface InvoiceProps {
   currency?: string;
   appName?: string;
   supportEmail?: string;
+  locale?: string;
+  dir?: 'ltr' | 'rtl';
+  strings?: Partial<InvoiceStrings>;
 }
 
 const tableStyle: CSSProperties = {
@@ -55,13 +88,15 @@ const totalRowStyle: CSSProperties = {
   borderTop: '2px solid #e5e7eb',
 };
 
-function formatCurrency(amount: number, currency: string): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
+function formatCurrency(amount: number, currency: string, locale?: string): string {
+  return new Intl.NumberFormat(locale ?? 'en-US', { style: 'currency', currency }).format(amount);
 }
 
 export const Invoice = defineEmail<InvoiceProps>({
-  subject: ({ appName, invoiceNumber }) =>
-    `Invoice #${invoiceNumber} from ${appName ?? 'Us'}`,
+  subject: ({ appName = 'Us', invoiceNumber, strings }) => {
+    const s = { ...INVOICE_STRINGS, ...strings };
+    return s.subject(invoiceNumber, appName);
+  },
   component: ({
     customerName,
     invoiceNumber,
@@ -69,22 +104,31 @@ export const Invoice = defineEmail<InvoiceProps>({
     currency = 'USD',
     appName = 'Our App',
     supportEmail,
+    locale,
+    dir,
+    strings,
   }) => {
+    const s = { ...INVOICE_STRINGS, ...strings };
+    const year = currentYear(locale);
     const total = items.reduce((sum, item) => sum + item.price * (item.quantity ?? 1), 0);
 
     return (
-      <EmailTemplate preview={`Invoice #${invoiceNumber} — ${formatCurrency(total, currency)}`}>
-        <Heading>Invoice #{invoiceNumber}</Heading>
-        <Text>Hi {customerName},</Text>
-        <Text>Thank you for your business. Here's your invoice summary.</Text>
+      <EmailTemplate
+        preview={`Invoice #${invoiceNumber} — ${formatCurrency(total, currency, locale)}`}
+        lang={locale}
+        dir={dir}
+      >
+        <Heading>{s.heading(invoiceNumber)}</Heading>
+        <Text>{s.greeting(customerName)}</Text>
+        <Text>{s.intro}</Text>
         <Section>
           <table style={tableStyle} cellPadding="0" cellSpacing="0">
             <thead>
               <tr>
-                <th style={thStyle}>Item</th>
-                <th style={{ ...thStyle, textAlign: 'right' }}>Qty</th>
-                <th style={{ ...thStyle, textAlign: 'right' }}>Price</th>
-                <th style={{ ...thStyle, textAlign: 'right' }}>Total</th>
+                <th style={thStyle}>{s.colItem}</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>{s.colQty}</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>{s.colPrice}</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>{s.colTotal}</th>
               </tr>
             </thead>
             <tbody>
@@ -103,19 +147,19 @@ export const Invoice = defineEmail<InvoiceProps>({
                   </td>
                   <td style={{ ...tdStyle, textAlign: 'right' }}>{item.quantity ?? 1}</td>
                   <td style={{ ...tdStyle, textAlign: 'right' }}>
-                    {formatCurrency(item.price, currency)}
+                    {formatCurrency(item.price, currency, locale)}
                   </td>
                   <td style={{ ...tdStyle, textAlign: 'right' }}>
-                    {formatCurrency(item.price * (item.quantity ?? 1), currency)}
+                    {formatCurrency(item.price * (item.quantity ?? 1), currency, locale)}
                   </td>
                 </tr>
               ))}
               <tr>
                 <td style={totalRowStyle} colSpan={3}>
-                  Total
+                  {s.totalLabel}
                 </td>
                 <td style={{ ...totalRowStyle, textAlign: 'right' }}>
-                  {formatCurrency(total, currency)}
+                  {formatCurrency(total, currency, locale)}
                 </td>
               </tr>
             </tbody>
@@ -123,11 +167,9 @@ export const Invoice = defineEmail<InvoiceProps>({
         </Section>
         <Hr />
         <Text muted size="sm">
-          {supportEmail
-            ? `Questions about this invoice? Contact us at ${supportEmail}.`
-            : 'Questions? Reply to this email.'}
+          {supportEmail ? s.supportNote(supportEmail) : s.replyNote}
         </Text>
-        <Footer>© {currentYear()} {appName}. All rights reserved.</Footer>
+        <Footer>{s.footer(year, appName)}</Footer>
       </EmailTemplate>
     );
   },

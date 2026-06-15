@@ -5,6 +5,8 @@ interface EmailTemplateProps {
   backgroundColor?: string;
   fontFamily?: string;
   preview?: string;
+  lang?: string;
+  dir?: 'ltr' | 'rtl';
 }
 
 const bodyStyle: CSSProperties = {
@@ -36,9 +38,11 @@ export function EmailTemplate({
   backgroundColor = '#f4f4f4',
   fontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
   preview,
+  lang = 'en',
+  dir = 'ltr',
 }: EmailTemplateProps) {
   return (
-    <html lang="en">
+    <html lang={lang} dir={dir}>
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
