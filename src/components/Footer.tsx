@@ -1,11 +1,11 @@
-import type { ReactNode, CSSProperties } from 'react';
+import type { ReactNode, CSSProperties, ReactElement } from 'react';
 import { useTheme } from '../ThemeContext.js';
 
 interface FooterProps {
   children: ReactNode;
 }
 
-export function Footer({ children }: FooterProps) {
+export function Footer({ children }: FooterProps): ReactElement {
   const theme = useTheme();
   const style: CSSProperties = {
     padding: '24px 32px',

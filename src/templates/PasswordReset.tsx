@@ -7,6 +7,7 @@ import { Button } from '../components/Button.js';
 import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import type { Theme } from '../theme.js';
+import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface PasswordResetStrings {
   subject: (appName: string) => string;
@@ -43,7 +44,7 @@ export interface PasswordResetProps {
   theme?: Theme;
 }
 
-export const PasswordReset = defineEmail<PasswordResetProps>({
+export const PasswordReset: EmailTemplateType<PasswordResetProps> = defineEmail<PasswordResetProps>({
   subject: ({ appName = 'your', strings }) => {
     const s = { ...PASSWORD_RESET_STRINGS, ...strings };
     return s.subject(appName);

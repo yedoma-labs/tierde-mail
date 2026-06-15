@@ -7,6 +7,7 @@ import { Button } from '../components/Button.js';
 import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import type { Theme } from '../theme.js';
+import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface EmailVerificationStrings {
   subject: (appName: string) => string;
@@ -43,7 +44,7 @@ export interface EmailVerificationProps {
   theme?: Theme;
 }
 
-export const EmailVerification = defineEmail<EmailVerificationProps>({
+export const EmailVerification: EmailTemplateType<EmailVerificationProps> = defineEmail<EmailVerificationProps>({
   subject: ({ appName = 'your account', strings }) => {
     const s = { ...EMAIL_VERIFICATION_STRINGS, ...strings };
     return s.subject(appName);

@@ -1,8 +1,10 @@
+import type { ReactElement } from 'react';
+
 interface PreviewProps {
   children: string;
 }
 
-export function Preview({ children }: PreviewProps) {
+export function Preview({ children }: PreviewProps): ReactElement {
   return (
     <div
       style={{

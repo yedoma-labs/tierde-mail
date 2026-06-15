@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactElement } from 'react';
 
 interface ImageProps {
   src: string;
@@ -8,7 +8,7 @@ interface ImageProps {
   align?: 'left' | 'center' | 'right';
 }
 
-export function Image({ src, alt, width, height, align = 'center' }: ImageProps) {
+export function Image({ src, alt, width, height, align = 'center' }: ImageProps): ReactElement {
   const wrapperStyle: CSSProperties = {
     textAlign: align,
     padding: '0 32px 16px',

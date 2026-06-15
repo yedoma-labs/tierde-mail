@@ -6,6 +6,7 @@ import { Text } from '../components/Text.js';
 import { Button } from '../components/Button.js';
 import { Footer } from '../components/Footer.js';
 import type { Theme } from '../theme.js';
+import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface NotificationStrings {
   footer: (year: string, appName: string) => string;
@@ -27,7 +28,7 @@ export interface NotificationProps {
   theme?: Theme;
 }
 
-export const Notification = defineEmail<NotificationProps>({
+export const Notification: EmailTemplateType<NotificationProps> = defineEmail<NotificationProps>({
   subject: ({ title }) => title,
   component: ({ title, body, ctaLabel, ctaUrl, appName = 'Our App', locale, dir, strings, theme }) => {
     const s = { ...NOTIFICATION_STRINGS, ...strings };

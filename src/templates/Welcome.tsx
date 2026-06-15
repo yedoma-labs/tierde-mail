@@ -7,6 +7,7 @@ import { Button } from '../components/Button.js';
 import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import type { Theme } from '../theme.js';
+import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface WelcomeStrings {
   subject: (name: string, appName: string) => string;
@@ -39,7 +40,7 @@ export interface WelcomeProps {
   theme?: Theme;
 }
 
-export const Welcome = defineEmail<WelcomeProps>({
+export const Welcome: EmailTemplateType<WelcomeProps> = defineEmail<WelcomeProps>({
   subject: ({ name, appName = 'Our App', strings }) => {
     const s = { ...WELCOME_STRINGS, ...strings };
     return s.subject(name, appName);

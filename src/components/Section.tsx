@@ -1,4 +1,4 @@
-import type { ReactNode, CSSProperties } from 'react';
+import type { ReactNode, CSSProperties, ReactElement } from 'react';
 
 interface SectionProps {
   children: ReactNode;
@@ -10,7 +10,7 @@ export function Section({
   children,
   padding = '24px 32px',
   backgroundColor,
-}: SectionProps) {
+}: SectionProps): ReactElement {
   const style: CSSProperties = {
     padding,
     ...(backgroundColor ? { backgroundColor } : {}),

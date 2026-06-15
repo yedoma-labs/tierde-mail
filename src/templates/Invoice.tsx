@@ -8,6 +8,7 @@ import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
 import type { CSSProperties } from 'react';
 import type { Theme } from '../theme.js';
+import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface InvoiceStrings {
   subject: (invoiceNumber: string, appName: string) => string;
@@ -94,7 +95,7 @@ function formatCurrency(amount: number, currency: string, locale?: string): stri
   return new Intl.NumberFormat(locale ?? 'en-US', { style: 'currency', currency }).format(amount);
 }
 
-export const Invoice = defineEmail<InvoiceProps>({
+export const Invoice: EmailTemplateType<InvoiceProps> = defineEmail<InvoiceProps>({
   subject: ({ appName = 'Us', invoiceNumber, strings }) => {
     const s = { ...INVOICE_STRINGS, ...strings };
     return s.subject(invoiceNumber, appName);

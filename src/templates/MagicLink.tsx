@@ -7,6 +7,7 @@ import { Button } from '../components/Button.js';
 import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import type { Theme } from '../theme.js';
+import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface MagicLinkStrings {
   subject: (appName: string) => string;
@@ -40,7 +41,7 @@ export interface MagicLinkProps {
   theme?: Theme;
 }
 
-export const MagicLink = defineEmail<MagicLinkProps>({
+export const MagicLink: EmailTemplateType<MagicLinkProps> = defineEmail<MagicLinkProps>({
   subject: ({ appName = 'the app', strings }) => {
     const s = { ...MAGIC_LINK_STRINGS, ...strings };
     return s.subject(appName);

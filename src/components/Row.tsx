@@ -1,11 +1,11 @@
-import type { ReactNode, CSSProperties } from 'react';
+import type { ReactNode, CSSProperties, ReactElement } from 'react';
 
 interface RowProps {
   children: ReactNode;
   padding?: string;
 }
 
-export function Row({ children, padding = '0 32px' }: RowProps) {
+export function Row({ children, padding = '0 32px' }: RowProps): ReactElement {
   const tableStyle: CSSProperties = {
     width: '100%',
     borderCollapse: 'collapse',
@@ -27,7 +27,7 @@ interface ColumnProps {
   valign?: 'top' | 'middle' | 'bottom';
 }
 
-export function Column({ children, width, align = 'left', valign = 'top' }: ColumnProps) {
+export function Column({ children, width, align = 'left', valign = 'top' }: ColumnProps): ReactElement {
   const style: CSSProperties = {
     verticalAlign: valign,
     textAlign: align,

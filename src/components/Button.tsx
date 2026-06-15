@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactElement } from 'react';
 import { useTheme } from '../ThemeContext.js';
 
 interface ButtonProps {
@@ -8,7 +8,7 @@ interface ButtonProps {
   align?: 'left' | 'center' | 'right';
 }
 
-export function Button({ href, children, variant = 'primary', align = 'center' }: ButtonProps) {
+export function Button({ href, children, variant = 'primary', align = 'center' }: ButtonProps): ReactElement {
   const theme = useTheme();
 
   let bgColor: string;

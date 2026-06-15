@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactElement } from 'react';
 import { useTheme } from '../ThemeContext.js';
 
 interface HrProps {
@@ -6,7 +6,7 @@ interface HrProps {
   margin?: string;
 }
 
-export function Hr({ color, margin = '24px 32px' }: HrProps) {
+export function Hr({ color, margin = '24px 32px' }: HrProps): ReactElement {
   const theme = useTheme();
   const style: CSSProperties = {
     border: 'none',

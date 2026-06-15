@@ -8,6 +8,7 @@ import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import type { CSSProperties } from 'react';
 import type { Theme } from '../theme.js';
+import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface TwoFactorAuthStrings {
   subject: (appName: string) => string;
@@ -50,7 +51,7 @@ const codeStyle: CSSProperties = {
   fontFamily: 'monospace',
 };
 
-export const TwoFactorAuth = defineEmail<TwoFactorAuthProps>({
+export const TwoFactorAuth: EmailTemplateType<TwoFactorAuthProps> = defineEmail<TwoFactorAuthProps>({
   subject: ({ appName = 'verification', strings }) => {
     const s = { ...TWO_FACTOR_AUTH_STRINGS, ...strings };
     return s.subject(appName);

@@ -15,8 +15,8 @@ describe('template i18n — string overrides', () => {
       name: 'Alice',
       loginUrl: 'https://app.com',
       strings: {
-        subject: (name, appName) => `Bienvenue sur ${appName}, ${name} !`,
-        heading: (name) => `Bonjour ${name} !`,
+        subject: (name: string, appName: string) => `Bienvenue sur ${appName}, ${name} !`,
+        heading: (name: string) => `Bonjour ${name} !`,
       },
     });
     expect(subject).toBe('Bienvenue sur Our App, Alice !');
@@ -26,7 +26,7 @@ describe('template i18n — string overrides', () => {
         name: 'Alice',
         loginUrl: 'https://app.com',
         strings: {
-          heading: (name) => `Bonjour ${name} !`,
+          heading: (name: string) => `Bonjour ${name} !`,
           ctaLabel: 'Commencer',
         },
       }),
@@ -55,7 +55,7 @@ describe('template i18n — string overrides', () => {
         resetUrl: 'https://app.com/reset',
         strings: {
           heading: 'Passwort zurücksetzen',
-          greeting: (u) => `Hallo ${u},`,
+          greeting: (u: string) => `Hallo ${u},`,
           ctaLabel: 'Passwort zurücksetzen',
           securityNote: 'Falls Sie diese Anfrage nicht gestellt haben, ignorieren Sie diese E-Mail.',
         },

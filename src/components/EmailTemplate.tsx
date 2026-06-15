@@ -1,4 +1,4 @@
-import type { ReactNode, CSSProperties } from 'react';
+import type { ReactNode, CSSProperties, ReactElement } from 'react';
 import { ThemeContext, useTheme } from '../ThemeContext.js';
 import type { Theme } from '../theme.js';
 import { defaultTheme } from '../theme.js';
@@ -146,7 +146,7 @@ function EmailShell({
   );
 }
 
-export function EmailTemplate({ theme, ...rest }: EmailTemplateProps) {
+export function EmailTemplate({ theme, ...rest }: EmailTemplateProps): ReactElement {
   const resolvedTheme = theme ?? defaultTheme;
   return (
     <ThemeContext.Provider value={resolvedTheme}>

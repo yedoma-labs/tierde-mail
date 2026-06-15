@@ -10,6 +10,8 @@
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
     "noImplicitOverride": true,
+    "erasableSyntaxOnly": true,
+    "isolatedDeclarations": true,
 
     "declaration": true,
     "declarationMap": true,

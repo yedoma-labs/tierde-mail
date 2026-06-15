@@ -1,4 +1,4 @@
-import type { ReactNode, CSSProperties } from 'react';
+import type { ReactNode, CSSProperties, ReactElement } from 'react';
 
 interface LinkProps {
   href: string;
@@ -6,7 +6,7 @@ interface LinkProps {
   color?: string;
 }
 
-export function Link({ href, children, color = '#2563eb' }: LinkProps) {
+export function Link({ href, children, color = '#2563eb' }: LinkProps): ReactElement {
   const style: CSSProperties = {
     color,
     textDecoration: 'underline',

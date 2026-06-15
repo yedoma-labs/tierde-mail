@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactElement } from 'react';
 import { useTheme } from '../ThemeContext.js';
 
 interface LogoHeaderProps {
@@ -8,7 +8,7 @@ interface LogoHeaderProps {
   backgroundColor?: string;
 }
 
-export function LogoHeader({ src, alt, width, backgroundColor }: LogoHeaderProps) {
+export function LogoHeader({ src, alt, width, backgroundColor }: LogoHeaderProps): ReactElement | null {
   const theme = useTheme();
   const logoSrc = src ?? theme.logo;
   if (!logoSrc) return null;
