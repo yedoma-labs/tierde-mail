@@ -1,0 +1,167 @@
+{
+  "name": "@yedoma-labs/tierde-mail",
+  "version": "0.1.0",
+  "description": "Modern email library — JSX templates, multi-provider, TypeScript-first",
+  "repository": "https://github.com/yedoma-labs/tierde-mail",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./providers/resend": {
+      "import": {
+        "types": "./dist/providers/resend.d.ts",
+        "default": "./dist/providers/resend.js"
+      },
+      "require": {
+        "types": "./dist/providers/resend.d.cts",
+        "default": "./dist/providers/resend.cjs"
+      }
+    },
+    "./providers/smtp": {
+      "import": {
+        "types": "./dist/providers/smtp.d.ts",
+        "default": "./dist/providers/smtp.js"
+      },
+      "require": {
+        "types": "./dist/providers/smtp.d.cts",
+        "default": "./dist/providers/smtp.cjs"
+      }
+    },
+    "./providers/ses": {
+      "import": {
+        "types": "./dist/providers/ses.d.ts",
+        "default": "./dist/providers/ses.js"
+      },
+      "require": {
+        "types": "./dist/providers/ses.d.cts",
+        "default": "./dist/providers/ses.cjs"
+      }
+    },
+    "./providers/sendgrid": {
+      "import": {
+        "types": "./dist/providers/sendgrid.d.ts",
+        "default": "./dist/providers/sendgrid.js"
+      },
+      "require": {
+        "types": "./dist/providers/sendgrid.d.cts",
+        "default": "./dist/providers/sendgrid.cjs"
+      }
+    },
+    "./providers/postmark": {
+      "import": {
+        "types": "./dist/providers/postmark.d.ts",
+        "default": "./dist/providers/postmark.js"
+      },
+      "require": {
+        "types": "./dist/providers/postmark.d.cts",
+        "default": "./dist/providers/postmark.cjs"
+      }
+    },
+    "./preview": {
+      "import": {
+        "types": "./dist/preview/index.d.ts",
+        "default": "./dist/preview/index.js"
+      },
+      "require": {
+        "types": "./dist/preview/index.d.cts",
+        "default": "./dist/preview/index.cjs"
+      }
+    },
+    "./templates": {
+      "import": {
+        "types": "./dist/templates/index.d.ts",
+        "default": "./dist/templates/index.js"
+      },
+      "require": {
+        "types": "./dist/templates/index.d.cts",
+        "default": "./dist/templates/index.cjs"
+      }
+    },
+    "./testing": {
+      "import": {
+        "types": "./dist/testing/index.d.ts",
+        "default": "./dist/testing/index.js"
+      },
+      "require": {
+        "types": "./dist/testing/index.d.cts",
+        "default": "./dist/testing/index.cjs"
+      }
+    }
+  },
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "test": "vitest run --reporter=verbose",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "biome check src",
+    "lint:fix": "biome check src --write",
+    "typecheck": "tsc --noEmit",
+    "preview": "node scripts/preview-template.js",
+    "prepublishOnly": "pnpm run build && pnpm run typecheck"
+  },
+  "peerDependencies": {
+    "react": ">=19.2.7",
+    "react-dom": ">=19.2.7"
+  },
+  "dependencies": {
+    "@css-inline/css-inline": "^0.20.2",
+    "@yedoma-labs/bylyt-env-guard": "^0.3.5",
+    "@yedoma-labs/suruk-logger": "^0.2.0",
+    "@yedoma-labs/tuuru-chrono-tz": "^0.3.1",
+    "html-to-text": "^10.0.0",
+    "pino": "^10.3.1"
+  },
+  "optionalDependencies": {
+    "nodemailer": "^9.0.0"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-ses": "^3.1069.0",
+    "@biomejs/biome": "^2.5.0",
+    "@types/node": "^25.9.3",
+    "@types/nodemailer": "^8.0.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitest/coverage-v8": "^4.1.9",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.16",
+    "vite-plugin-dts": "^5.0.2",
+    "vitest": "^4.1.9"
+  },
+  "bin": {
+    "tierde": "./dist/bin/tierde.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "packageManager": "pnpm@11.7.0",
+  "keywords": [
+    "email",
+    "smtp",
+    "resend",
+    "ses",
+    "sendgrid",
+    "nodemailer",
+    "jsx",
+    "typescript",
+    "react"
+  ]
+}
