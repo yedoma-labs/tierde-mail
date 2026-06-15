@@ -124,7 +124,7 @@
     "pino": "^10.3.1"
   },
   "optionalDependencies": {
-    "nodemailer": "^6.10.1"
+    "nodemailer": "^8.0.9"
   },
   "devDependencies": {
     "@aws-sdk/client-ses": "^3.1068.0",
