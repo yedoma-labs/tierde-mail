@@ -8,6 +8,18 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Changed
+- Replaced `juice` CSS inliner with `@css-inline/css-inline` (Rust/NAPI). Eliminates the `juice → cheerio → whatwg-encoding` deprecated dependency chain. `@media` at-rules preserved via `keepAtRules: true` for dark mode support.
+- Bumped all dependencies to latest: React 19.2.7, Vite 8, Vitest 4, TypeScript 6, Biome 2.5, and runtime deps (`tuuru-chrono-tz`, `html-to-text`, `nodemailer`, etc.).
+- Minimum peer dependency tightened to React `>=19.0.0`.
+
+### Added
+- TypeScript 6 compiler flags: `erasableSyntaxOnly` (prevents runtime-impacting syntax) and `isolatedDeclarations` (explicit return types and type annotations on all exported symbols).
+- GitHub Actions CI workflow.
+- Explicit `ReactElement` / `ReactElement | null` return type annotations on all component functions.
+- Explicit `EmailTemplate<T>` type annotations on all template exports.
+- `Context<Theme>` annotation on `ThemeContext`.
+
 ---
 
 ## [0.1.0] — 2026-06-15
