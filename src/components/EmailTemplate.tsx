@@ -5,8 +5,8 @@ interface EmailTemplateProps {
   backgroundColor?: string;
   fontFamily?: string;
   preview?: string;
-  lang?: string;
-  dir?: 'ltr' | 'rtl';
+  lang?: string | undefined;
+  dir?: 'ltr' | 'rtl' | undefined;
 }
 
 const bodyStyle: CSSProperties = {

@@ -1,19 +1,59 @@
-#!/usr/bin/env node
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync, mkdirSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+// Template sources embedded at build time via Vite's ?raw imports.
+// No file-system access needed at runtime — works correctly when installed from npm.
+import WelcomeRaw from '../src/templates/Welcome.tsx?raw';
+import PasswordResetRaw from '../src/templates/PasswordReset.tsx?raw';
+import EmailVerificationRaw from '../src/templates/EmailVerification.tsx?raw';
+import TwoFactorAuthRaw from '../src/templates/TwoFactorAuth.tsx?raw';
+import InvoiceRaw from '../src/templates/Invoice.tsx?raw';
+import MagicLinkRaw from '../src/templates/MagicLink.tsx?raw';
+import NotificationRaw from '../src/templates/Notification.tsx?raw';
 
-const BUNDLED_TEMPLATES: Record<string, string> = {
-  welcome: resolve(__dirname, '../src/templates/Welcome.tsx'),
-  'password-reset': resolve(__dirname, '../src/templates/PasswordReset.tsx'),
-  'email-verification': resolve(__dirname, '../src/templates/EmailVerification.tsx'),
-  'two-factor-auth': resolve(__dirname, '../src/templates/TwoFactorAuth.tsx'),
-  invoice: resolve(__dirname, '../src/templates/Invoice.tsx'),
-  'magic-link': resolve(__dirname, '../src/templates/MagicLink.tsx'),
-  notification: resolve(__dirname, '../src/templates/Notification.tsx'),
+const TEMPLATES: Record<string, string> = {
+  welcome: WelcomeRaw,
+  'password-reset': PasswordResetRaw,
+  'email-verification': EmailVerificationRaw,
+  'two-factor-auth': TwoFactorAuthRaw,
+  invoice: InvoiceRaw,
+  'magic-link': MagicLinkRaw,
+  notification: NotificationRaw,
 };
+
+/**
+ * Rewrites internal library imports to point at the published package,
+ * and replaces the currentYear() helper with an inline implementation
+ * so ejected templates have zero internal dependencies.
+ */
+function rewriteImports(source: string): string {
+  // Remove utils import — we inline currentYear below
+  let result = source.replace(/^import \{ currentYear \} from '\.\/utils\.js';\n/m, '');
+
+  // Inline currentYear — year is locale-independent so no deps needed
+  result = result.replace(
+    /const year = currentYear\([^)]*\);/g,
+    'const year = new Date().getFullYear().toString();',
+  );
+
+  // Collect all named imports from internal paths that map to the published package,
+  // then replace all individual import lines with a single consolidated import.
+  const names: string[] = [];
+  result = result.replace(
+    /^import \{ ([^}]+) \} from '(?:\.\.\/define-email\.js|\.\.\/components\/[^']+)';\n/gm,
+    (_, captured: string) => {
+      names.push(...captured.split(',').map((s: string) => s.trim()));
+      return '';
+    },
+  );
+
+  if (names.length > 0) {
+    const unique = [...new Set(names)];
+    result = `import { ${unique.join(', ')} } from '@yedoma-labs/tierde-mail';\n` + result;
+  }
+
+  return result;
+}
 
 function usage(): void {
   console.log(`
@@ -23,7 +63,7 @@ Commands:
   eject --template <name> <output-path>   Copy a built-in template to your project
 
 Available templates:
-  ${Object.keys(BUNDLED_TEMPLATES).join('\n  ')}
+  ${Object.keys(TEMPLATES).join('\n  ')}
 
 Example:
   npx tierde eject --template password-reset ./emails/PasswordReset.tsx
@@ -45,27 +85,14 @@ function eject(args: string[]): void {
     process.exit(1);
   }
 
-  const srcPath = BUNDLED_TEMPLATES[templateName];
-  if (!srcPath) {
+  const raw = TEMPLATES[templateName];
+  if (!raw) {
     console.error(`Error: unknown template "${templateName}"`);
-    console.error(`Available: ${Object.keys(BUNDLED_TEMPLATES).join(', ')}`);
+    console.error(`Available: ${Object.keys(TEMPLATES).join(', ')}`);
     process.exit(1);
   }
 
-  let content: string;
-  try {
-    content = readFileSync(srcPath, 'utf-8');
-  } catch {
-    console.error(`Error: could not read template from ${srcPath}`);
-    process.exit(1);
-  }
-
-  // Rewrite the import to point to the published package
-  content = content
-    .replace(/from '\.\.\/define-email\.js'/g, "from '@yedoma-labs/tierde-mail'")
-    .replace(/from '\.\.\/components\/(\w+)\.js'/g, "from '@yedoma-labs/tierde-mail'")
-    .replace(/from '\.\.\/components\/index\.js'/g, "from '@yedoma-labs/tierde-mail'");
-
+  const content = rewriteImports(raw);
   const resolvedOutput = resolve(process.cwd(), outputPath);
   mkdirSync(dirname(resolvedOutput), { recursive: true });
   writeFileSync(resolvedOutput, content, 'utf-8');

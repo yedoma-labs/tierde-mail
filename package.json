@@ -143,8 +143,11 @@
     "vitest": "^3.0.0"
   },
   "bin": {
-    "tierde": "./bin/tierde.js"
+    "tierde": "./dist/bin/tierde.js"
   },
+  "files": [
+    "dist"
+  ],
   "engines": {
     "node": ">=20.0.0"
   },

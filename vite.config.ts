@@ -1,4 +1,5 @@
 import { resolve } from 'node:path';
+import { chmodSync } from 'node:fs';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 
@@ -12,6 +13,25 @@ const entries = {
   'preview/index': resolve(__dirname, 'src/preview/index.ts'),
   'templates/index': resolve(__dirname, 'src/templates/index.ts'),
   'testing/index': resolve(__dirname, 'src/testing/index.ts'),
+  // CLI — compiled with ?raw template embedding
+  'bin/tierde': resolve(__dirname, 'bin/tierde.ts'),
+};
+
+const shebangPlugin = {
+  name: 'tierde-cli-shebang',
+  renderChunk(code: string, chunk: { fileName: string }) {
+    if (chunk.fileName === 'bin/tierde.js') {
+      return { code: '#!/usr/bin/env node\n' + code, map: null };
+    }
+    return null;
+  },
+  writeBundle() {
+    try {
+      chmodSync(resolve(__dirname, 'dist/bin/tierde.js'), 0o755);
+    } catch {
+      // non-fatal: npm sets permissions on install
+    }
+  },
 };
 
 export default defineConfig({
@@ -21,6 +41,7 @@ export default defineConfig({
       outDir: 'dist',
       rollupTypes: false,
     }),
+    shebangPlugin,
   ],
   build: {
     lib: {
@@ -40,6 +61,13 @@ export default defineConfig({
         'node:events',
         '@aws-sdk/client-ses',
         'nodemailer',
+        // Runtime dependencies — installed alongside the package, not bundled
+        '@yedoma-labs/bylyt-env-guard',
+        '@yedoma-labs/suruk-logger',
+        '@yedoma-labs/tuuru-chrono-tz',
+        'pino',
+        'juice',
+        'html-to-text',
       ],
       output: {
         preserveModules: true,
