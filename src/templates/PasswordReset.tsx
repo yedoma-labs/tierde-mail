@@ -6,6 +6,7 @@ import { Text } from '../components/Text.js';
 import { Button } from '../components/Button.js';
 import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
+import type { Theme } from '../theme.js';
 
 export interface PasswordResetStrings {
   subject: (appName: string) => string;
@@ -39,6 +40,7 @@ export interface PasswordResetProps {
   locale?: string;
   dir?: 'ltr' | 'rtl';
   strings?: Partial<PasswordResetStrings>;
+  theme?: Theme;
 }
 
 export const PasswordReset = defineEmail<PasswordResetProps>({
@@ -46,7 +48,7 @@ export const PasswordReset = defineEmail<PasswordResetProps>({
     const s = { ...PASSWORD_RESET_STRINGS, ...strings };
     return s.subject(appName);
   },
-  component: ({ username, resetUrl, expiresIn = '1 hour', appName = 'Our App', locale, dir, strings }) => {
+  component: ({ username, resetUrl, expiresIn = '1 hour', appName = 'Our App', locale, dir, strings, theme }) => {
     const s = { ...PASSWORD_RESET_STRINGS, ...strings };
     const year = currentYear(locale);
     return (
@@ -54,6 +56,7 @@ export const PasswordReset = defineEmail<PasswordResetProps>({
         preview="Password reset requested. Click to reset your password."
         lang={locale}
         dir={dir}
+        theme={theme}
       >
         <Heading>{s.heading}</Heading>
         <Text>{s.greeting(username)}</Text>

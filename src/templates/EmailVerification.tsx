@@ -6,6 +6,7 @@ import { Text } from '../components/Text.js';
 import { Button } from '../components/Button.js';
 import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
+import type { Theme } from '../theme.js';
 
 export interface EmailVerificationStrings {
   subject: (appName: string) => string;
@@ -39,6 +40,7 @@ export interface EmailVerificationProps {
   locale?: string;
   dir?: 'ltr' | 'rtl';
   strings?: Partial<EmailVerificationStrings>;
+  theme?: Theme;
 }
 
 export const EmailVerification = defineEmail<EmailVerificationProps>({
@@ -46,7 +48,7 @@ export const EmailVerification = defineEmail<EmailVerificationProps>({
     const s = { ...EMAIL_VERIFICATION_STRINGS, ...strings };
     return s.subject(appName);
   },
-  component: ({ name, verifyUrl, expiresIn = '24 hours', appName = 'Our App', locale, dir, strings }) => {
+  component: ({ name, verifyUrl, expiresIn = '24 hours', appName = 'Our App', locale, dir, strings, theme }) => {
     const s = { ...EMAIL_VERIFICATION_STRINGS, ...strings };
     const year = currentYear(locale);
     return (
@@ -54,6 +56,7 @@ export const EmailVerification = defineEmail<EmailVerificationProps>({
         preview="Please verify your email address to get started."
         lang={locale}
         dir={dir}
+        theme={theme}
       >
         <Heading>{s.heading}</Heading>
         <Text>{s.greeting(name)}</Text>

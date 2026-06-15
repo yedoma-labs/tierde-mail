@@ -1,6 +1,8 @@
 export { defineEmail } from './define-email.js';
 export { createMailer } from './mailer.js';
 export { createMailerFromEnv } from './env-mailer.js';
+export { createTheme, defaultTheme } from './theme.js';
+export type { Theme } from './theme.js';
 
 export {
   EmailTemplate,
@@ -15,6 +17,7 @@ export {
   Section,
   Row,
   Column,
+  LogoHeader,
 } from './components/index.js';
 
 export type {

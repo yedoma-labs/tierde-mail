@@ -1,4 +1,5 @@
 import type { ReactNode, CSSProperties } from 'react';
+import { useTheme } from '../ThemeContext.js';
 
 interface TextProps {
   children: ReactNode;
@@ -15,13 +16,20 @@ const sizeMap = {
 };
 
 export function Text({ children, color, size = 'md', muted = false, align = 'left' }: TextProps) {
+  const theme = useTheme();
+  const defaultColor = muted ? theme.textMuted : theme.textSecondary;
+  const className = muted ? 'tierde-text-muted' : 'tierde-text-secondary';
   const style: CSSProperties = {
     margin: '0 0 16px 0',
     padding: '0 32px',
     fontSize: sizeMap[size],
     lineHeight: '1.6',
-    color: color ?? (muted ? '#6b7280' : '#374151'),
+    color: color ?? defaultColor,
     textAlign: align,
   };
-  return <p style={style}>{children}</p>;
+  return (
+    <p className={className} style={style}>
+      {children}
+    </p>
+  );
 }

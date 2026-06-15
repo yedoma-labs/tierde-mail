@@ -7,6 +7,7 @@ import { Section } from '../components/Section.js';
 import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import type { CSSProperties } from 'react';
+import type { Theme } from '../theme.js';
 
 export interface TwoFactorAuthStrings {
   subject: (appName: string) => string;
@@ -37,6 +38,7 @@ export interface TwoFactorAuthProps {
   locale?: string;
   dir?: 'ltr' | 'rtl';
   strings?: Partial<TwoFactorAuthStrings>;
+  theme?: Theme;
 }
 
 const codeStyle: CSSProperties = {
@@ -53,7 +55,7 @@ export const TwoFactorAuth = defineEmail<TwoFactorAuthProps>({
     const s = { ...TWO_FACTOR_AUTH_STRINGS, ...strings };
     return s.subject(appName);
   },
-  component: ({ username, code, expiresIn = '10 minutes', appName = 'Our App', locale, dir, strings }) => {
+  component: ({ username, code, expiresIn = '10 minutes', appName = 'Our App', locale, dir, strings, theme }) => {
     const s = { ...TWO_FACTOR_AUTH_STRINGS, ...strings };
     const year = currentYear(locale);
     return (
@@ -61,6 +63,7 @@ export const TwoFactorAuth = defineEmail<TwoFactorAuthProps>({
         preview={`Your ${appName} verification code: ${code}`}
         lang={locale}
         dir={dir}
+        theme={theme}
       >
         <Heading>{s.heading}</Heading>
         <Text>{s.greeting(username)}</Text>

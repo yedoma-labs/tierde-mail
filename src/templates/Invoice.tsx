@@ -7,6 +7,7 @@ import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
 import type { CSSProperties } from 'react';
+import type { Theme } from '../theme.js';
 
 export interface InvoiceStrings {
   subject: (invoiceNumber: string, appName: string) => string;
@@ -55,6 +56,7 @@ export interface InvoiceProps {
   locale?: string;
   dir?: 'ltr' | 'rtl';
   strings?: Partial<InvoiceStrings>;
+  theme?: Theme;
 }
 
 const tableStyle: CSSProperties = {
@@ -107,6 +109,7 @@ export const Invoice = defineEmail<InvoiceProps>({
     locale,
     dir,
     strings,
+    theme,
   }) => {
     const s = { ...INVOICE_STRINGS, ...strings };
     const year = currentYear(locale);
@@ -117,6 +120,7 @@ export const Invoice = defineEmail<InvoiceProps>({
         preview={`Invoice #${invoiceNumber} — ${formatCurrency(total, currency, locale)}`}
         lang={locale}
         dir={dir}
+        theme={theme}
       >
         <Heading>{s.heading(invoiceNumber)}</Heading>
         <Text>{s.greeting(customerName)}</Text>

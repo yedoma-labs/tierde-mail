@@ -1,4 +1,5 @@
 import type { ReactNode, CSSProperties } from 'react';
+import { useTheme } from '../ThemeContext.js';
 
 interface HeadingProps {
   children: ReactNode;
@@ -6,14 +7,6 @@ interface HeadingProps {
   color?: string;
   align?: 'left' | 'center' | 'right';
 }
-
-const baseStyle: CSSProperties = {
-  fontWeight: '700',
-  lineHeight: '1.3',
-  margin: '0 0 16px 0',
-  padding: '24px 32px 0',
-  color: '#1a1a1a',
-};
 
 const sizeMap: Record<number, CSSProperties> = {
   1: { fontSize: '28px' },
@@ -23,12 +16,20 @@ const sizeMap: Record<number, CSSProperties> = {
 };
 
 export function Heading({ children, level = 1, color, align = 'left' }: HeadingProps) {
+  const theme = useTheme();
   const Tag = `h${level}` as 'h1' | 'h2' | 'h3' | 'h4';
   const style: CSSProperties = {
-    ...baseStyle,
-    ...(sizeMap[level] ?? sizeMap[1]),
-    ...(color ? { color } : {}),
+    fontWeight: '700',
+    lineHeight: '1.3',
+    margin: '0 0 16px 0',
+    padding: '24px 32px 0',
+    color: color ?? theme.textPrimary,
     textAlign: align,
+    ...(sizeMap[level] ?? sizeMap[1]),
   };
-  return <Tag style={style}>{children}</Tag>;
+  return (
+    <Tag className="tierde-text-primary" style={style}>
+      {children}
+    </Tag>
+  );
 }

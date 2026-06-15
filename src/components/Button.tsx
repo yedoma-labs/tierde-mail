@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import { useTheme } from '../ThemeContext.js';
 
 interface ButtonProps {
   href: string;
@@ -7,46 +8,68 @@ interface ButtonProps {
   align?: 'left' | 'center' | 'right';
 }
 
-const variants: Record<string, CSSProperties> = {
-  primary: {
-    backgroundColor: '#2563eb',
-    color: '#ffffff',
-    border: 'none',
-  },
-  secondary: {
-    backgroundColor: '#f3f4f6',
-    color: '#1f2937',
-    border: 'none',
-  },
-  outline: {
-    backgroundColor: 'transparent',
-    color: '#2563eb',
-    border: '2px solid #2563eb',
-  },
-};
-
 export function Button({ href, children, variant = 'primary', align = 'center' }: ButtonProps) {
-  const variantStyle = variants[variant] ?? (variants['primary'] as CSSProperties);
+  const theme = useTheme();
+
+  let bgColor: string;
+  let textColor: string;
+  let border: string;
+
+  if (variant === 'secondary') {
+    bgColor = theme.secondary;
+    textColor = theme.secondaryText;
+    border = 'none';
+  } else if (variant === 'outline') {
+    bgColor = 'transparent';
+    textColor = theme.primary;
+    border = `2px solid ${theme.primary}`;
+  } else {
+    bgColor = theme.primary;
+    textColor = theme.primaryText;
+    border = 'none';
+  }
+
   const wrapperStyle: CSSProperties = {
     padding: '8px 32px 24px',
     textAlign: align,
   };
+
+  // Table-based button: renders correctly in Outlook without VML
+  const tableStyle: CSSProperties = {
+    display: 'inline-table',
+    borderCollapse: 'collapse',
+    borderRadius: theme.buttonBorderRadius,
+    border,
+  };
+
+  const tdStyle: CSSProperties = {
+    backgroundColor: bgColor,
+    borderRadius: theme.buttonBorderRadius,
+    padding: '13px 30px',
+  };
+
   const linkStyle: CSSProperties = {
-    ...variantStyle,
-    display: 'inline-block',
-    padding: '12px 28px',
-    borderRadius: '6px',
+    color: textColor,
     fontSize: '15px',
     fontWeight: '600',
     lineHeight: '1',
     textDecoration: 'none',
-    cursor: 'pointer',
+    display: 'block',
   };
+
   return (
     <div style={wrapperStyle}>
-      <a href={href} style={linkStyle}>
-        {children}
-      </a>
+      <table role="presentation" style={tableStyle} cellPadding="0" cellSpacing="0">
+        <tbody>
+          <tr>
+            <td style={tdStyle}>
+              <a href={href} style={linkStyle}>
+                {children}
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   );
 }

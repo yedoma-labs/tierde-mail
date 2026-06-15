@@ -6,6 +6,7 @@ import { Text } from '../components/Text.js';
 import { Button } from '../components/Button.js';
 import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
+import type { Theme } from '../theme.js';
 
 export interface MagicLinkStrings {
   subject: (appName: string) => string;
@@ -36,6 +37,7 @@ export interface MagicLinkProps {
   locale?: string;
   dir?: 'ltr' | 'rtl';
   strings?: Partial<MagicLinkStrings>;
+  theme?: Theme;
 }
 
 export const MagicLink = defineEmail<MagicLinkProps>({
@@ -43,7 +45,7 @@ export const MagicLink = defineEmail<MagicLinkProps>({
     const s = { ...MAGIC_LINK_STRINGS, ...strings };
     return s.subject(appName);
   },
-  component: ({ email, loginUrl, expiresIn = '15 minutes', appName = 'Our App', locale, dir, strings }) => {
+  component: ({ email, loginUrl, expiresIn = '15 minutes', appName = 'Our App', locale, dir, strings, theme }) => {
     const s = { ...MAGIC_LINK_STRINGS, ...strings };
     const year = currentYear(locale);
     return (
@@ -51,6 +53,7 @@ export const MagicLink = defineEmail<MagicLinkProps>({
         preview={`Click to sign in to ${appName}. No password needed.`}
         lang={locale}
         dir={dir}
+        theme={theme}
       >
         <Heading>{s.heading(appName)}</Heading>
         <Text>{s.body(email)}</Text>

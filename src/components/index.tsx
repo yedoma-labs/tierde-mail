@@ -9,3 +9,4 @@ export { Link } from './Link.js';
 export { Preview } from './Preview.js';
 export { Section } from './Section.js';
 export { Row, Column } from './Row.js';
+export { LogoHeader } from './LogoHeader.js';

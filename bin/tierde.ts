@@ -40,12 +40,27 @@ function rewriteImports(source: string): string {
   // then replace all individual import lines with a single consolidated import.
   const names: string[] = [];
   result = result.replace(
-    /^import \{ ([^}]+) \} from '(?:\.\.\/define-email\.js|\.\.\/components\/[^']+)';\n/gm,
+    /^import \{ ([^}]+) \} from '(?:\.\.\/define-email\.js|\.\.\/components\/[^']+|\.\.\/theme\.js)';\n/gm,
     (_, captured: string) => {
       names.push(...captured.split(',').map((s: string) => s.trim()));
       return '';
     },
   );
+
+  // Collect type-only imports from internal paths and consolidate into a single type import
+  const typeNames: string[] = [];
+  result = result.replace(
+    /^import type \{ ([^}]+) \} from '(?:\.\.\/theme\.js|\.\.\/define-email\.js|\.\.\/components\/[^']+)';\n/gm,
+    (_, captured: string) => {
+      typeNames.push(...captured.split(',').map((s: string) => s.trim()));
+      return '';
+    },
+  );
+
+  if (typeNames.length > 0) {
+    const uniqueTypes = [...new Set(typeNames)];
+    result = `import type { ${uniqueTypes.join(', ')} } from '@yedoma-labs/tierde-mail';\n` + result;
+  }
 
   if (names.length > 0) {
     const unique = [...new Set(names)];

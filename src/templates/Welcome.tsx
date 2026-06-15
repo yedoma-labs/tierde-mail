@@ -6,6 +6,7 @@ import { Text } from '../components/Text.js';
 import { Button } from '../components/Button.js';
 import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
+import type { Theme } from '../theme.js';
 
 export interface WelcomeStrings {
   subject: (name: string, appName: string) => string;
@@ -35,6 +36,7 @@ export interface WelcomeProps {
   locale?: string;
   dir?: 'ltr' | 'rtl';
   strings?: Partial<WelcomeStrings>;
+  theme?: Theme;
 }
 
 export const Welcome = defineEmail<WelcomeProps>({
@@ -42,7 +44,7 @@ export const Welcome = defineEmail<WelcomeProps>({
     const s = { ...WELCOME_STRINGS, ...strings };
     return s.subject(name, appName);
   },
-  component: ({ name, loginUrl, appName = 'Our App', supportEmail, locale, dir, strings }) => {
+  component: ({ name, loginUrl, appName = 'Our App', supportEmail, locale, dir, strings, theme }) => {
     const s = { ...WELCOME_STRINGS, ...strings };
     const year = currentYear(locale);
     return (
@@ -50,6 +52,7 @@ export const Welcome = defineEmail<WelcomeProps>({
         preview={s.subject(name, appName)}
         lang={locale}
         dir={dir}
+        theme={theme}
       >
         <Heading>{s.heading(name)}</Heading>
         <Text>{s.body(appName)}</Text>
