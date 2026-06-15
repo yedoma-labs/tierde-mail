@@ -1,0 +1,55 @@
+import type { EmailAddress, EmailAddressInput, Attachment } from './types.js';
+
+const ALLOWED_CONTENT_TYPES = new Set([
+  'application/pdf',
+  'application/zip',
+  'application/octet-stream',
+  'image/png',
+  'image/jpeg',
+  'image/gif',
+  'image/webp',
+  'text/plain',
+  'text/csv',
+  'text/html',
+]);
+
+export function validateEmail(email: string): void {
+  if (typeof email !== 'string' || !email.includes('@')) {
+    throw new TypeError(`Invalid email address: ${email}`);
+  }
+  const atIdx = email.lastIndexOf('@');
+  const local = email.slice(0, atIdx);
+  const domain = email.slice(atIdx + 1);
+  if (!local || !domain || !domain.includes('.') || domain.startsWith('.') || domain.endsWith('.')) {
+    throw new TypeError(`Invalid email address: ${email}`);
+  }
+}
+
+export function normalizeAddress(input: EmailAddressInput): EmailAddress {
+  if (typeof input === 'string') {
+    validateEmail(input);
+    return { email: input };
+  }
+  validateEmail(input.email);
+  return input;
+}
+
+export function normalizeAddresses(
+  input: EmailAddressInput | EmailAddressInput[],
+): EmailAddress[] {
+  return Array.isArray(input)
+    ? input.map(normalizeAddress)
+    : [normalizeAddress(input)];
+}
+
+export function validateAttachment(attachment: Attachment): void {
+  const filename = attachment.filename;
+  if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+    throw new TypeError(`Unsafe attachment filename: ${filename}`);
+  }
+  const ct = attachment.contentType;
+  const baseType = ct.split(';')[0]?.trim().toLowerCase() ?? '';
+  if (!ALLOWED_CONTENT_TYPES.has(baseType) && !baseType.startsWith('image/')) {
+    throw new TypeError(`Disallowed attachment content type: ${ct}`);
+  }
+}
