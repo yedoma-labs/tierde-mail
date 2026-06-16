@@ -8,14 +8,62 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+---
+
+## [0.2.0] — 2026-06-16
+
+### Added
+
+**Templates** (34 new, 41 total)
+- `SecurityAlert` — new-login, password-change, suspicious-activity, and other security events; optional detail table (IP, location, device, timestamp); `AlertBox` callout for high-risk events
+- `AccountLocked` — reason-specific body (`too_many_attempts` / `suspicious_activity` / `admin_action`); optional support-email block
+- `AccountUnlocked` — account restored confirmation with login CTA
+- `PasswordChangedConfirmation` — password change acknowledgement with optional security detail table
+- `RegistrationConfirmation` — post-signup confirmation with dashboard link
+- `EmailChangeVerification` — OTP/link flow for changing email address
+- `PhoneVerification` — OTP code for phone number verification
+- `ProfileUpdated` — field-level change log with old→new value table
+- `LoginActivity` — multi-row login event table with success/failed status badges
+- `DataExportRequest` — `ready` (download link + expiry) and `expired` (re-request) event variants
+- `AccountDeletionConfirmation` — `scheduled` (warning box + cancel CTA), `completed` (danger box), and `cancelled` variants
+- `NewsletterConfirmation` — double opt-in confirm link; optional unsubscribe link
+- `PasswordlessOtp` — standalone OTP code for passwordless login
+- `TeamInvite` — team invitation with inviter name and invite URL
+- `PaymentFailed` — payment failure alert with optional amount and failure reason
+- `RefundConfirmation` — refund detail table (amount, refund ID, payment method, original order)
+- `OrderConfirmation` — order summary with line items
+- `ShippingUpdate` — shipment status with tracking URL
+- `MagicLink` — passwordless magic-link sign-in
+
+**Components**
+- `<AlertBox variant icon>` — variant-driven callout box (`danger` / `warning` / `success` / `info`); optional leading icon character
+- `<KeyValueTable rows>` — filtered label/value table; auto-skips `null`, `undefined`, `''`, and `false` values; `mono` flag for monospace value cells
+
+**Shared types** (exported from root and `templates` subpath)
+- `BaseTemplateProps<S>` — generic base for all template props; carries `appName?`, `locale?`, `dir?`, `theme?`, `strings?`; eliminates boilerplate from every template interface
+- `SecurityDetails` — `ipAddress?`, `location?`, `device?`, `timestamp?`; shared by security templates
+- `ChangeRecord` — `{ field, oldValue?, newValue }` for profile change entries
+- `LoginEvent` — extends `SecurityDetails` with required `timestamp` and `status: 'success' | 'failed'`
+
+**Testing**
+- `components.test.tsx` — `AlertBox` variant/icon rendering, `KeyValueTable` filtering (null, undefined, empty string, false, all-filtered), monospace flag, `Link` and `Button` XSS protocol blocking
+- Extended `templates.test.tsx` — 35+ tests across all template groups (built-in, security, account lifecycle)
+- Extended `validate.test.ts` — CRLF injection, null byte, spaces in local/domain, empty recipient array, absolute path, backslash path, control chars in filename, `image/*` wildcard, CSV acceptance
+- Extended `mailer.test.tsx` — round-robin distribution across providers, empty `to` array rejection
+
+### Fixed
+- **Security: null byte attachment bypass** — `validateAttachment` now checks for control characters (`\x00–\x1f`) before path-traversal checks; previously `'\x00'` bypassed the `includes('..')` guard
+- **Security: empty recipient array silently accepted** — `normalizeAddresses([])` now throws `TypeError('At least one recipient address is required')`
+- **Security: `Link` missing URL protocol validation** — `<Link href>` now blocks `javascript:`, `data:`, and `vbscript:` protocols (matching `<Button>` behaviour added in 0.1.0)
+- **`KeyValueTable` renders `false` values** — filter now excludes `false` ReactNode in addition to `null`, `undefined`, and `''`
+
 ### Changed
+- All 41 template `Props` interfaces now extend `BaseTemplateProps<S>` instead of repeating the five shared fields inline
 - Replaced `juice` CSS inliner with `@css-inline/css-inline` (Rust/NAPI). Eliminates the `juice → cheerio → whatwg-encoding` deprecated dependency chain. `@media` at-rules preserved via `keepAtRules: true` for dark mode support.
 - Bumped all dependencies to latest: React 19.2.7, Vite 8, Vitest 4, TypeScript 6, Biome 2.5, and runtime deps (`tuuru-chrono-tz`, `html-to-text`, `nodemailer`, etc.).
 - Minimum peer dependency tightened to React `>=19.0.0`.
-
-### Added
-- TypeScript 6 compiler flags: `erasableSyntaxOnly` (prevents runtime-impacting syntax) and `isolatedDeclarations` (explicit return types and type annotations on all exported symbols).
-- GitHub Actions CI workflow.
+- TypeScript 6 compiler flags: `erasableSyntaxOnly` and `isolatedDeclarations`.
+- GitHub Actions CI workflow added.
 - Explicit `ReactElement` / `ReactElement | null` return type annotations on all component functions.
 - Explicit `EmailTemplate<T>` type annotations on all template exports.
 - `Context<Theme>` annotation on `ThemeContext`.
