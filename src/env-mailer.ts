@@ -5,13 +5,14 @@ import { smtp } from './providers/smtp.js';
 import { ses } from './providers/ses.js';
 import { sendgrid } from './providers/sendgrid.js';
 import { postmark } from './providers/postmark.js';
+import { mailpit } from './providers/mailpit.js';
 import type { Mailer } from './types.js';
 
 /**
  * Creates a Mailer from environment variables.
  *
  * Required:
- *   TIERDE_PROVIDER   resend | smtp | ses | sendgrid | postmark
+ *   TIERDE_PROVIDER   resend | smtp | ses | sendgrid | postmark | mailpit
  *   TIERDE_FROM_EMAIL sender address
  *
  * Optional:
@@ -23,11 +24,12 @@ import type { Mailer } from './types.js';
  *   ses:      AWS_REGION (or SES_REGION)
  *   sendgrid: SENDGRID_API_KEY
  *   postmark: POSTMARK_SERVER_TOKEN
+ *   mailpit:  MAILPIT_HOST (default localhost), MAILPIT_PORT (default 1025)
  */
 export function createMailerFromEnv(): Mailer {
   const env = createEnv({
     schema: {
-      TIERDE_PROVIDER: eg.enum(['resend', 'smtp', 'ses', 'sendgrid', 'postmark'] as const),
+      TIERDE_PROVIDER: eg.enum(['resend', 'smtp', 'ses', 'sendgrid', 'postmark', 'mailpit'] as const),
       TIERDE_FROM_EMAIL: eg.string().required(),
       TIERDE_FROM_NAME: eg.string().optional(),
 
@@ -50,6 +52,10 @@ export function createMailerFromEnv(): Mailer {
 
       // postmark
       POSTMARK_SERVER_TOKEN: eg.string().sensitive().optional(),
+
+      // mailpit / mailhog
+      MAILPIT_HOST: eg.string().default('localhost'),
+      MAILPIT_PORT: eg.integer().default(1025),
     },
   });
 
@@ -88,6 +94,9 @@ export function createMailerFromEnv(): Mailer {
     case 'postmark': {
       if (!env.POSTMARK_SERVER_TOKEN) throw new Error('POSTMARK_SERVER_TOKEN is required for postmark provider');
       return createMailer({ provider: postmark({ serverToken: env.POSTMARK_SERVER_TOKEN }), from });
+    }
+    case 'mailpit': {
+      return createMailer({ provider: mailpit({ host: env.MAILPIT_HOST, port: env.MAILPIT_PORT }), from });
     }
   }
 }

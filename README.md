@@ -62,6 +62,7 @@ Import each provider from its subpath:
 ```ts
 import { resend }    from '@yedoma-labs/tierde-mail/providers/resend';
 import { smtp }      from '@yedoma-labs/tierde-mail/providers/smtp';
+import { mailpit }   from '@yedoma-labs/tierde-mail/providers/mailpit';
 import { ses }       from '@yedoma-labs/tierde-mail/providers/ses';
 import { sendgrid }  from '@yedoma-labs/tierde-mail/providers/sendgrid';
 import { postmark }  from '@yedoma-labs/tierde-mail/providers/postmark';
@@ -84,6 +85,15 @@ smtp({ host: 'smtp.example.com', port: 587, auth: { user: '...', pass: '...' } }
 ```
 pnpm add nodemailer
 ```
+
+### Mailpit / MailHog (local dev)
+
+```ts
+mailpit()                                    // localhost:1025 (defaults)
+mailpit({ host: 'mailpit', port: 1025 })    // custom host/port
+```
+
+Spins up no extra services — just point at a running [Mailpit](https://mailpit.axllent.org/) or MailHog instance. TLS is disabled by default; `rejectUnauthorized` is `false` so self-signed certs work out of the box.
 
 ### AWS SES
 
@@ -140,7 +150,7 @@ Required variables:
 
 | Variable | Values |
 |---|---|
-| `TIERDE_PROVIDER` | `resend` \| `smtp` \| `ses` \| `sendgrid` \| `postmark` |
+| `TIERDE_PROVIDER` | `resend` \| `smtp` \| `mailpit` \| `ses` \| `sendgrid` \| `postmark` |
 | `TIERDE_FROM_EMAIL` | sender address |
 | `TIERDE_FROM_NAME` | sender display name (optional) |
 
@@ -150,6 +160,7 @@ Provider-specific variables:
 |---|---|
 | resend | `RESEND_API_KEY` |
 | smtp | `SMTP_HOST`, `SMTP_PORT` (default 587), `SMTP_USER`, `SMTP_PASS`, `SMTP_SECURE` |
+| mailpit | `MAILPIT_HOST` (default `localhost`), `MAILPIT_PORT` (default `1025`) |
 | ses | `SES_REGION` or `AWS_REGION` |
 | sendgrid | `SENDGRID_API_KEY` |
 | postmark | `POSTMARK_SERVER_TOKEN` |
@@ -248,12 +259,15 @@ Import from `@yedoma-labs/tierde-mail/templates`:
 import {
   Welcome, PasswordReset, EmailVerification, TwoFactorAuth,
   MagicLink, PasswordlessOtp, Invoice, OrderConfirmation,
-  ShippingUpdate, PaymentFailed, Subscription,
-  TeamInvite, AccountDeactivated, Notification,
-  AccountUnlocked, RegistrationConfirmation, EmailChangeVerification,
-  PhoneVerification, ProfileUpdated, PasswordChangedConfirmation,
-  LoginActivity, DataExportRequest, AccountDeletionConfirmation,
-  NewsletterConfirmation,
+  ShippingUpdate, PaymentFailed, Subscription, TeamInvite,
+  AccountDeactivated, Notification, AbandonedCart, SecurityAlert,
+  ReviewRequest, PolicyUpdate, WeeklyDigest, OnboardingProgress,
+  CommentMention, RefundConfirmation, UsageAlert, BackInStock,
+  MaintenanceNotification, ExportReady, WinBack, SupportTicket,
+  Referral, FeatureAnnouncement, AccountLocked, AccountUnlocked,
+  RegistrationConfirmation, EmailChangeVerification, PhoneVerification,
+  ProfileUpdated, PasswordChangedConfirmation, LoginActivity,
+  DataExportRequest, AccountDeletionConfirmation, NewsletterConfirmation,
 } from '@yedoma-labs/tierde-mail/templates';
 ```
 
@@ -326,18 +340,110 @@ await mailer.send(Welcome, {
 
 ---
 
-## Ejecting templates
+## CLI
+
+### `tierde render`
+
+Render a template to HTML (or plain text) without running the preview server:
+
+```bash
+# Render to stdout
+npx tierde render welcome --props '{"name":"Alice","loginUrl":"https://example.com"}'
+
+# Write to file
+npx tierde render invoice --props '{"customerName":"Acme","invoiceNumber":"INV-001","items":[]}' -o out.html
+
+# Render plain-text version
+npx tierde render welcome --props '{"name":"Alice","loginUrl":"https://example.com"}' --text
+```
+
+### `tierde eject`
 
 Copy any built-in template to your project for full customisation:
 
-```
+```bash
+# Eject a single template
 npx tierde eject --template welcome ./emails/Welcome.tsx
-npx tierde eject --template password-reset ./emails/PasswordReset.tsx
+
+# List all available template names
+npx tierde eject --list
+
+# Eject all templates at once
+npx tierde eject --all ./emails/
 ```
 
 Available template names: `welcome`, `password-reset`, `email-verification`, `two-factor-auth`, `magic-link`, `passwordless-otp`, `invoice`, `order-confirmation`, `shipping-update`, `payment-failed`, `subscription`, `team-invite`, `account-deactivated`, `abandoned-cart`, `security-alert`, `review-request`, `policy-update`, `weekly-digest`, `onboarding-progress`, `comment-mention`, `refund-confirmation`, `usage-alert`, `back-in-stock`, `maintenance-notification`, `export-ready`, `win-back`, `support-ticket`, `referral`, `feature-announcement`, `account-locked`, `account-unlocked`, `registration-confirmation`, `email-change-verification`, `phone-verification`, `profile-updated`, `password-changed-confirmation`, `login-activity`, `data-export-request`, `account-deletion-confirmation`, `newsletter-confirmation`, `notification`.
 
 The ejected file imports only from `@yedoma-labs/tierde-mail` — no internal paths.
+
+---
+
+## Batch sending
+
+Send one template to many recipients with concurrency control:
+
+```ts
+const result = await mailer.sendBatch(WelcomeEmail, {
+  recipients: [
+    { to: 'alice@example.com', props: { name: 'Alice', url: '...' } },
+    { to: 'bob@example.com',   props: { name: 'Bob',   url: '...' } },
+  ],
+  concurrency: 5,    // max parallel sends per chunk (default 5)
+  delayMs: 200,      // pause between chunks (default 0)
+  onResult: (r) => console.log(r.to, r.result?.id ?? r.error?.message),
+});
+
+console.log(`${result.sent} sent, ${result.failed} failed`);
+```
+
+Individual failures are isolated — a single bounce does not abort the batch.
+
+---
+
+## Webhooks
+
+Verify and parse inbound event payloads from Resend and Postmark:
+
+```ts
+import {
+  createResendWebhookHandler,
+  createPostmarkWebhookHandler,
+} from '@yedoma-labs/tierde-mail/webhooks';
+
+// Resend (Svix HMAC-SHA256)
+const resendWebhooks = createResendWebhookHandler({ secret: process.env.RESEND_WEBHOOK_SECRET! });
+
+// Postmark (HMAC-SHA256)
+const postmarkWebhooks = createPostmarkWebhookHandler({ token: process.env.POSTMARK_WEBHOOK_TOKEN! });
+
+// In your HTTP handler:
+const event = resendWebhooks.verify(rawBody, req.headers);
+// event.type: 'email.sent' | 'email.delivered' | 'email.bounced' | ...
+// event.email: { id, to[], from, subject, timestamp }
+// event.raw: original payload
+```
+
+`WebhookVerificationError` is thrown on invalid signature or expired timestamp. Resend uses a ±300 second tolerance by default (configurable via `toleranceSeconds`).
+
+---
+
+## Unsubscribe headers
+
+Add RFC 8058 one-click unsubscribe headers to any send:
+
+```ts
+import { unsubscribeHeaders } from '@yedoma-labs/tierde-mail';
+
+await mailer.send(Newsletter, {
+  to: 'subscriber@example.com',
+  props: { ... },
+  headers: unsubscribeHeaders({
+    url: `https://example.com/unsubscribe?token=${token}`,
+    email: 'unsub@example.com',  // optional mailto fallback
+    oneClick: true,              // default — adds List-Unsubscribe-Post header
+  }),
+});
+```
 
 ---
 
@@ -407,23 +513,48 @@ export function myProvider(): EmailProvider {
 
 ---
 
-## Previewing templates
+## React integration
 
-Build the library and render a template to an HTML file:
+The `/react` subpath exports an `<EmailPreview>` component and `renderEmailHtml()` for embedding email previews in your Next.js admin or Storybook:
 
-```bash
-# Build first (required for Vite ?raw imports)
-pnpm build
+```tsx
+import { EmailPreview, renderEmailHtml } from '@yedoma-labs/tierde-mail/react';
+import { WelcomeEmail } from '@/emails/WelcomeEmail';
 
-# Preview any template by name
-pnpm preview Welcome
-pnpm preview OrderConfirmation
-pnpm preview ShippingUpdate
-pnpm preview PasswordlessOtp
-# etc — any template name works
+// Server component (Next.js App Router)
+export default function PreviewPage() {
+  const html = renderEmailHtml(WelcomeEmail, { name: 'Alice', url: '...' });
+  return <EmailPreview html={html} style={{ height: '700px' }} />;
+}
 ```
 
-This generates an HTML file in the `preview/` directory that can be opened in any browser. Templates are rendered with sample data and can be inspected for layout, styling, and dark mode support.
+`renderEmailHtml` must be called server-side (Node.js). `<EmailPreview>` renders the HTML in an isolated `<iframe srcDoc>` so styles don't leak.
+
+---
+
+## Preview server
+
+The built-in preview server lets you browse all templates with live reload, dark mode toggle, and side-by-side comparison:
+
+```ts
+import { startPreviewServer } from '@yedoma-labs/tierde-mail/preview';
+import * as templates from './src/templates/index.js'; // your templates
+
+startPreviewServer({ templates, port: 3001 });
+```
+
+Features:
+- **Live reload** — server restart is detected via SSE; the browser refreshes automatically
+- **Dark mode** — toggle in the toolbar injects `color-scheme: dark` CSS and forces `@media (prefers-color-scheme: dark)` in the iframe
+- **Compare** — split view with a second template dropdown for side-by-side comparison
+- **Mobile preview** — resize the iframe to 375px to simulate narrow viewports
+
+For a quick look at a single built-in template, use `tierde render`:
+
+```bash
+npx tierde render welcome --props '{"name":"Alice","loginUrl":"https://example.com"}' -o preview.html
+open preview.html
+```
 
 ---
 

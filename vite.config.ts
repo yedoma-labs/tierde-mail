@@ -12,6 +12,7 @@ const entries = {
   'providers/sendgrid': resolve(__dirname, 'src/providers/sendgrid.ts'),
   'providers/postmark': resolve(__dirname, 'src/providers/postmark.ts'),
   'webhooks/index': resolve(__dirname, 'src/webhooks/index.ts'),
+  'react/index': resolve(__dirname, 'src/react/index.tsx'),
   'preview/index': resolve(__dirname, 'src/preview/index.ts'),
   'templates/index': resolve(__dirname, 'src/templates/index.ts'),
   'testing/index': resolve(__dirname, 'src/testing/index.ts'),

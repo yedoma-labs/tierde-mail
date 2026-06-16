@@ -1,4 +1,6 @@
 export type { BaseTemplateProps, SecurityDetails, ChangeRecord, LoginEvent } from './templates/shared.js';
+export { unsubscribeHeaders } from './unsubscribe.js';
+export type { UnsubscribeOptions } from './unsubscribe.js';
 
 export { defineEmail } from './define-email.js';
 export { createMailer } from './mailer.js';

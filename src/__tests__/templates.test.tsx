@@ -24,6 +24,23 @@ import { PaymentFailed } from '../templates/PaymentFailed.js';
 import { PasswordlessOtp } from '../templates/PasswordlessOtp.js';
 import { TeamInvite } from '../templates/TeamInvite.js';
 import { RefundConfirmation } from '../templates/RefundConfirmation.js';
+import { Notification } from '../templates/Notification.js';
+import { AbandonedCart } from '../templates/AbandonedCart.js';
+import { AccountDeactivated } from '../templates/AccountDeactivated.js';
+import { BackInStock } from '../templates/BackInStock.js';
+import { CommentMention } from '../templates/CommentMention.js';
+import { ExportReady } from '../templates/ExportReady.js';
+import { FeatureAnnouncement } from '../templates/FeatureAnnouncement.js';
+import { MaintenanceNotification } from '../templates/MaintenanceNotification.js';
+import { OnboardingProgress } from '../templates/OnboardingProgress.js';
+import { PolicyUpdate } from '../templates/PolicyUpdate.js';
+import { Referral } from '../templates/Referral.js';
+import { ReviewRequest } from '../templates/ReviewRequest.js';
+import { Subscription } from '../templates/Subscription.js';
+import { SupportTicket } from '../templates/SupportTicket.js';
+import { UsageAlert } from '../templates/UsageAlert.js';
+import { WeeklyDigest } from '../templates/WeeklyDigest.js';
+import { WinBack } from '../templates/WinBack.js';
 
 describe('built-in templates', () => {
   it('Welcome renders with required props', () => {
@@ -457,5 +474,295 @@ describe('account lifecycle templates', () => {
     );
     expect(html).toContain('https://app.com/unsubscribe');
     expect(html).toContain('Unsubscribe');
+  });
+});
+
+describe('additional templates', () => {
+  it('Notification renders title and body', () => {
+    const html = renderEmail(
+      Notification.component({ title: 'System alert', body: 'Something happened.' }),
+    );
+    expect(html).toContain('System alert');
+    expect(html).toContain('Something happened.');
+  });
+
+  it('Notification renders CTA when provided', () => {
+    const html = renderEmail(
+      Notification.component({ title: 'Alert', body: 'Details', ctaLabel: 'View', ctaUrl: 'https://app.com' }),
+    );
+    expect(html).toContain('View');
+    expect(html).toContain('https://app.com');
+  });
+
+  it('AbandonedCart renders items and cart URL', () => {
+    const html = renderEmail(
+      AbandonedCart.component({
+        name: 'Alice',
+        cartUrl: 'https://shop.com/cart',
+        items: [{ name: 'Widget', price: 9.99, imageUrl: 'https://img.example.com/w.png' }],
+      }),
+    );
+    expect(html).toContain('Widget');
+    expect(html).toContain('https://shop.com/cart');
+  });
+
+  it('AccountDeactivated renders reactivate URL', () => {
+    const html = renderEmail(
+      AccountDeactivated.component({
+        name: 'Alice',
+        reactivateUrl: 'https://app.com/reactivate',
+      }),
+    );
+    expect(html).toContain('https://app.com/reactivate');
+    expect(html).toContain('Alice');
+  });
+
+  it('AccountDeactivated renders optional fields', () => {
+    const html = renderEmail(
+      AccountDeactivated.component({
+        name: 'Alice',
+        reactivateUrl: 'https://app.com/reactivate',
+        reason: 'Inactivity',
+        dataRetentionDays: 90,
+        supportEmail: 'help@app.com',
+      }),
+    );
+    expect(html).toContain('Inactivity');
+    expect(html).toContain('90');
+    expect(html).toContain('help@app.com');
+  });
+
+  it('BackInStock renders product name and URL', () => {
+    const html = renderEmail(
+      BackInStock.component({
+        name: 'Bob',
+        productName: 'Blue Widget',
+        productUrl: 'https://shop.com/blue-widget',
+      }),
+    );
+    expect(html).toContain('Blue Widget');
+    expect(html).toContain('https://shop.com/blue-widget');
+  });
+
+  it('CommentMention renders actor and context', () => {
+    const html = renderEmail(
+      CommentMention.component({
+        name: 'Alice',
+        event: 'mention',
+        actorName: 'Bob',
+        contextName: 'Project Alpha',
+        commentUrl: 'https://app.com/comments/1',
+        commentText: 'Hey @Alice, check this out!',
+      }),
+    );
+    expect(html).toContain('Bob');
+    expect(html).toContain('Project Alpha');
+    expect(html).toContain('Hey @Alice');
+  });
+
+  it('ExportReady renders download URL', () => {
+    const html = renderEmail(
+      ExportReady.component({
+        name: 'Alice',
+        exportName: 'users_june.csv',
+        downloadUrl: 'https://app.com/downloads/abc',
+        expiresInHours: 48,
+      }),
+    );
+    expect(html).toContain('https://app.com/downloads/abc');
+    expect(html).toContain('48');
+  });
+
+  it('FeatureAnnouncement renders feature name and CTA', () => {
+    const html = renderEmail(
+      FeatureAnnouncement.component({
+        name: 'Alice',
+        featureName: 'AI Suggestions',
+        description: 'Smarter autocomplete for your workflow.',
+        ctaUrl: 'https://app.com/features/ai',
+        changes: [{ type: 'new', title: 'AI Suggestions', description: 'Autocomplete.' }],
+      }),
+    );
+    expect(html).toContain('AI Suggestions');
+    expect(html).toContain('https://app.com/features/ai');
+  });
+
+  it('MaintenanceNotification scheduled renders window', () => {
+    const html = renderEmail(
+      MaintenanceNotification.component({
+        type: 'scheduled',
+        startTime: 'June 20, 2026 at 02:00 UTC',
+        endTime: 'June 20, 2026 at 04:00 UTC',
+        duration: '2 hours',
+        statusPageUrl: 'https://status.app.com',
+      }),
+    );
+    expect(html).toContain('June 20, 2026');
+    expect(html).toContain('https://status.app.com');
+  });
+
+  it('MaintenanceNotification completed renders back-online message', () => {
+    const html = renderEmail(
+      MaintenanceNotification.component({ type: 'completed' }),
+    );
+    expect(html).toContain('back online');
+  });
+
+  it('OnboardingProgress renders step list', () => {
+    const html = renderEmail(
+      OnboardingProgress.component({
+        name: 'Alice',
+        dashboardUrl: 'https://app.com/dashboard',
+        steps: [
+          { title: 'Create account', completed: true },
+          { title: 'Add team members', completed: false },
+        ],
+      }),
+    );
+    expect(html).toContain('Create account');
+    expect(html).toContain('Add team members');
+    expect(html).toContain('https://app.com/dashboard');
+  });
+
+  it('PolicyUpdate renders policy type and date', () => {
+    const html = renderEmail(
+      PolicyUpdate.component({
+        policyType: 'privacy',
+        effectiveDate: 'July 1, 2026',
+        policyUrl: 'https://app.com/privacy',
+      }),
+    );
+    expect(html).toContain('July 1, 2026');
+    expect(html).toContain('https://app.com/privacy');
+  });
+
+  it('Referral invite renders referrer name and code', () => {
+    const html = renderEmail(
+      Referral.component({
+        name: 'Alice',
+        event: 'invite',
+        referrerName: 'Bob',
+        actionUrl: 'https://app.com/join?ref=BOB20',
+        referralCode: 'BOB20',
+        reward: '$20 off',
+      }),
+    );
+    expect(html).toContain('Bob');
+    expect(html).toContain('BOB20');
+    expect(html).toContain('$20 off');
+  });
+
+  it('ReviewRequest renders review URL', () => {
+    const html = renderEmail(
+      ReviewRequest.component({
+        name: 'Alice',
+        reviewUrl: 'https://g.page/r/review',
+        productOrService: 'Pro Plan',
+      }),
+    );
+    expect(html).toContain('https://g.page/r/review');
+    expect(html).toContain('Pro Plan');
+  });
+
+  it('Subscription started renders plan name', () => {
+    const html = renderEmail(
+      Subscription.component({
+        name: 'Alice',
+        event: 'started',
+        planName: 'Pro',
+        actionUrl: 'https://app.com/dashboard',
+      }),
+    );
+    expect(html).toContain('Pro');
+    expect(html).toContain('https://app.com/dashboard');
+  });
+
+  it('Subscription trial_ending renders days remaining', () => {
+    const html = renderEmail(
+      Subscription.component({
+        name: 'Alice',
+        event: 'trial_ending',
+        planName: 'Pro',
+        actionUrl: 'https://app.com/upgrade',
+        trialDaysRemaining: 3,
+      }),
+    );
+    expect(html).toContain('3');
+  });
+
+  it('SupportTicket created renders ticket ID and title', () => {
+    const html = renderEmail(
+      SupportTicket.component({
+        name: 'Alice',
+        event: 'created',
+        ticketId: 'TKT-1042',
+        ticketTitle: 'Login not working',
+        ticketUrl: 'https://support.app.com/tickets/1042',
+      }),
+    );
+    expect(html).toContain('TKT-1042');
+    expect(html).toContain('Login not working');
+  });
+
+  it('SupportTicket resolved renders agent message', () => {
+    const html = renderEmail(
+      SupportTicket.component({
+        name: 'Alice',
+        event: 'resolved',
+        ticketId: 'TKT-1042',
+        ticketTitle: 'Login not working',
+        ticketUrl: 'https://support.app.com/tickets/1042',
+        agentMessage: 'Issue fixed in v2.3.',
+        agentName: 'Support Team',
+      }),
+    );
+    expect(html).toContain('Issue fixed in v2.3.');
+  });
+
+  it('UsageAlert warning renders usage stats', () => {
+    const html = renderEmail(
+      UsageAlert.component({
+        name: 'Alice',
+        resource: 'API calls',
+        used: 8500,
+        limit: 10000,
+        unit: 'calls',
+        percentUsed: 85,
+        severity: 'warning',
+        upgradeUrl: 'https://app.com/upgrade',
+      }),
+    );
+    expect(html).toContain('API calls');
+    expect(html).toContain('8500');
+    expect(html).toContain('https://app.com/upgrade');
+  });
+
+  it('WeeklyDigest renders stats and items', () => {
+    const html = renderEmail(
+      WeeklyDigest.component({
+        name: 'Alice',
+        weekOf: 'June 9–15, 2026',
+        dashboardUrl: 'https://app.com/dashboard',
+        stats: [{ label: 'Emails sent', value: '1,204', change: '+12%' }],
+        items: [{ title: 'Top article', url: 'https://blog.app.com/top', category: 'Blog' }],
+      }),
+    );
+    expect(html).toContain('1,204');
+    expect(html).toContain('Top article');
+    expect(html).toContain('June 9–15, 2026');
+  });
+
+  it('WinBack renders return URL and days since', () => {
+    const html = renderEmail(
+      WinBack.component({
+        name: 'Alice',
+        returnUrl: 'https://app.com/login',
+        daysSince: 30,
+        offer: '20% off for 3 months',
+      }),
+    );
+    expect(html).toContain('https://app.com/login');
+    expect(html).toContain('30');
+    expect(html).toContain('20% off');
   });
 });

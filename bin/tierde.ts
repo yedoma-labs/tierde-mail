@@ -147,11 +147,15 @@ function usage(): void {
 tierde — email template CLI
 
 Commands:
+  render <name> --props '<json>' [-o <file>] [--text]
+                                          Render a template to HTML (or plain text)
   eject --template <name> <output-path>   Copy one template to your project
   eject --all <output-dir>                Copy all templates to a directory
   eject --list                            Print all available template names
 
 Examples:
+  npx tierde render welcome --props '{"name":"Alice","loginUrl":"https://app.com"}' -o welcome.html
+  npx tierde render invoice --props '{"customerName":"ACME","invoiceNumber":"INV-1","items":[]}' --text
   npx tierde eject --template password-reset ./emails/PasswordReset.tsx
   npx tierde eject --all ./emails
   npx tierde eject --list
@@ -218,13 +222,92 @@ function eject(args: string[]): void {
   console.log(`Ejected template "${templateName}" to ${resolvedOutput}`);
 }
 
+async function renderTemplate(args: string[]): Promise<void> {
+  const name = args[0];
+  if (!name || name.startsWith('-')) {
+    console.error('Error: template name is required');
+    console.error('Usage: tierde render <name> --props \'{"key":"value"}\' [-o output.html]');
+    process.exit(1);
+  }
+
+  const propsIdx = args.indexOf('--props');
+  const propsJson = propsIdx !== -1 ? args[propsIdx + 1] : undefined;
+  const outIdx = args.indexOf('-o') !== -1 ? args.indexOf('-o') : args.indexOf('--output');
+  const outputPath = outIdx !== -1 ? args[outIdx + 1] : undefined;
+  const textMode = args.includes('--text');
+
+  if (!propsJson) {
+    console.error('Error: --props <json> is required');
+    process.exit(1);
+  }
+
+  let props: unknown;
+  try {
+    props = JSON.parse(propsJson);
+  } catch {
+    console.error('Error: --props value is not valid JSON');
+    process.exit(1);
+  }
+
+  // Dynamic import so React/css-inline are not loaded for other commands (eject, etc.)
+  type RenderMod = typeof import('../src/render.js');
+  type TextMod = typeof import('../src/plain-text.js');
+  type TemplatesMod = typeof import('../src/templates/index.js');
+
+  const [{ renderEmail }, { htmlToPlainText }, allTemplates] = await Promise.all([
+    import('../src/render.js') as Promise<RenderMod>,
+    import('../src/plain-text.js') as Promise<TextMod>,
+    import('../src/templates/index.js') as Promise<TemplatesMod>,
+  ]);
+
+  const exportName = toPascalCase(name);
+  const template = (allTemplates as Record<string, unknown>)[exportName] as
+    | { component: (p: unknown) => unknown; subject: (p: unknown) => string }
+    | undefined;
+
+  if (!template?.component) {
+    console.error(`Error: unknown template "${name}"`);
+    console.error(`Available: ${Object.keys(TEMPLATES).join(', ')}`);
+    process.exit(1);
+  }
+
+  let output: string;
+  try {
+    const element = template.component(props);
+    output = renderEmail(element as Parameters<typeof renderEmail>[0]);
+    if (textMode) output = htmlToPlainText(output);
+  } catch (err) {
+    console.error(`Error rendering template: ${err instanceof Error ? err.message : String(err)}`);
+    process.exit(1);
+  }
+
+  if (outputPath) {
+    const resolvedOutput = resolve(process.cwd(), outputPath);
+    mkdirSync(dirname(resolvedOutput), { recursive: true });
+    writeFileSync(resolvedOutput, output, 'utf-8');
+    console.error(`Rendered "${name}" → ${resolvedOutput}`);
+  } else {
+    process.stdout.write(output);
+  }
+}
+
 const [, , command, ...rest] = process.argv;
 
-switch (command) {
-  case 'eject':
-    eject(rest);
-    break;
-  default:
-    usage();
-    break;
+async function main(): Promise<void> {
+  switch (command) {
+    case 'render':
+      await renderTemplate(rest);
+      break;
+    case 'eject':
+      eject(rest);
+      break;
+    default:
+      usage();
+      break;
+  }
 }
+
+main().catch((err) => {
+  console.error(err instanceof Error ? err.message : String(err));
+  process.exit(1);
+});

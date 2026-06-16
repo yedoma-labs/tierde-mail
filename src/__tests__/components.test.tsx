@@ -6,6 +6,9 @@ import { AlertBox } from '../components/AlertBox.js';
 import { KeyValueTable } from '../components/KeyValueTable.js';
 import { Link } from '../components/Link.js';
 import { Button } from '../components/Button.js';
+import { Image } from '../components/Image.js';
+import { LogoHeader } from '../components/LogoHeader.js';
+import { Row, Column } from '../components/Row.js';
 
 // Wrap in EmailTemplate to satisfy theme context for Button/Link
 function wrap(element: React.ReactElement) {
@@ -170,5 +173,84 @@ describe('Button security', () => {
 
   it('allows https URLs', () => {
     expect(() => wrap(<Button href="https://example.com">OK</Button>)).not.toThrow();
+  });
+});
+
+describe('Image', () => {
+  it('renders img with src and alt', () => {
+    const html = renderEmail(<Image src="https://example.com/logo.png" alt="Logo" />);
+    expect(html).toContain('src="https://example.com/logo.png"');
+    expect(html).toContain('alt="Logo"');
+  });
+
+  it('defaults to center align', () => {
+    const html = renderEmail(<Image src="https://example.com/x.png" alt="" />);
+    expect(html).toContain('text-align:center');
+  });
+
+  it('applies left align', () => {
+    const html = renderEmail(<Image src="https://example.com/x.png" alt="" align="left" />);
+    expect(html).toContain('text-align:left');
+  });
+
+  it('applies width and height', () => {
+    const html = renderEmail(<Image src="https://example.com/x.png" alt="" width={200} height={100} />);
+    expect(html).toContain('width:200px');
+    expect(html).toContain('height:100px');
+  });
+});
+
+describe('LogoHeader', () => {
+  it('renders nothing when no src or theme logo', () => {
+    const html = renderEmail(<LogoHeader />);
+    expect(html).not.toContain('<img');
+  });
+
+  it('renders logo img when src provided', () => {
+    const html = renderEmail(
+      <EmailTemplate><LogoHeader src="https://example.com/logo.png" alt="Brand" width={160} /></EmailTemplate>,
+    );
+    expect(html).toContain('https://example.com/logo.png');
+    expect(html).toContain('alt="Brand"');
+  });
+
+  it('applies custom backgroundColor', () => {
+    const html = renderEmail(
+      <EmailTemplate><LogoHeader src="https://example.com/logo.png" backgroundColor="#ff0000" /></EmailTemplate>,
+    );
+    expect(html).toContain('#ff0000');
+  });
+});
+
+describe('Row / Column', () => {
+  it('Row renders presentation table', () => {
+    const html = renderEmail(
+      <Row>
+        <Column>Left</Column>
+        <Column>Right</Column>
+      </Row>,
+    );
+    expect(html).toContain('role="presentation"');
+    expect(html).toContain('Left');
+    expect(html).toContain('Right');
+  });
+
+  it('Column applies width and align', () => {
+    const html = renderEmail(
+      <Row>
+        <Column width="50%" align="center" valign="middle">Content</Column>
+      </Row>,
+    );
+    expect(html).toContain('width:50%');
+    expect(html).toContain('text-align:center');
+    expect(html).toContain('vertical-align:middle');
+  });
+
+  it('Column defaults to left/top alignment', () => {
+    const html = renderEmail(
+      <Row><Column>Test</Column></Row>,
+    );
+    expect(html).toContain('text-align:left');
+    expect(html).toContain('vertical-align:top');
   });
 });
