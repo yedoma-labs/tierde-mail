@@ -8,6 +8,43 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Added
+
+**Batch send**
+- `mailer.sendBatch(template, { recipients, concurrency?, delayMs?, onResult? })` — send one template to many recipients with chunk-based concurrency control and per-item failure isolation
+- `concurrency` (default 5) limits parallel sends per chunk; `delayMs` adds a pause between chunks for rate-limited providers
+- `onResult` callback fires after each send attempt (success or failure) for streaming progress
+- `captureEmails()` test utility supports `sendBatch` via the same interface
+- New types: `BatchRecipient<P>`, `BatchSendOptions<P>`, `BatchItemResult<P>`, `BatchSendResult<P>`
+
+**Webhooks** (subpath `@yedoma-labs/tierde-mail/webhooks`)
+- `createResendWebhookHandler({ secret })` — verifies Svix HMAC-SHA256 signatures with configurable timestamp tolerance (default 5 min)
+- `createPostmarkWebhookHandler({ token })` — verifies HMAC-SHA256 over raw request body
+- Both return a normalized `WebhookEvent { type, provider, email, raw }` — consistent event shape across providers; `raw` is the original parsed payload for provider-specific fields
+- `WebhookVerificationError` — thrown on invalid signature, missing headers, or expired timestamp
+- Constant-time comparison via `node:crypto timingSafeEqual` prevents timing attacks
+- Normalized `type` values: `email.delivered`, `email.bounced`, `email.complained`, `email.opened`, `email.clicked`, `email.sent`, `email.delivery_delayed`, `email.subscription_changed`
+
+**Local dev provider**
+- `mailpit()` — zero-config SMTP provider targeting `localhost:1025`; compatible with both Mailpit (recommended) and MailHog; `tls.rejectUnauthorized: false` set automatically; custom `host`/`port` supported for Docker setups
+- Subpath: `@yedoma-labs/tierde-mail/providers/mailpit`
+
+**CLI**
+- `tierde eject --list` — prints all available template names (one per line, pipe-friendly)
+- `tierde eject --all <dir>` — ejects all 41 templates into a directory with PascalCase filenames (e.g. `password-reset` → `PasswordReset.tsx`)
+
+**Preview server**
+- Live reload via SSE (`/api/events`) — browser auto-refreshes current email when the server restarts; works with `nodemon` / `tsx watch`; green "live" badge appears on connect
+- Dark mode toggle — injects `color-scheme:dark` CSS into the iframe, forcing `@media (prefers-color-scheme: dark)` to match without modifying template source
+- Compare mode — splits the preview pane into two iframes with an independent email selector; labels show which template is in each pane
+
+**Integration tests**
+- `providers.integration.test.ts` covers all six providers (resend, sendgrid, postmark, smtp, mailpit, ses); each suite is skipped unless the required env vars are present — safe to run in CI without credentials
+
+### Fixed
+- `exactOptionalPropertyTypes` violation in `WebhookEmail.subject` — added explicit `| undefined`
+- SMTP integration test: conditional spread for `auth` instead of passing `undefined` directly
+
 ---
 
 ## [0.2.0] — 2026-06-16
