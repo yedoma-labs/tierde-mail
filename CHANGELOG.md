@@ -6,7 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ---
 
-## [Unreleased]
+## [0.3.0] — 2026-06-17
 
 ### Added
 
@@ -28,18 +28,29 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 **Local dev provider**
 - `mailpit()` — zero-config SMTP provider targeting `localhost:1025`; compatible with both Mailpit (recommended) and MailHog; `tls.rejectUnauthorized: false` set automatically; custom `host`/`port` supported for Docker setups
 - Subpath: `@yedoma-labs/tierde-mail/providers/mailpit`
+- `createMailerFromEnv()` now accepts `TIERDE_PROVIDER=mailpit` with optional `MAILPIT_HOST` / `MAILPIT_PORT`
 
 **CLI**
+- `tierde render <name> --props '<json>'` — renders any template to HTML (or `--text` for plain text) without starting the preview server; `-o <file>` writes output to disk
 - `tierde eject --list` — prints all available template names (one per line, pipe-friendly)
 - `tierde eject --all <dir>` — ejects all 41 templates into a directory with PascalCase filenames (e.g. `password-reset` → `PasswordReset.tsx`)
+
+**Unsubscribe headers**
+- `unsubscribeHeaders({ url, email?, oneClick? })` — generates RFC 8058 `List-Unsubscribe` (and `List-Unsubscribe-Post`) headers; spread directly into `mailer.send()` options
+
+**React integration** (subpath `@yedoma-labs/tierde-mail/react`)
+- `<EmailPreview html style? className? title?>` — renders an email HTML string inside an isolated `<iframe srcDoc>`; use in Next.js admin panels, Storybook stories, or any React app
+- `renderEmailHtml(template, props)` — server-side helper that renders a typed template to an HTML string for use with `<EmailPreview>`
 
 **Preview server**
 - Live reload via SSE (`/api/events`) — browser auto-refreshes current email when the server restarts; works with `nodemon` / `tsx watch`; green "live" badge appears on connect
 - Dark mode toggle — injects `color-scheme:dark` CSS into the iframe, forcing `@media (prefers-color-scheme: dark)` to match without modifying template source
 - Compare mode — splits the preview pane into two iframes with an independent email selector; labels show which template is in each pane
 
-**Integration tests**
-- `providers.integration.test.ts` covers all six providers (resend, sendgrid, postmark, smtp, mailpit, ses); each suite is skipped unless the required env vars are present — safe to run in CI without credentials
+**Coverage**
+- Overall coverage raised from ~51% to 84.66%; component coverage 94.5%, provider coverage 82.64%, template coverage 83.88%
+- New unit test suites: provider mocks (resend, sendgrid, postmark, smtp, ses), `Image` / `LogoHeader` / `Row`/`Column` components, 17 additional built-in templates, `unsubscribeHeaders`
+- Integration test suite (`providers.integration.test.ts`) covers all six providers — skipped unless env vars are present
 
 ### Fixed
 - `exactOptionalPropertyTypes` violation in `WebhookEmail.subject` — added explicit `| undefined`

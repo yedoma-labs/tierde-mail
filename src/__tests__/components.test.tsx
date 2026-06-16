@@ -9,6 +9,7 @@ import { Button } from '../components/Button.js';
 import { Image } from '../components/Image.js';
 import { LogoHeader } from '../components/LogoHeader.js';
 import { Row, Column } from '../components/Row.js';
+import { Preview } from '../components/Preview.js';
 
 // Wrap in EmailTemplate to satisfy theme context for Button/Link
 function wrap(element: React.ReactElement) {
@@ -252,5 +253,13 @@ describe('Row / Column', () => {
     );
     expect(html).toContain('text-align:left');
     expect(html).toContain('vertical-align:top');
+  });
+});
+
+describe('Preview', () => {
+  it('renders children as hidden text', () => {
+    const html = renderEmail(<Preview>Check your inbox!</Preview>);
+    expect(html).toContain('Check your inbox!');
+    expect(html).toContain('display:none');
   });
 });
