@@ -39,6 +39,16 @@
         "default": "./dist/providers/smtp.cjs"
       }
     },
+    "./providers/mailpit": {
+      "import": {
+        "types": "./dist/providers/mailpit.d.ts",
+        "default": "./dist/providers/mailpit.js"
+      },
+      "require": {
+        "types": "./dist/providers/mailpit.d.cts",
+        "default": "./dist/providers/mailpit.cjs"
+      }
+    },
     "./providers/ses": {
       "import": {
         "types": "./dist/providers/ses.d.ts",
@@ -156,6 +166,8 @@
   "keywords": [
     "email",
     "smtp",
+    "mailpit",
+    "mailhog",
     "resend",
     "ses",
     "sendgrid",

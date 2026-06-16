@@ -7,6 +7,7 @@ const entries = {
   index: resolve(__dirname, 'src/index.ts'),
   'providers/resend': resolve(__dirname, 'src/providers/resend.ts'),
   'providers/smtp': resolve(__dirname, 'src/providers/smtp.ts'),
+  'providers/mailpit': resolve(__dirname, 'src/providers/mailpit.ts'),
   'providers/ses': resolve(__dirname, 'src/providers/ses.ts'),
   'providers/sendgrid': resolve(__dirname, 'src/providers/sendgrid.ts'),
   'providers/postmark': resolve(__dirname, 'src/providers/postmark.ts'),
