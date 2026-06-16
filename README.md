@@ -277,6 +277,16 @@ All templates accept `theme?: Theme`, `locale?: string`, `dir?: 'ltr' | 'rtl'`, 
 | `WeeklyDigest` | `name`, `weekOf`, `dashboardUrl` |
 | `OnboardingProgress` | `name`, `steps[]`, `dashboardUrl` |
 | `CommentMention` | `name`, `event`, `actorName`, `contextName`, `commentUrl` |
+| `RefundConfirmation` | `name`, `refundAmount` |
+| `UsageAlert` | `name`, `resource`, `used`, `limit`, `percentUsed`, `severity`, `upgradeUrl` |
+| `BackInStock` | `name`, `productName`, `productUrl` |
+| `MaintenanceNotification` | `type` |
+| `ExportReady` | `name`, `exportName`, `downloadUrl` |
+| `WinBack` | `name`, `returnUrl`, `daysSince` |
+| `SupportTicket` | `name`, `event`, `ticketId`, `ticketTitle`, `ticketUrl` |
+| `Referral` | `name`, `event`, `referrerName`, `actionUrl` |
+| `FeatureAnnouncement` | `name`, `featureName`, `description`, `ctaUrl` |
+| `AccountLocked` | `name`, `reason`, `unlockUrl` |
 | `Notification` | `title`, `body` |
 
 ### String overrides (i18n)

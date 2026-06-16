@@ -24,6 +24,16 @@ import PolicyUpdateRaw from '../src/templates/PolicyUpdate.tsx?raw';
 import WeeklyDigestRaw from '../src/templates/WeeklyDigest.tsx?raw';
 import OnboardingProgressRaw from '../src/templates/OnboardingProgress.tsx?raw';
 import CommentMentionRaw from '../src/templates/CommentMention.tsx?raw';
+import RefundConfirmationRaw from '../src/templates/RefundConfirmation.tsx?raw';
+import UsageAlertRaw from '../src/templates/UsageAlert.tsx?raw';
+import BackInStockRaw from '../src/templates/BackInStock.tsx?raw';
+import MaintenanceNotificationRaw from '../src/templates/MaintenanceNotification.tsx?raw';
+import ExportReadyRaw from '../src/templates/ExportReady.tsx?raw';
+import WinBackRaw from '../src/templates/WinBack.tsx?raw';
+import SupportTicketRaw from '../src/templates/SupportTicket.tsx?raw';
+import ReferralRaw from '../src/templates/Referral.tsx?raw';
+import FeatureAnnouncementRaw from '../src/templates/FeatureAnnouncement.tsx?raw';
+import AccountLockedRaw from '../src/templates/AccountLocked.tsx?raw';
 
 const TEMPLATES: Record<string, string> = {
   welcome: WelcomeRaw,
@@ -47,6 +57,16 @@ const TEMPLATES: Record<string, string> = {
   'weekly-digest': WeeklyDigestRaw,
   'onboarding-progress': OnboardingProgressRaw,
   'comment-mention': CommentMentionRaw,
+  'refund-confirmation': RefundConfirmationRaw,
+  'usage-alert': UsageAlertRaw,
+  'back-in-stock': BackInStockRaw,
+  'maintenance-notification': MaintenanceNotificationRaw,
+  'export-ready': ExportReadyRaw,
+  'win-back': WinBackRaw,
+  'support-ticket': SupportTicketRaw,
+  referral: ReferralRaw,
+  'feature-announcement': FeatureAnnouncementRaw,
+  'account-locked': AccountLockedRaw,
 };
 
 /**
