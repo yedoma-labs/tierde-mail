@@ -250,6 +250,10 @@ import {
   MagicLink, PasswordlessOtp, Invoice, OrderConfirmation,
   ShippingUpdate, PaymentFailed, Subscription,
   TeamInvite, AccountDeactivated, Notification,
+  AccountUnlocked, RegistrationConfirmation, EmailChangeVerification,
+  PhoneVerification, ProfileUpdated, PasswordChangedConfirmation,
+  LoginActivity, DataExportRequest, AccountDeletionConfirmation,
+  NewsletterConfirmation,
 } from '@yedoma-labs/tierde-mail/templates';
 ```
 
@@ -287,6 +291,16 @@ All templates accept `theme?: Theme`, `locale?: string`, `dir?: 'ltr' | 'rtl'`, 
 | `Referral` | `name`, `event`, `referrerName`, `actionUrl` |
 | `FeatureAnnouncement` | `name`, `featureName`, `description`, `ctaUrl` |
 | `AccountLocked` | `name`, `reason`, `unlockUrl` |
+| `AccountUnlocked` | `name`, `loginUrl` |
+| `RegistrationConfirmation` | `name`, `dashboardUrl` |
+| `EmailChangeVerification` | `name`, `newEmail`, `verifyUrl` |
+| `PhoneVerification` | `name`, `phone`, `code` |
+| `ProfileUpdated` | `name`, `changes[]`, `accountUrl` |
+| `PasswordChangedConfirmation` | `name`, `securityUrl` |
+| `LoginActivity` | `name`, `events[]`, `securityUrl` |
+| `DataExportRequest` | `name`, `event`, `actionUrl` |
+| `AccountDeletionConfirmation` | `name`, `event` |
+| `NewsletterConfirmation` | `email`, `confirmUrl` |
 | `Notification` | `title`, `body` |
 
 ### String overrides (i18n)
@@ -321,7 +335,7 @@ npx tierde eject --template welcome ./emails/Welcome.tsx
 npx tierde eject --template password-reset ./emails/PasswordReset.tsx
 ```
 
-Available template names: `welcome`, `password-reset`, `email-verification`, `two-factor-auth`, `magic-link`, `passwordless-otp`, `invoice`, `order-confirmation`, `shipping-update`, `payment-failed`, `subscription`, `team-invite`, `account-deactivated`, `abandoned-cart`, `security-alert`, `review-request`, `policy-update`, `weekly-digest`, `onboarding-progress`, `comment-mention`, `notification`.
+Available template names: `welcome`, `password-reset`, `email-verification`, `two-factor-auth`, `magic-link`, `passwordless-otp`, `invoice`, `order-confirmation`, `shipping-update`, `payment-failed`, `subscription`, `team-invite`, `account-deactivated`, `abandoned-cart`, `security-alert`, `review-request`, `policy-update`, `weekly-digest`, `onboarding-progress`, `comment-mention`, `refund-confirmation`, `usage-alert`, `back-in-stock`, `maintenance-notification`, `export-ready`, `win-back`, `support-ticket`, `referral`, `feature-announcement`, `account-locked`, `account-unlocked`, `registration-confirmation`, `email-change-verification`, `phone-verification`, `profile-updated`, `password-changed-confirmation`, `login-activity`, `data-export-request`, `account-deletion-confirmation`, `newsletter-confirmation`, `notification`.
 
 The ejected file imports only from `@yedoma-labs/tierde-mail` — no internal paths.
 

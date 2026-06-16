@@ -90,3 +90,33 @@ export type { FeatureAnnouncementProps, FeatureAnnouncementStrings, ChangelogIte
 
 export { AccountLocked, ACCOUNT_LOCKED_STRINGS } from './AccountLocked.js';
 export type { AccountLockedProps, AccountLockedStrings, LockReason } from './AccountLocked.js';
+
+export { AccountUnlocked, ACCOUNT_UNLOCKED_STRINGS } from './AccountUnlocked.js';
+export type { AccountUnlockedProps, AccountUnlockedStrings } from './AccountUnlocked.js';
+
+export { RegistrationConfirmation, REGISTRATION_CONFIRMATION_STRINGS } from './RegistrationConfirmation.js';
+export type { RegistrationConfirmationProps, RegistrationConfirmationStrings } from './RegistrationConfirmation.js';
+
+export { EmailChangeVerification, EMAIL_CHANGE_VERIFICATION_STRINGS } from './EmailChangeVerification.js';
+export type { EmailChangeVerificationProps, EmailChangeVerificationStrings } from './EmailChangeVerification.js';
+
+export { PhoneVerification, PHONE_VERIFICATION_STRINGS } from './PhoneVerification.js';
+export type { PhoneVerificationProps, PhoneVerificationStrings } from './PhoneVerification.js';
+
+export { ProfileUpdated, PROFILE_UPDATED_STRINGS } from './ProfileUpdated.js';
+export type { ProfileUpdatedProps, ProfileUpdatedStrings, ProfileChange } from './ProfileUpdated.js';
+
+export { PasswordChangedConfirmation, PASSWORD_CHANGED_CONFIRMATION_STRINGS } from './PasswordChangedConfirmation.js';
+export type { PasswordChangedConfirmationProps, PasswordChangedConfirmationStrings } from './PasswordChangedConfirmation.js';
+
+export { LoginActivity, LOGIN_ACTIVITY_STRINGS } from './LoginActivity.js';
+export type { LoginActivityProps, LoginActivityStrings, LoginEvent } from './LoginActivity.js';
+
+export { DataExportRequest, DATA_EXPORT_REQUEST_STRINGS } from './DataExportRequest.js';
+export type { DataExportRequestProps, DataExportRequestStrings, DataExportRequestEvent } from './DataExportRequest.js';
+
+export { AccountDeletionConfirmation, ACCOUNT_DELETION_CONFIRMATION_STRINGS } from './AccountDeletionConfirmation.js';
+export type { AccountDeletionConfirmationProps, AccountDeletionConfirmationStrings, AccountDeletionEvent } from './AccountDeletionConfirmation.js';
+
+export { NewsletterConfirmation, NEWSLETTER_CONFIRMATION_STRINGS } from './NewsletterConfirmation.js';
+export type { NewsletterConfirmationProps, NewsletterConfirmationStrings } from './NewsletterConfirmation.js';

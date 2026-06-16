@@ -34,6 +34,16 @@ import SupportTicketRaw from '../src/templates/SupportTicket.tsx?raw';
 import ReferralRaw from '../src/templates/Referral.tsx?raw';
 import FeatureAnnouncementRaw from '../src/templates/FeatureAnnouncement.tsx?raw';
 import AccountLockedRaw from '../src/templates/AccountLocked.tsx?raw';
+import AccountUnlockedRaw from '../src/templates/AccountUnlocked.tsx?raw';
+import RegistrationConfirmationRaw from '../src/templates/RegistrationConfirmation.tsx?raw';
+import EmailChangeVerificationRaw from '../src/templates/EmailChangeVerification.tsx?raw';
+import PhoneVerificationRaw from '../src/templates/PhoneVerification.tsx?raw';
+import ProfileUpdatedRaw from '../src/templates/ProfileUpdated.tsx?raw';
+import PasswordChangedConfirmationRaw from '../src/templates/PasswordChangedConfirmation.tsx?raw';
+import LoginActivityRaw from '../src/templates/LoginActivity.tsx?raw';
+import DataExportRequestRaw from '../src/templates/DataExportRequest.tsx?raw';
+import AccountDeletionConfirmationRaw from '../src/templates/AccountDeletionConfirmation.tsx?raw';
+import NewsletterConfirmationRaw from '../src/templates/NewsletterConfirmation.tsx?raw';
 
 const TEMPLATES: Record<string, string> = {
   welcome: WelcomeRaw,
@@ -67,6 +77,16 @@ const TEMPLATES: Record<string, string> = {
   referral: ReferralRaw,
   'feature-announcement': FeatureAnnouncementRaw,
   'account-locked': AccountLockedRaw,
+  'account-unlocked': AccountUnlockedRaw,
+  'registration-confirmation': RegistrationConfirmationRaw,
+  'email-change-verification': EmailChangeVerificationRaw,
+  'phone-verification': PhoneVerificationRaw,
+  'profile-updated': ProfileUpdatedRaw,
+  'password-changed-confirmation': PasswordChangedConfirmationRaw,
+  'login-activity': LoginActivityRaw,
+  'data-export-request': DataExportRequestRaw,
+  'account-deletion-confirmation': AccountDeletionConfirmationRaw,
+  'newsletter-confirmation': NewsletterConfirmationRaw,
 };
 
 /**
