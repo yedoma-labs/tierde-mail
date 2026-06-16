@@ -138,25 +138,61 @@ function rewriteImports(source: string): string {
   return result;
 }
 
+function toPascalCase(kebab: string): string {
+  return kebab.split('-').map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join('');
+}
+
 function usage(): void {
   console.log(`
 tierde — email template CLI
 
 Commands:
-  eject --template <name> <output-path>   Copy a built-in template to your project
+  eject --template <name> <output-path>   Copy one template to your project
+  eject --all <output-dir>                Copy all templates to a directory
+  eject --list                            Print all available template names
+
+Examples:
+  npx tierde eject --template password-reset ./emails/PasswordReset.tsx
+  npx tierde eject --all ./emails
+  npx tierde eject --list
 
 Available templates:
   ${Object.keys(TEMPLATES).join('\n  ')}
-
-Example:
-  npx tierde eject --template password-reset ./emails/PasswordReset.tsx
 `);
 }
 
 function eject(args: string[]): void {
+  // --list: print all template names and exit
+  if (args.includes('--list')) {
+    Object.keys(TEMPLATES).forEach((name) => console.log(name));
+    return;
+  }
+
+  // --all <output-dir>: eject every template into a directory
+  if (args.includes('--all')) {
+    const allIdx = args.indexOf('--all');
+    const outputDir = args[allIdx + 1];
+    if (!outputDir) {
+      console.error('Error: output directory is required after --all');
+      process.exit(1);
+    }
+    const resolvedDir = resolve(process.cwd(), outputDir);
+    for (const [name, raw] of Object.entries(TEMPLATES)) {
+      const filename = `${toPascalCase(name)}.tsx`;
+      const content = rewriteImports(raw);
+      const resolvedOutput = resolve(resolvedDir, filename);
+      mkdirSync(dirname(resolvedOutput), { recursive: true });
+      writeFileSync(resolvedOutput, content, 'utf-8');
+      console.log(`  ✓ ${name} → ${filename}`);
+    }
+    console.log(`\nEjected ${Object.keys(TEMPLATES).length} templates to ${resolvedDir}`);
+    return;
+  }
+
+  // --template <name> <output-path>: eject a single template
   const templateIdx = args.indexOf('--template');
   if (templateIdx === -1 || !args[templateIdx + 1]) {
-    console.error('Error: --template <name> is required');
+    console.error('Error: --template <name>, --all <dir>, or --list is required');
     process.exit(1);
   }
 
