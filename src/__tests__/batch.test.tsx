@@ -165,4 +165,50 @@ describe('mailer.sendBatch', () => {
     expect(msg?.cc).toBeDefined();
     expect(msg?.bcc).toBeDefined();
   });
+
+  it('maxPerSecond sends all recipients and preserves order', async () => {
+    const provider = mockProvider();
+    const mailer = createMailer({ provider, from: 'sender@example.com' });
+    const recipients = Array.from({ length: 6 }, (_, i) => ({
+      to: `r${i}@example.com`,
+      props: { name: `R${i}` },
+    }));
+
+    const result = await mailer.sendBatch(TestEmail, {
+      recipients,
+      maxPerSecond: 100, // high limit so test is fast
+      concurrency: 3,
+    });
+
+    expect(result.sent).toBe(6);
+    expect(result.failed).toBe(0);
+    expect(result.results).toHaveLength(6);
+    // Order preserved — first result matches first recipient
+    expect(result.results[0]?.to).toBe('r0@example.com');
+    expect(result.results[5]?.to).toBe('r5@example.com');
+  });
+
+  it('maxPerSecond isolates individual failures', async () => {
+    let callCount = 0;
+    const provider: EmailProvider & { calls: EmailMessage[] } = {
+      name: 'flaky',
+      calls: [],
+      async send(msg) {
+        callCount++;
+        if (callCount === 3) throw new Error('transient error');
+        this.calls.push(msg);
+        return { id: `id-${callCount}`, provider: this.name };
+      },
+    };
+    const mailer = createMailer({ provider, from: 'sender@example.com' });
+
+    const result = await mailer.sendBatch(TestEmail, {
+      recipients: Array.from({ length: 5 }, (_, i) => ({ to: `r${i}@example.com`, props: { name: `R${i}` } })),
+      maxPerSecond: 100,
+      concurrency: 5,
+    });
+
+    expect(result.sent).toBe(4);
+    expect(result.failed).toBe(1);
+  });
 });

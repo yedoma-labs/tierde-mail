@@ -342,6 +342,17 @@ await mailer.send(Welcome, {
 
 ## CLI
 
+### `tierde dev`
+
+Start the preview server with all 41 built-in templates and sample data:
+
+```bash
+npx tierde dev
+npx tierde dev --port 3001
+```
+
+Opens at `http://localhost:3000`. Includes dark mode toggle, compare view, and live reload on server restart.
+
 ### `tierde render`
 
 Render a template to HTML (or plain text) without running the preview server:
@@ -356,6 +367,19 @@ npx tierde render invoice --props '{"customerName":"Acme","invoiceNumber":"INV-0
 # Render plain-text version
 npx tierde render welcome --props '{"name":"Alice","loginUrl":"https://example.com"}' --text
 ```
+
+### `tierde send`
+
+Send a template via your configured provider — useful for smoke-testing credentials:
+
+```bash
+TIERDE_PROVIDER=resend RESEND_API_KEY=re_... TIERDE_FROM_EMAIL=you@example.com \
+  npx tierde send welcome \
+  --to recipient@example.com \
+  --props '{"name":"Alice","loginUrl":"https://example.com"}'
+```
+
+Reads the same env vars as `createMailerFromEnv()`. Prints the message ID on success.
 
 ### `tierde eject`
 
@@ -397,6 +421,20 @@ console.log(`${result.sent} sent, ${result.failed} failed`);
 ```
 
 Individual failures are isolated — a single bounce does not abort the batch.
+
+### Rate limiting
+
+Use `maxPerSecond` to stay within provider rate limits (e.g. Resend free tier: 2 req/s):
+
+```ts
+await mailer.sendBatch(NewsletterEmail, {
+  recipients: [...],
+  maxPerSecond: 2,    // token-bucket: ≤2 sends per second
+  concurrency: 2,     // max concurrent in-flight
+});
+```
+
+`maxPerSecond` and `delayMs` are mutually exclusive — `maxPerSecond` takes precedence when both are set.
 
 ---
 

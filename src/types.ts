@@ -81,8 +81,10 @@ export interface BatchSendOptions<Props> {
   recipients: BatchRecipient<Props>[];
   /** Max concurrent sends per chunk. Default: 5 */
   concurrency?: number;
-  /** Milliseconds to wait between chunks (rate limiting). Default: 0 */
+  /** Milliseconds to wait between chunks. Default: 0 */
   delayMs?: number;
+  /** Max sends per second across the entire batch (token-bucket). Overrides delayMs when set. */
+  maxPerSecond?: number;
   /** Called after each send attempt, success or failure */
   onResult?: (result: BatchItemResult<Props>) => void;
 }

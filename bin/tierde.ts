@@ -147,15 +147,21 @@ function usage(): void {
 tierde — email template CLI
 
 Commands:
+  dev [--port 3000]                       Start preview server (built-in templates)
   render <name> --props '<json>' [-o <file>] [--text]
                                           Render a template to HTML (or plain text)
+  send <name> --to <email> [--props '<json>'] [--subject '<text>']
+                                          Send a template via TIERDE_PROVIDER env
   eject --template <name> <output-path>   Copy one template to your project
   eject --all <output-dir>                Copy all templates to a directory
   eject --list                            Print all available template names
 
 Examples:
+  npx tierde dev
+  npx tierde dev --port 3001
   npx tierde render welcome --props '{"name":"Alice","loginUrl":"https://app.com"}' -o welcome.html
   npx tierde render invoice --props '{"customerName":"ACME","invoiceNumber":"INV-1","items":[]}' --text
+  npx tierde send welcome --to alice@example.com --props '{"name":"Alice","loginUrl":"https://app.com"}'
   npx tierde eject --template password-reset ./emails/PasswordReset.tsx
   npx tierde eject --all ./emails
   npx tierde eject --list
@@ -291,12 +297,118 @@ async function renderTemplate(args: string[]): Promise<void> {
   }
 }
 
+async function devServer(args: string[]): Promise<void> {
+  const portIdx = args.indexOf('--port');
+  const port = portIdx !== -1 ? Number(args[portIdx + 1]) : 3000;
+  if (isNaN(port) || port < 1 || port > 65535) {
+    console.error('Error: --port must be a valid port number (1–65535)');
+    process.exit(1);
+  }
+
+  type PreviewMod = typeof import('../src/preview/index.js');
+  type TemplatesMod = typeof import('../src/templates/index.js');
+  type SamplePropsMod = typeof import('../src/templates/sample-props.js');
+
+  const [{ createPreviewServer }, allTemplates, { SAMPLE_PROPS }] = await Promise.all([
+    import('../src/preview/index.js') as Promise<PreviewMod>,
+    import('../src/templates/index.js') as Promise<TemplatesMod>,
+    import('../src/templates/sample-props.js') as Promise<SamplePropsMod>,
+  ]);
+
+  const emails: Record<string, { template: unknown; props: unknown }> = {};
+  for (const [exportName, template] of Object.entries(allTemplates)) {
+    if (typeof template === 'object' && template !== null && 'component' in template) {
+      const kebab = exportName.replace(/([A-Z])/g, (c: string, _: string, i: number) =>
+        i === 0 ? c.toLowerCase() : `-${c.toLowerCase()}`,
+      );
+      emails[kebab] = { template, props: SAMPLE_PROPS[exportName] ?? {} };
+    }
+  }
+
+  const server = createPreviewServer({ port, emails: emails as Parameters<typeof createPreviewServer>[0]['emails'] });
+  server.start();
+  console.log(`tierde preview server running at http://localhost:${port}`);
+  console.log('Press Ctrl+C to stop.');
+}
+
+async function sendTemplate(args: string[]): Promise<void> {
+  const name = args[0];
+  if (!name || name.startsWith('-')) {
+    console.error('Error: template name is required');
+    console.error("Usage: tierde send <name> --to <email> [--props '<json>']");
+    process.exit(1);
+  }
+
+  const toIdx = args.indexOf('--to');
+  const to = toIdx !== -1 ? args[toIdx + 1] : undefined;
+  if (!to) {
+    console.error('Error: --to <email> is required');
+    process.exit(1);
+  }
+
+  const propsIdx = args.indexOf('--props');
+  const propsJson = propsIdx !== -1 ? args[propsIdx + 1] : '{}';
+  let props: unknown;
+  try {
+    props = JSON.parse(propsJson ?? '{}');
+  } catch {
+    console.error('Error: --props value is not valid JSON');
+    process.exit(1);
+  }
+
+  type EnvMailerMod = typeof import('../src/env-mailer.js');
+  type TemplatesMod = typeof import('../src/templates/index.js');
+
+  const [{ createMailerFromEnv }, allTemplates] = await Promise.all([
+    import('../src/env-mailer.js') as Promise<EnvMailerMod>,
+    import('../src/templates/index.js') as Promise<TemplatesMod>,
+  ]);
+
+  const exportName = toPascalCase(name);
+  const template = (allTemplates as Record<string, unknown>)[exportName] as
+    | { component: (p: unknown) => unknown; subject: (p: unknown) => string }
+    | undefined;
+
+  if (!template?.component) {
+    console.error(`Error: unknown template "${name}"`);
+    console.error(`Available: ${Object.keys(TEMPLATES).join(', ')}`);
+    process.exit(1);
+  }
+
+  let mailer: Awaited<ReturnType<EnvMailerMod['createMailerFromEnv']>>;
+  try {
+    mailer = createMailerFromEnv();
+  } catch (err) {
+    console.error(`Error: ${err instanceof Error ? err.message : String(err)}`);
+    console.error('Set TIERDE_PROVIDER, TIERDE_FROM_EMAIL, and provider-specific env vars.');
+    process.exit(1);
+  }
+
+  console.error(`Sending "${name}" to ${to} via ${process.env['TIERDE_PROVIDER']} ...`);
+  try {
+    const result = await (mailer as unknown as import('../src/types.js').Mailer).send(
+      template as import('../src/types.js').EmailTemplate<unknown>,
+      { to, props },
+    );
+    console.log(`Sent. Message ID: ${result.id} (provider: ${result.provider})`);
+  } catch (err) {
+    console.error(`Send failed: ${err instanceof Error ? err.message : String(err)}`);
+    process.exit(1);
+  }
+}
+
 const [, , command, ...rest] = process.argv;
 
 async function main(): Promise<void> {
   switch (command) {
+    case 'dev':
+      await devServer(rest);
+      break;
     case 'render':
       await renderTemplate(rest);
+      break;
+    case 'send':
+      await sendTemplate(rest);
       break;
     case 'eject':
       eject(rest);

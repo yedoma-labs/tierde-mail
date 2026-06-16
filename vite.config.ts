@@ -15,6 +15,7 @@ const entries = {
   'react/index': resolve(__dirname, 'src/react/index.tsx'),
   'preview/index': resolve(__dirname, 'src/preview/index.ts'),
   'templates/index': resolve(__dirname, 'src/templates/index.ts'),
+  'templates/sample-props': resolve(__dirname, 'src/templates/sample-props.ts'),
   'testing/index': resolve(__dirname, 'src/testing/index.ts'),
   // CLI — compiled with ?raw template embedding
   'bin/tierde': resolve(__dirname, 'bin/tierde.ts'),
