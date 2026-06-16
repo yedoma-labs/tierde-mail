@@ -30,6 +30,13 @@ const {
   Subscription,
   AccountDeactivated,
   PasswordlessOtp,
+  AbandonedCart,
+  SecurityAlert,
+  ReviewRequest,
+  PolicyUpdate,
+  WeeklyDigest,
+  OnboardingProgress,
+  CommentMention,
 } = await import(resolve(pkgDir, 'dist/templates/index.js'));
 
 const templates = {
@@ -47,6 +54,13 @@ const templates = {
   Subscription,
   AccountDeactivated,
   PasswordlessOtp,
+  AbandonedCart,
+  SecurityAlert,
+  ReviewRequest,
+  PolicyUpdate,
+  WeeklyDigest,
+  OnboardingProgress,
+  CommentMention,
 };
 
 const template = templates[templateName];
@@ -226,6 +240,86 @@ const sampleProps = {
   PasswordlessOtp: {
     code: '847 293',
     expiresInMinutes: 10,
+    appName: 'Acme',
+  },
+  AbandonedCart: {
+    name: 'Alice Smith',
+    cartUrl: 'https://example.com/cart',
+    items: [
+      { name: 'Merino Wool Sweater', description: 'Size M, Navy', price: 89.99, quantity: 1 },
+      { name: 'Leather Belt', price: 34.99, quantity: 1 },
+    ],
+  },
+  SecurityAlert: {
+    name: 'Alice Smith',
+    event: 'new_login',
+    reviewUrl: 'https://example.com/security',
+    ipAddress: '203.0.113.42',
+    location: 'Berlin, Germany',
+    device: 'Chrome on macOS',
+    timestamp: 'June 16, 2026 at 14:32 UTC',
+  },
+  ReviewRequest: {
+    name: 'Alice Smith',
+    reviewUrl: 'https://example.com/review',
+    productOrService: 'Acme Pro',
+    appName: 'Acme',
+  },
+  PolicyUpdate: {
+    policyType: 'privacy',
+    effectiveDate: 'July 1, 2026',
+    policyUrl: 'https://example.com/privacy',
+    changes: [
+      { section: 'Data Retention', summary: 'We now retain logs for 90 days instead of 180 days.' },
+      { section: 'Third-Party Sharing', summary: 'Added clarity on analytics providers we use.' },
+    ],
+    supportEmail: 'privacy@example.com',
+    appName: 'Acme',
+  },
+  WeeklyDigest: {
+    name: 'Alice Smith',
+    weekOf: 'June 9, 2026',
+    dashboardUrl: 'https://example.com/dashboard',
+    stats: [
+      { label: 'Emails Sent', value: '1,248', change: '+12%', positive: true },
+      { label: 'Open Rate', value: '38.4%', change: '+2.1%', positive: true },
+      { label: 'Clicks', value: '247', change: '-4%', positive: false },
+    ],
+    items: [
+      {
+        title: 'New deliverability improvements',
+        summary: 'SPF and DKIM alignment now validated automatically on every send.',
+        url: 'https://example.com/changelog/1',
+        category: 'Product',
+        meta: 'June 12',
+      },
+      {
+        title: 'Template library expanded',
+        summary: '14 new ready-to-use templates added this week.',
+        url: 'https://example.com/changelog/2',
+        category: 'Product',
+        meta: 'June 10',
+      },
+    ],
+  },
+  OnboardingProgress: {
+    name: 'Alice Smith',
+    dashboardUrl: 'https://example.com/setup',
+    steps: [
+      { title: 'Create your account', completed: true },
+      { title: 'Verify your email address', completed: true },
+      { title: 'Add a sending domain', description: 'Set up SPF, DKIM, and DMARC for best deliverability.', completed: true },
+      { title: 'Send your first email', description: 'Try the API or pick a template.', completed: false, url: 'https://example.com/send' },
+      { title: 'Invite your team', completed: false, url: 'https://example.com/team' },
+    ],
+  },
+  CommentMention: {
+    name: 'Alice Smith',
+    event: 'mention',
+    actorName: 'Bob Johnson',
+    contextName: 'Q3 Email Campaign',
+    commentText: 'Hey @alice can you review the subject line for this one? I think it might need a tweak.',
+    commentUrl: 'https://example.com/projects/123#comment-456',
     appName: 'Acme',
   },
 };

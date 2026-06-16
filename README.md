@@ -270,6 +270,13 @@ All templates accept `theme?: Theme`, `locale?: string`, `dir?: 'ltr' | 'rtl'`, 
 | `Subscription` | `name`, `event`, `planName`, `actionUrl` |
 | `TeamInvite` | `inviterName`, `teamName`, `inviteUrl` |
 | `AccountDeactivated` | `name`, `reactivateUrl` |
+| `AbandonedCart` | `name`, `cartUrl`, `items[]` |
+| `SecurityAlert` | `name`, `event`, `reviewUrl` |
+| `ReviewRequest` | `name`, `reviewUrl` |
+| `PolicyUpdate` | `policyType`, `effectiveDate`, `policyUrl` |
+| `WeeklyDigest` | `name`, `weekOf`, `dashboardUrl` |
+| `OnboardingProgress` | `name`, `steps[]`, `dashboardUrl` |
+| `CommentMention` | `name`, `event`, `actorName`, `contextName`, `commentUrl` |
 | `Notification` | `title`, `body` |
 
 ### String overrides (i18n)
@@ -304,7 +311,7 @@ npx tierde eject --template welcome ./emails/Welcome.tsx
 npx tierde eject --template password-reset ./emails/PasswordReset.tsx
 ```
 
-Available template names: `welcome`, `password-reset`, `email-verification`, `two-factor-auth`, `magic-link`, `passwordless-otp`, `invoice`, `order-confirmation`, `shipping-update`, `payment-failed`, `subscription`, `team-invite`, `account-deactivated`, `notification`.
+Available template names: `welcome`, `password-reset`, `email-verification`, `two-factor-auth`, `magic-link`, `passwordless-otp`, `invoice`, `order-confirmation`, `shipping-update`, `payment-failed`, `subscription`, `team-invite`, `account-deactivated`, `abandoned-cart`, `security-alert`, `review-request`, `policy-update`, `weekly-digest`, `onboarding-progress`, `comment-mention`, `notification`.
 
 The ejected file imports only from `@yedoma-labs/tierde-mail` — no internal paths.
 

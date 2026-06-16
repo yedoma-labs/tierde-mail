@@ -39,3 +39,24 @@ export type { AccountDeactivatedProps, AccountDeactivatedStrings } from './Accou
 
 export { PasswordlessOtp, PASSWORDLESS_OTP_STRINGS } from './PasswordlessOtp.js';
 export type { PasswordlessOtpProps, PasswordlessOtpStrings } from './PasswordlessOtp.js';
+
+export { AbandonedCart, ABANDONED_CART_STRINGS } from './AbandonedCart.js';
+export type { AbandonedCartProps, AbandonedCartStrings, CartItem } from './AbandonedCart.js';
+
+export { SecurityAlert, SECURITY_ALERT_STRINGS } from './SecurityAlert.js';
+export type { SecurityAlertProps, SecurityAlertStrings, SecurityEventType } from './SecurityAlert.js';
+
+export { ReviewRequest, REVIEW_REQUEST_STRINGS } from './ReviewRequest.js';
+export type { ReviewRequestProps, ReviewRequestStrings } from './ReviewRequest.js';
+
+export { PolicyUpdate, POLICY_UPDATE_STRINGS } from './PolicyUpdate.js';
+export type { PolicyUpdateProps, PolicyUpdateStrings, PolicyType, PolicyChange } from './PolicyUpdate.js';
+
+export { WeeklyDigest, WEEKLY_DIGEST_STRINGS } from './WeeklyDigest.js';
+export type { WeeklyDigestProps, WeeklyDigestStrings, DigestItem, DigestStat } from './WeeklyDigest.js';
+
+export { OnboardingProgress, ONBOARDING_PROGRESS_STRINGS } from './OnboardingProgress.js';
+export type { OnboardingProgressProps, OnboardingProgressStrings, OnboardingStep } from './OnboardingProgress.js';
+
+export { CommentMention, COMMENT_MENTION_STRINGS } from './CommentMention.js';
+export type { CommentMentionProps, CommentMentionStrings, MentionEventType } from './CommentMention.js';

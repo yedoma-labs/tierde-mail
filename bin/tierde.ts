@@ -17,6 +17,13 @@ import PaymentFailedRaw from '../src/templates/PaymentFailed.tsx?raw';
 import SubscriptionRaw from '../src/templates/Subscription.tsx?raw';
 import AccountDeactivatedRaw from '../src/templates/AccountDeactivated.tsx?raw';
 import PasswordlessOtpRaw from '../src/templates/PasswordlessOtp.tsx?raw';
+import AbandonedCartRaw from '../src/templates/AbandonedCart.tsx?raw';
+import SecurityAlertRaw from '../src/templates/SecurityAlert.tsx?raw';
+import ReviewRequestRaw from '../src/templates/ReviewRequest.tsx?raw';
+import PolicyUpdateRaw from '../src/templates/PolicyUpdate.tsx?raw';
+import WeeklyDigestRaw from '../src/templates/WeeklyDigest.tsx?raw';
+import OnboardingProgressRaw from '../src/templates/OnboardingProgress.tsx?raw';
+import CommentMentionRaw from '../src/templates/CommentMention.tsx?raw';
 
 const TEMPLATES: Record<string, string> = {
   welcome: WelcomeRaw,
@@ -33,6 +40,13 @@ const TEMPLATES: Record<string, string> = {
   subscription: SubscriptionRaw,
   'account-deactivated': AccountDeactivatedRaw,
   'passwordless-otp': PasswordlessOtpRaw,
+  'abandoned-cart': AbandonedCartRaw,
+  'security-alert': SecurityAlertRaw,
+  'review-request': ReviewRequestRaw,
+  'policy-update': PolicyUpdateRaw,
+  'weekly-digest': WeeklyDigestRaw,
+  'onboarding-progress': OnboardingProgressRaw,
+  'comment-mention': CommentMentionRaw,
 };
 
 /**
