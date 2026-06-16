@@ -97,11 +97,13 @@ describe.skipIf(!hasBaseEnv() || !process.env['SMTP_HOST'])(
       const { smtp } = await import('../providers/smtp.js');
       const host = process.env['SMTP_HOST']!;
       const port = process.env['SMTP_PORT'] ? Number(process.env['SMTP_PORT']) : 587;
-      const auth =
-        process.env['SMTP_USER'] && process.env['SMTP_PASS']
-          ? { user: process.env['SMTP_USER']!, pass: process.env['SMTP_PASS']! }
-          : undefined;
-      const provider = smtp({ host, port, auth });
+      const provider = smtp({
+        host,
+        port,
+        ...(process.env['SMTP_USER'] && process.env['SMTP_PASS']
+          ? { auth: { user: process.env['SMTP_USER']!, pass: process.env['SMTP_PASS']! } }
+          : {}),
+      });
       const result = await provider.send(testMessage('smtp'));
       expect(result.provider).toBe('smtp');
       expect(result.id).toBeTruthy();

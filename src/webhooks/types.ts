@@ -14,7 +14,7 @@ export interface WebhookEmail {
   id: string;
   to: string[];
   from: string;
-  subject?: string;
+  subject?: string | undefined;
   timestamp: string;
 }
 
