@@ -45,13 +45,20 @@ export function normalizeAddress(input: EmailAddressInput): EmailAddress {
 export function normalizeAddresses(
   input: EmailAddressInput | EmailAddressInput[],
 ): EmailAddress[] {
-  return Array.isArray(input)
+  const addresses = Array.isArray(input)
     ? input.map(normalizeAddress)
     : [normalizeAddress(input)];
+  if (addresses.length === 0) {
+    throw new TypeError('At least one recipient address is required');
+  }
+  return addresses;
 }
 
 export function validateAttachment(attachment: Attachment): void {
   const filename = attachment.filename;
+  if (/[\x00-\x1f]/.test(filename)) {
+    throw new TypeError(`Unsafe attachment filename: contains control characters`);
+  }
   if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
     throw new TypeError(`Unsafe attachment filename: ${filename}`);
   }

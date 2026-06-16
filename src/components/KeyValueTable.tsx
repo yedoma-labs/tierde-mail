@@ -18,7 +18,7 @@ const cellBase: CSSProperties = {
 };
 
 export function KeyValueTable({ rows }: KeyValueTableProps): ReactElement {
-  const filtered = rows.filter((r) => r.value != null && r.value !== '');
+  const filtered = rows.filter((r) => r.value != null && r.value !== '' && r.value !== false);
   if (filtered.length === 0) return <></>;
 
   return (
