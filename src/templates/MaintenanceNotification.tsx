@@ -8,7 +8,7 @@ import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
 import type { CSSProperties } from 'react';
-import type { Theme } from '../theme.js';
+import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export type MaintenanceType = 'scheduled' | 'emergency' | 'completed' | 'extended';
@@ -58,18 +58,13 @@ export interface AffectedService {
   impact: 'full_outage' | 'partial_outage' | 'degraded';
 }
 
-export interface MaintenanceNotificationProps {
+export interface MaintenanceNotificationProps extends BaseTemplateProps<MaintenanceNotificationStrings> {
   type: MaintenanceType;
   startTime?: string;
   endTime?: string;
   duration?: string;
   affectedServices?: AffectedService[];
   statusPageUrl?: string;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<MaintenanceNotificationStrings>;
-  theme?: Theme;
 }
 
 const windowBoxStyle: CSSProperties = {

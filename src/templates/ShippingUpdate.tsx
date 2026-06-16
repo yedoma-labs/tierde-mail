@@ -7,7 +7,7 @@ import { Button } from '../components/Button.js';
 import { Footer } from '../components/Footer.js';
 import { Section } from '../components/Section.js';
 import type { CSSProperties } from 'react';
-import type { Theme } from '../theme.js';
+import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export type ShippingStatus = 'shipped' | 'out_for_delivery' | 'delivered' | 'delayed';
@@ -56,7 +56,7 @@ export const SHIPPING_UPDATE_STRINGS: ShippingUpdateStrings = {
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface ShippingUpdateProps {
+export interface ShippingUpdateProps extends BaseTemplateProps<ShippingUpdateStrings> {
   name: string;
   orderNumber: string;
   status: ShippingStatus;
@@ -64,11 +64,6 @@ export interface ShippingUpdateProps {
   trackingNumber?: string;
   carrier?: string;
   estimatedDelivery?: string;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<ShippingUpdateStrings>;
-  theme?: Theme;
 }
 
 const infoRowStyle: CSSProperties = {

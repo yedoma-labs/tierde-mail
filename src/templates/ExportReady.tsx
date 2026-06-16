@@ -8,7 +8,7 @@ import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
 import type { CSSProperties } from 'react';
-import type { Theme } from '../theme.js';
+import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface ExportReadyStrings {
@@ -31,7 +31,7 @@ export const EXPORT_READY_STRINGS: ExportReadyStrings = {
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface ExportReadyProps {
+export interface ExportReadyProps extends BaseTemplateProps<ExportReadyStrings> {
   name: string;
   exportName: string;
   downloadUrl: string;
@@ -39,11 +39,6 @@ export interface ExportReadyProps {
   fileFormat?: string;
   rowCount?: number;
   expiresInHours?: number;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<ExportReadyStrings>;
-  theme?: Theme;
 }
 
 const metaBoxStyle: CSSProperties = {

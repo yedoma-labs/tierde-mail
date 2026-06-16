@@ -8,7 +8,7 @@ import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
 import type { CSSProperties } from 'react';
-import type { Theme } from '../theme.js';
+import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export type MentionEventType = 'mention' | 'comment' | 'reply' | 'reaction';
@@ -55,7 +55,7 @@ export const COMMENT_MENTION_STRINGS: CommentMentionStrings = {
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface CommentMentionProps {
+export interface CommentMentionProps extends BaseTemplateProps<CommentMentionStrings> {
   name: string;
   event: MentionEventType;
   actorName: string;
@@ -63,11 +63,6 @@ export interface CommentMentionProps {
   contextName: string;
   commentText?: string;
   commentUrl: string;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<CommentMentionStrings>;
-  theme?: Theme;
 }
 
 const quoteBlockStyle: CSSProperties = {

@@ -8,7 +8,7 @@ import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
 import type { CSSProperties } from 'react';
-import type { Theme } from '../theme.js';
+import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface BackInStockStrings {
@@ -31,18 +31,13 @@ export const BACK_IN_STOCK_STRINGS: BackInStockStrings = {
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface BackInStockProps {
+export interface BackInStockProps extends BaseTemplateProps<BackInStockStrings> {
   name: string;
   productName: string;
   productUrl: string;
   productImageUrl?: string;
   price?: string;
   variant?: string;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<BackInStockStrings>;
-  theme?: Theme;
 }
 
 const productCardStyle: CSSProperties = {

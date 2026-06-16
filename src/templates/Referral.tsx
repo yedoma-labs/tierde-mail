@@ -8,7 +8,7 @@ import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
 import type { CSSProperties } from 'react';
-import type { Theme } from '../theme.js';
+import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export type ReferralEvent = 'invite' | 'reminder' | 'reward_earned' | 'reward_credited';
@@ -65,18 +65,13 @@ export const REFERRAL_STRINGS: ReferralStrings = {
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface ReferralProps {
+export interface ReferralProps extends BaseTemplateProps<ReferralStrings> {
   name: string;
   event: ReferralEvent;
   referrerName: string;
   actionUrl: string;
   referralCode?: string;
   reward?: string;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<ReferralStrings>;
-  theme?: Theme;
 }
 
 const codeBoxStyle: CSSProperties = {

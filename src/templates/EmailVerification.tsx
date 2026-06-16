@@ -6,7 +6,7 @@ import { Text } from '../components/Text.js';
 import { Button } from '../components/Button.js';
 import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
-import type { Theme } from '../theme.js';
+import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface EmailVerificationStrings {
@@ -33,15 +33,10 @@ export const EMAIL_VERIFICATION_STRINGS: EmailVerificationStrings = {
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface EmailVerificationProps {
+export interface EmailVerificationProps extends BaseTemplateProps<EmailVerificationStrings> {
   name: string;
   verifyUrl: string;
   expiresIn?: string;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<EmailVerificationStrings>;
-  theme?: Theme;
 }
 
 export const EmailVerification: EmailTemplateType<EmailVerificationProps> = defineEmail<EmailVerificationProps>({

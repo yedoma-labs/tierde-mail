@@ -7,7 +7,7 @@ import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
 import type { CSSProperties } from 'react';
-import type { Theme } from '../theme.js';
+import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface InvoiceStrings {
@@ -47,17 +47,12 @@ export interface InvoiceLineItem {
   price: number;
 }
 
-export interface InvoiceProps {
+export interface InvoiceProps extends BaseTemplateProps<InvoiceStrings> {
   customerName: string;
   invoiceNumber: string;
   items: InvoiceLineItem[];
   currency?: string;
-  appName?: string;
   supportEmail?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<InvoiceStrings>;
-  theme?: Theme;
 }
 
 const tableStyle: CSSProperties = {

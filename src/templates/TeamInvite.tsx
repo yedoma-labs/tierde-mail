@@ -6,7 +6,7 @@ import { Text } from '../components/Text.js';
 import { Button } from '../components/Button.js';
 import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
-import type { Theme } from '../theme.js';
+import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface TeamInviteStrings {
@@ -32,17 +32,12 @@ export const TEAM_INVITE_STRINGS: TeamInviteStrings = {
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface TeamInviteProps {
+export interface TeamInviteProps extends BaseTemplateProps<TeamInviteStrings> {
   inviterName: string;
   teamName: string;
   inviteUrl: string;
   role?: string;
   expiresInHours?: number;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<TeamInviteStrings>;
-  theme?: Theme;
 }
 
 export const TeamInvite: EmailTemplateType<TeamInviteProps> = defineEmail<TeamInviteProps>({

@@ -7,6 +7,8 @@ import { Text } from '../components/Text.js';
 import { Button } from '../components/Button.js';
 import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
+import { Section } from '../components/Section.js';
+import { KeyValueTable } from '../components/KeyValueTable.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface PasswordChangedConfirmationStrings {
@@ -53,9 +55,15 @@ export const PasswordChangedConfirmation: EmailTemplateType<PasswordChangedConfi
         <Heading>{s.heading}</Heading>
         <Text>{s.greeting(name)}</Text>
         <Text>{s.body}</Text>
-        {timestamp && <Text muted size="sm">{s.timestampLabel}: {timestamp}</Text>}
-        {location && <Text muted size="sm">{s.locationLabel}: {location}</Text>}
-        {ipAddress && <Text muted size="sm">{s.ipLabel}: {ipAddress}</Text>}
+        {(timestamp || location || ipAddress) && (
+          <Section>
+            <KeyValueTable rows={[
+              { label: s.timestampLabel, value: timestamp },
+              { label: s.locationLabel, value: location },
+              { label: s.ipLabel, value: ipAddress, mono: true },
+            ]} />
+          </Section>
+        )}
         <Button href={securityUrl} variant="outline">{s.securityCtaLabel}</Button>
         <Hr />
         <Text muted size="sm">{s.notYouNote}</Text>

@@ -8,7 +8,7 @@ import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
 import type { CSSProperties } from 'react';
-import type { Theme } from '../theme.js';
+import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface OrderConfirmationStrings {
@@ -45,17 +45,12 @@ export interface OrderLineItem {
   imageUrl?: string;
 }
 
-export interface OrderConfirmationProps {
+export interface OrderConfirmationProps extends BaseTemplateProps<OrderConfirmationStrings> {
   name: string;
   orderNumber: string;
   items: OrderLineItem[];
   orderUrl: string;
   currency?: string;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<OrderConfirmationStrings>;
-  theme?: Theme;
 }
 
 const tableStyle: CSSProperties = {

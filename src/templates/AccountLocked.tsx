@@ -8,7 +8,8 @@ import { Button } from '../components/Button.js';
 import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
-import type { CSSProperties } from 'react';
+import { AlertBox } from '../components/AlertBox.js';
+import { KeyValueTable } from '../components/KeyValueTable.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export type LockReason = 'too_many_attempts' | 'suspicious_activity' | 'admin_action' | 'policy_violation';
@@ -20,6 +21,9 @@ export interface AccountLockedStrings {
   body: (reason: LockReason) => string;
   unlockCtaLabel: string;
   supportNote: (email: string) => string;
+  timeLabel: string;
+  locationLabel: string;
+  ipLabel: string;
   footer: (year: string, appName: string) => string;
 }
 
@@ -38,6 +42,9 @@ export const ACCOUNT_LOCKED_STRINGS: AccountLockedStrings = {
   },
   unlockCtaLabel: 'Unlock My Account',
   supportNote: (email) => `Need help? Contact our support team at ${email}.`,
+  timeLabel: 'Time',
+  locationLabel: 'Location',
+  ipLabel: 'IP Address',
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
@@ -48,89 +55,34 @@ export interface AccountLockedProps extends BaseTemplateProps<AccountLockedStrin
   supportEmail?: string;
 }
 
-const alertBoxStyle: CSSProperties = {
-  backgroundColor: '#fef2f2',
-  border: '1px solid #fecaca',
-  borderRadius: '8px',
-  padding: '16px',
-};
-
-const alertIconStyle: CSSProperties = {
-  fontSize: '28px',
-  display: 'block',
-  marginBottom: '8px',
-};
-
-const alertTextStyle: CSSProperties = {
-  color: '#7f1d1d',
-  fontSize: '14px',
-  margin: 0,
-  lineHeight: '1.6',
-};
-
-const detailRowStyle: CSSProperties = {
-  padding: '8px 0',
-  borderBottom: '1px solid #f3f4f6',
-  fontSize: '14px',
-};
-
 export const AccountLocked: EmailTemplateType<AccountLockedProps> = defineEmail<AccountLockedProps>({
   subject: ({ appName = 'Our App', strings }) => {
     const s = { ...ACCOUNT_LOCKED_STRINGS, ...strings };
     return s.subject(appName);
   },
   component: ({
-    name,
-    reason,
-    unlockUrl,
-    ipAddress,
-    location,
-    timestamp,
+    name, reason, unlockUrl,
+    ipAddress, location, timestamp,
     supportEmail,
-    appName = 'Our App',
-    locale,
-    dir,
-    strings,
-    theme,
+    appName = 'Our App', locale, dir, strings, theme,
   }) => {
     const s = { ...ACCOUNT_LOCKED_STRINGS, ...strings };
     const year = currentYear(locale);
-    const hasDetails = ipAddress || location || timestamp;
 
     return (
       <EmailTemplate preview={s.subject(appName)} lang={locale} dir={dir} theme={theme}>
         <Heading>{s.heading}</Heading>
         <Text>{s.greeting(name)}</Text>
         <Section>
-          <div style={alertBoxStyle}>
-            <span style={alertIconStyle}>🔒</span>
-            <p style={alertTextStyle}>{s.body(reason)}</p>
-          </div>
+          <AlertBox variant="danger" icon="🔒">{s.body(reason)}</AlertBox>
         </Section>
-        {hasDetails && (
+        {(timestamp || location || ipAddress) && (
           <Section>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }} cellPadding="0" cellSpacing="0">
-              <tbody>
-                {timestamp && (
-                  <tr>
-                    <td style={detailRowStyle}><span style={{ color: '#6b7280' }}>Time</span></td>
-                    <td style={{ ...detailRowStyle, textAlign: 'right', fontWeight: '600', color: '#0f172a' }}>{timestamp}</td>
-                  </tr>
-                )}
-                {location && (
-                  <tr>
-                    <td style={detailRowStyle}><span style={{ color: '#6b7280' }}>Location</span></td>
-                    <td style={{ ...detailRowStyle, textAlign: 'right', fontWeight: '600', color: '#0f172a' }}>{location}</td>
-                  </tr>
-                )}
-                {ipAddress && (
-                  <tr>
-                    <td style={detailRowStyle}><span style={{ color: '#6b7280' }}>IP Address</span></td>
-                    <td style={{ ...detailRowStyle, textAlign: 'right', fontWeight: '600', color: '#0f172a', fontFamily: 'monospace', fontSize: '13px' }}>{ipAddress}</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+            <KeyValueTable rows={[
+              { label: s.timeLabel, value: timestamp },
+              { label: s.locationLabel, value: location },
+              { label: s.ipLabel, value: ipAddress, mono: true },
+            ]} />
           </Section>
         )}
         <Button href={unlockUrl}>{s.unlockCtaLabel}</Button>

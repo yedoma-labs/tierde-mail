@@ -6,7 +6,7 @@ import { Text } from '../components/Text.js';
 import { Button } from '../components/Button.js';
 import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
-import type { Theme } from '../theme.js';
+import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface MagicLinkStrings {
@@ -30,15 +30,10 @@ export const MAGIC_LINK_STRINGS: MagicLinkStrings = {
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface MagicLinkProps {
+export interface MagicLinkProps extends BaseTemplateProps<MagicLinkStrings> {
   email: string;
   loginUrl: string;
   expiresIn?: string;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<MagicLinkStrings>;
-  theme?: Theme;
 }
 
 export const MagicLink: EmailTemplateType<MagicLinkProps> = defineEmail<MagicLinkProps>({

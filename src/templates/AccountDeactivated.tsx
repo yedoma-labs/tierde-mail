@@ -6,7 +6,7 @@ import { Text } from '../components/Text.js';
 import { Button } from '../components/Button.js';
 import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
-import type { Theme } from '../theme.js';
+import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface AccountDeactivatedStrings {
@@ -35,17 +35,12 @@ export const ACCOUNT_DEACTIVATED_STRINGS: AccountDeactivatedStrings = {
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface AccountDeactivatedProps {
+export interface AccountDeactivatedProps extends BaseTemplateProps<AccountDeactivatedStrings> {
   name: string;
   reactivateUrl: string;
   reason?: string;
   dataRetentionDays?: number;
   supportEmail?: string;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<AccountDeactivatedStrings>;
-  theme?: Theme;
 }
 
 export const AccountDeactivated: EmailTemplateType<AccountDeactivatedProps> = defineEmail<AccountDeactivatedProps>({

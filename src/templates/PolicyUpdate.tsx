@@ -6,7 +6,7 @@ import { Text } from '../components/Text.js';
 import { Button } from '../components/Button.js';
 import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
-import type { Theme } from '../theme.js';
+import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export type PolicyType = 'privacy' | 'terms' | 'cookie' | 'acceptable_use' | 'data_processing';
@@ -46,17 +46,12 @@ export interface PolicyChange {
   summary: string;
 }
 
-export interface PolicyUpdateProps {
+export interface PolicyUpdateProps extends BaseTemplateProps<PolicyUpdateStrings> {
   policyType: PolicyType;
   effectiveDate: string;
   policyUrl: string;
   changes?: PolicyChange[];
   supportEmail?: string;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<PolicyUpdateStrings>;
-  theme?: Theme;
 }
 
 export const PolicyUpdate: EmailTemplateType<PolicyUpdateProps> = defineEmail<PolicyUpdateProps>({

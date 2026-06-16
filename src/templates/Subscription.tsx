@@ -8,7 +8,7 @@ import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
 import type { CSSProperties } from 'react';
-import type { Theme } from '../theme.js';
+import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export type SubscriptionEvent = 'started' | 'upgraded' | 'downgraded' | 'cancelled' | 'renewed' | 'trial_started' | 'trial_ending';
@@ -77,18 +77,13 @@ export const SUBSCRIPTION_STRINGS: SubscriptionStrings = {
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface SubscriptionProps {
+export interface SubscriptionProps extends BaseTemplateProps<SubscriptionStrings> {
   name: string;
   event: SubscriptionEvent;
   planName: string;
   actionUrl: string;
   nextBillingDate?: string;
   trialDaysRemaining?: number;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<SubscriptionStrings>;
-  theme?: Theme;
 }
 
 const planBadgeStyle: CSSProperties = {

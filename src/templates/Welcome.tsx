@@ -6,7 +6,7 @@ import { Text } from '../components/Text.js';
 import { Button } from '../components/Button.js';
 import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
-import type { Theme } from '../theme.js';
+import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface WelcomeStrings {
@@ -29,15 +29,10 @@ export const WELCOME_STRINGS: WelcomeStrings = {
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface WelcomeProps {
+export interface WelcomeProps extends BaseTemplateProps<WelcomeStrings> {
   name: string;
   loginUrl: string;
-  appName?: string;
   supportEmail?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<WelcomeStrings>;
-  theme?: Theme;
 }
 
 export const Welcome: EmailTemplateType<WelcomeProps> = defineEmail<WelcomeProps>({

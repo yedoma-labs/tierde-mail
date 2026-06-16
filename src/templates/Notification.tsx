@@ -5,7 +5,7 @@ import { Heading } from '../components/Heading.js';
 import { Text } from '../components/Text.js';
 import { Button } from '../components/Button.js';
 import { Footer } from '../components/Footer.js';
-import type { Theme } from '../theme.js';
+import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface NotificationStrings {
@@ -16,16 +16,11 @@ export const NOTIFICATION_STRINGS: NotificationStrings = {
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface NotificationProps {
+export interface NotificationProps extends BaseTemplateProps<NotificationStrings> {
   title: string;
   body: string;
   ctaLabel?: string;
   ctaUrl?: string;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<NotificationStrings>;
-  theme?: Theme;
 }
 
 export const Notification: EmailTemplateType<NotificationProps> = defineEmail<NotificationProps>({

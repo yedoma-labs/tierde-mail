@@ -8,7 +8,7 @@ import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
 import type { CSSProperties } from 'react';
-import type { Theme } from '../theme.js';
+import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface AbandonedCartStrings {
@@ -39,16 +39,11 @@ export interface CartItem {
   imageUrl?: string;
 }
 
-export interface AbandonedCartProps {
+export interface AbandonedCartProps extends BaseTemplateProps<AbandonedCartStrings> {
   name: string;
   cartUrl: string;
   items: CartItem[];
   currency?: string;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<AbandonedCartStrings>;
-  theme?: Theme;
 }
 
 const itemRowStyle: CSSProperties = {

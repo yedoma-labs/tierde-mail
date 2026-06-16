@@ -8,7 +8,7 @@ import { Button } from '../components/Button.js';
 import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
-import type { CSSProperties } from 'react';
+import { AlertBox } from '../components/AlertBox.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export type AccountDeletionEvent = 'requested' | 'scheduled' | 'completed' | 'cancelled';
@@ -67,20 +67,6 @@ export interface AccountDeletionConfirmationProps extends BaseTemplateProps<Acco
   dataRetentionDays?: number;
 }
 
-const warningBoxStyle: CSSProperties = {
-  backgroundColor: '#fff7ed',
-  border: '1px solid #fed7aa',
-  borderRadius: '8px',
-  padding: '16px',
-};
-
-const warningTextStyle: CSSProperties = {
-  color: '#7c2d12',
-  fontSize: '14px',
-  margin: 0,
-  lineHeight: '1.6',
-};
-
 export const AccountDeletionConfirmation: EmailTemplateType<AccountDeletionConfirmationProps> = defineEmail<AccountDeletionConfirmationProps>({
   subject: ({ event, appName = 'Our App', strings }) => {
     const s = { ...ACCOUNT_DELETION_CONFIRMATION_STRINGS, ...strings };
@@ -98,11 +84,9 @@ export const AccountDeletionConfirmation: EmailTemplateType<AccountDeletionConfi
         <Text>{s.body(event, deletionDate)}</Text>
         {showWarning && (
           <Section>
-            <div style={warningBoxStyle}>
-              <p style={warningTextStyle}>
-                {event === 'scheduled' ? s.dataNote(dataRetentionDays) : s.permanentNote}
-              </p>
-            </div>
+            <AlertBox variant={event === 'completed' ? 'danger' : 'warning'}>
+              {event === 'scheduled' ? s.dataNote(dataRetentionDays) : s.permanentNote}
+            </AlertBox>
           </Section>
         )}
         {cancelUrl && event === 'scheduled' && (

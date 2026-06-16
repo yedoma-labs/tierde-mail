@@ -6,7 +6,7 @@ import { Text } from '../components/Text.js';
 import { Button } from '../components/Button.js';
 import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
-import type { Theme } from '../theme.js';
+import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface WinBackStrings {
@@ -30,17 +30,12 @@ export const WIN_BACK_STRINGS: WinBackStrings = {
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface WinBackProps {
+export interface WinBackProps extends BaseTemplateProps<WinBackStrings> {
   name: string;
   returnUrl: string;
   daysSince: number;
   offer?: string;
   unsubscribeUrl?: string;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<WinBackStrings>;
-  theme?: Theme;
 }
 
 export const WinBack: EmailTemplateType<WinBackProps> = defineEmail<WinBackProps>({

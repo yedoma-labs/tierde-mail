@@ -6,7 +6,7 @@ import { Text } from '../components/Text.js';
 import { Button } from '../components/Button.js';
 import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
-import type { Theme } from '../theme.js';
+import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface ReviewRequestStrings {
@@ -30,15 +30,10 @@ export const REVIEW_REQUEST_STRINGS: ReviewRequestStrings = {
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface ReviewRequestProps {
+export interface ReviewRequestProps extends BaseTemplateProps<ReviewRequestStrings> {
   name: string;
   reviewUrl: string;
   productOrService?: string;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<ReviewRequestStrings>;
-  theme?: Theme;
 }
 
 export const ReviewRequest: EmailTemplateType<ReviewRequestProps> = defineEmail<ReviewRequestProps>({

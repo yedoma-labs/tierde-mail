@@ -10,3 +10,7 @@ export { Preview } from './Preview.js';
 export { Section } from './Section.js';
 export { Row, Column } from './Row.js';
 export { LogoHeader } from './LogoHeader.js';
+export { KeyValueTable } from './KeyValueTable.js';
+export type { KeyValueRow } from './KeyValueTable.js';
+export { AlertBox } from './AlertBox.js';
+export type { AlertBoxVariant } from './AlertBox.js';

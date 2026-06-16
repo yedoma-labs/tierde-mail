@@ -8,7 +8,7 @@ import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
 import type { CSSProperties } from 'react';
-import type { Theme } from '../theme.js';
+import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface DigestItem {
@@ -50,17 +50,12 @@ export const WEEKLY_DIGEST_STRINGS: WeeklyDigestStrings = {
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface WeeklyDigestProps {
+export interface WeeklyDigestProps extends BaseTemplateProps<WeeklyDigestStrings> {
   name: string;
   weekOf: string;
   dashboardUrl: string;
   stats?: DigestStat[];
   items?: DigestItem[];
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<WeeklyDigestStrings>;
-  theme?: Theme;
 }
 
 const statCellStyle: CSSProperties = {

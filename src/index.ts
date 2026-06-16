@@ -1,3 +1,5 @@
+export type { BaseTemplateProps, SecurityDetails, ChangeRecord, LoginEvent } from './templates/shared.js';
+
 export { defineEmail } from './define-email.js';
 export { createMailer } from './mailer.js';
 export { createMailerFromEnv } from './env-mailer.js';
@@ -18,7 +20,10 @@ export {
   Row,
   Column,
   LogoHeader,
+  KeyValueTable,
+  AlertBox,
 } from './components/index.js';
+export type { KeyValueRow, AlertBoxVariant } from './components/index.js';
 
 export type {
   EmailAddress,

@@ -7,7 +7,7 @@ import { Section } from '../components/Section.js';
 import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import type { CSSProperties } from 'react';
-import type { Theme } from '../theme.js';
+import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface TwoFactorAuthStrings {
@@ -31,15 +31,10 @@ export const TWO_FACTOR_AUTH_STRINGS: TwoFactorAuthStrings = {
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface TwoFactorAuthProps {
+export interface TwoFactorAuthProps extends BaseTemplateProps<TwoFactorAuthStrings> {
   username: string;
   code: string;
   expiresIn?: string;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<TwoFactorAuthStrings>;
-  theme?: Theme;
 }
 
 const codeStyle: CSSProperties = {

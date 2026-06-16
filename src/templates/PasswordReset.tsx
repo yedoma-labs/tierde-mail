@@ -6,7 +6,7 @@ import { Text } from '../components/Text.js';
 import { Button } from '../components/Button.js';
 import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
-import type { Theme } from '../theme.js';
+import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface PasswordResetStrings {
@@ -33,15 +33,10 @@ export const PASSWORD_RESET_STRINGS: PasswordResetStrings = {
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface PasswordResetProps {
+export interface PasswordResetProps extends BaseTemplateProps<PasswordResetStrings> {
   username: string;
   resetUrl: string;
   expiresIn?: string;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<PasswordResetStrings>;
-  theme?: Theme;
 }
 
 export const PasswordReset: EmailTemplateType<PasswordResetProps> = defineEmail<PasswordResetProps>({

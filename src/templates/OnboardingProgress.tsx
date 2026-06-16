@@ -8,7 +8,7 @@ import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
 import type { CSSProperties } from 'react';
-import type { Theme } from '../theme.js';
+import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface OnboardingStep {
@@ -51,15 +51,10 @@ export const ONBOARDING_PROGRESS_STRINGS: OnboardingProgressStrings = {
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface OnboardingProgressProps {
+export interface OnboardingProgressProps extends BaseTemplateProps<OnboardingProgressStrings> {
   name: string;
   steps: OnboardingStep[];
   dashboardUrl: string;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<OnboardingProgressStrings>;
-  theme?: Theme;
 }
 
 const stepRowStyle: CSSProperties = {

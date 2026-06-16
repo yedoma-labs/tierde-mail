@@ -8,7 +8,7 @@ import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
 import type { CSSProperties } from 'react';
-import type { Theme } from '../theme.js';
+import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export type SupportTicketEvent = 'created' | 'updated' | 'resolved' | 'closed' | 'reopened';
@@ -58,7 +58,7 @@ export const SUPPORT_TICKET_STRINGS: SupportTicketStrings = {
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface SupportTicketProps {
+export interface SupportTicketProps extends BaseTemplateProps<SupportTicketStrings> {
   name: string;
   event: SupportTicketEvent;
   ticketId: string;
@@ -67,11 +67,6 @@ export interface SupportTicketProps {
   agentMessage?: string;
   agentName?: string;
   priority?: 'low' | 'normal' | 'high' | 'urgent';
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<SupportTicketStrings>;
-  theme?: Theme;
 }
 
 const detailRowStyle: CSSProperties = {

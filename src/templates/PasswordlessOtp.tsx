@@ -7,7 +7,7 @@ import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
 import type { CSSProperties } from 'react';
-import type { Theme } from '../theme.js';
+import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface PasswordlessOtpStrings {
@@ -28,14 +28,9 @@ export const PASSWORDLESS_OTP_STRINGS: PasswordlessOtpStrings = {
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface PasswordlessOtpProps {
+export interface PasswordlessOtpProps extends BaseTemplateProps<PasswordlessOtpStrings> {
   code: string;
   expiresInMinutes?: number;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<PasswordlessOtpStrings>;
-  theme?: Theme;
 }
 
 const codeBlockStyle: CSSProperties = {

@@ -8,7 +8,7 @@ import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
 import type { CSSProperties } from 'react';
-import type { Theme } from '../theme.js';
+import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface ChangelogItem {
@@ -39,18 +39,13 @@ export const FEATURE_ANNOUNCEMENT_STRINGS: FeatureAnnouncementStrings = {
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface FeatureAnnouncementProps {
+export interface FeatureAnnouncementProps extends BaseTemplateProps<FeatureAnnouncementStrings> {
   name: string;
   featureName: string;
   description: string;
   ctaUrl: string;
   imageUrl?: string;
   changes?: ChangelogItem[];
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<FeatureAnnouncementStrings>;
-  theme?: Theme;
 }
 
 const typeBadge = (type: ChangelogItem['type'], strings: FeatureAnnouncementStrings): CSSProperties & { label: string } => {

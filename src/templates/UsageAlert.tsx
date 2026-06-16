@@ -8,7 +8,7 @@ import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
 import type { CSSProperties } from 'react';
-import type { Theme } from '../theme.js';
+import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export type UsageSeverity = 'warning' | 'critical' | 'exceeded';
@@ -46,7 +46,7 @@ export const USAGE_ALERT_STRINGS: UsageAlertStrings = {
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface UsageAlertProps {
+export interface UsageAlertProps extends BaseTemplateProps<UsageAlertStrings> {
   name: string;
   resource: string;
   used: number | string;
@@ -56,11 +56,6 @@ export interface UsageAlertProps {
   severity: UsageSeverity;
   upgradeUrl: string;
   resetDate?: string;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<UsageAlertStrings>;
-  theme?: Theme;
 }
 
 const progressBarWrapStyle: CSSProperties = {
