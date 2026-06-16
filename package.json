@@ -79,6 +79,16 @@
         "default": "./dist/providers/postmark.cjs"
       }
     },
+    "./webhooks": {
+      "import": {
+        "types": "./dist/webhooks/index.d.ts",
+        "default": "./dist/webhooks/index.js"
+      },
+      "require": {
+        "types": "./dist/webhooks/index.d.cts",
+        "default": "./dist/webhooks/index.cjs"
+      }
+    },
     "./preview": {
       "import": {
         "types": "./dist/preview/index.d.ts",

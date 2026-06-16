@@ -1,6 +1,7 @@
 import { renderEmail } from '../render.js';
 import { htmlToPlainText } from '../plain-text.js';
 import { normalizeAddress, normalizeAddresses } from '../validate.js';
+import { executeBatch } from '../mailer.js';
 import type {
   EmailProvider,
   EmailMessage,
@@ -10,6 +11,8 @@ import type {
   Mailer,
   CreateMailerConfig,
   EmailAddress,
+  BatchSendOptions,
+  BatchSendResult,
 } from '../types.js';
 
 export interface CapturedEmail {
@@ -89,6 +92,13 @@ class CaptureMailer implements Mailer {
     };
 
     return this.#provider.send(message);
+  }
+
+  sendBatch<Props>(
+    template: EmailTemplate<Props>,
+    options: BatchSendOptions<Props>,
+  ): Promise<BatchSendResult<Props>> {
+    return executeBatch(this, template, options);
   }
 }
 

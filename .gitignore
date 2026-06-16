@@ -1,6 +1,6 @@
 node_modules/
 dist/
-preview/
+/preview/
 coverage/
 .env
 .env.local

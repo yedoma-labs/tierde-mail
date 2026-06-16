@@ -11,6 +11,7 @@ const entries = {
   'providers/ses': resolve(__dirname, 'src/providers/ses.ts'),
   'providers/sendgrid': resolve(__dirname, 'src/providers/sendgrid.ts'),
   'providers/postmark': resolve(__dirname, 'src/providers/postmark.ts'),
+  'webhooks/index': resolve(__dirname, 'src/webhooks/index.ts'),
   'preview/index': resolve(__dirname, 'src/preview/index.ts'),
   'templates/index': resolve(__dirname, 'src/templates/index.ts'),
   'testing/index': resolve(__dirname, 'src/testing/index.ts'),
@@ -94,6 +95,7 @@ export default defineConfig({
         'node:path',
         'node:url',
         'node:events',
+        'node:crypto',
         '@aws-sdk/client-ses',
         'nodemailer',
         // Runtime dependencies — installed alongside the package, not bundled

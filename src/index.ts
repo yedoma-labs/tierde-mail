@@ -39,4 +39,8 @@ export type {
   SingleProviderMailerConfig,
   MultiProviderMailerConfig,
   Attachment,
+  BatchRecipient,
+  BatchSendOptions,
+  BatchItemResult,
+  BatchSendResult,
 } from './types.js';

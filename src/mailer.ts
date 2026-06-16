@@ -10,6 +10,9 @@ import type {
   SendOptions,
   SendResult,
   MultiProviderMailerConfig,
+  BatchSendOptions,
+  BatchSendResult,
+  BatchItemResult,
 } from './types.js';
 
 function isMultiProvider(config: CreateMailerConfig): config is MultiProviderMailerConfig {
@@ -92,9 +95,62 @@ class MailerImpl implements Mailer {
     throw lastError ?? new Error('All providers failed with no error message');
   }
 
+  async sendBatch<Props>(
+    template: EmailTemplate<Props>,
+    options: BatchSendOptions<Props>,
+  ): Promise<BatchSendResult<Props>> {
+    return executeBatch(this, template, options);
+  }
+
   toString(): string {
     return `Mailer(providers=[${this.#providers.map((p) => p.name).join(', ')}])`;
   }
+}
+
+export async function executeBatch<Props>(
+  mailer: Mailer,
+  template: EmailTemplate<Props>,
+  options: BatchSendOptions<Props>,
+): Promise<BatchSendResult<Props>> {
+  const { recipients, concurrency = 5, delayMs = 0, onResult } = options;
+  const results: BatchItemResult<Props>[] = [];
+
+  for (let i = 0; i < recipients.length; i += concurrency) {
+    if (i > 0 && delayMs > 0) {
+      await new Promise<void>((resolve) => setTimeout(resolve, delayMs));
+    }
+    const chunk = recipients.slice(i, i + concurrency);
+    const chunkResults = await Promise.all(
+      chunk.map(async (recipient): Promise<BatchItemResult<Props>> => {
+        try {
+          const result = await mailer.send(template, {
+            to: recipient.to,
+            props: recipient.props,
+            ...(recipient.cc ? { cc: recipient.cc } : {}),
+            ...(recipient.bcc ? { bcc: recipient.bcc } : {}),
+          });
+          const item: BatchItemResult<Props> = { to: recipient.to, props: recipient.props, result };
+          onResult?.(item);
+          return item;
+        } catch (err) {
+          const item: BatchItemResult<Props> = {
+            to: recipient.to,
+            props: recipient.props,
+            error: err instanceof Error ? err : new Error(String(err)),
+          };
+          onResult?.(item);
+          return item;
+        }
+      }),
+    );
+    results.push(...chunkResults);
+  }
+
+  return {
+    results,
+    sent: results.filter((r) => !r.error).length,
+    failed: results.filter((r) => !!r.error).length,
+  };
 }
 
 export function createMailer(config: CreateMailerConfig): Mailer {
