@@ -245,8 +245,12 @@ Dark mode is automatic — a `@media (prefers-color-scheme: dark)` block is inje
 Import from `@yedoma-labs/tierde-mail/templates`:
 
 ```ts
-import { Welcome, PasswordReset, EmailVerification, TwoFactorAuth, Invoice, MagicLink, Notification }
-  from '@yedoma-labs/tierde-mail/templates';
+import {
+  Welcome, PasswordReset, EmailVerification, TwoFactorAuth,
+  MagicLink, PasswordlessOtp, Invoice, OrderConfirmation,
+  ShippingUpdate, PaymentFailed, Subscription,
+  TeamInvite, AccountDeactivated, Notification,
+} from '@yedoma-labs/tierde-mail/templates';
 ```
 
 All templates accept `theme?: Theme`, `locale?: string`, `dir?: 'ltr' | 'rtl'`, and a `strings?` prop for overriding every piece of copy.
@@ -257,8 +261,15 @@ All templates accept `theme?: Theme`, `locale?: string`, `dir?: 'ltr' | 'rtl'`, 
 | `PasswordReset` | `username`, `resetUrl` |
 | `EmailVerification` | `name`, `verifyUrl` |
 | `TwoFactorAuth` | `username`, `code` |
-| `Invoice` | `customerName`, `invoiceNumber`, `items` |
 | `MagicLink` | `email`, `loginUrl` |
+| `PasswordlessOtp` | `code` |
+| `Invoice` | `customerName`, `invoiceNumber`, `items` |
+| `OrderConfirmation` | `name`, `orderNumber`, `items`, `orderUrl` |
+| `ShippingUpdate` | `name`, `orderNumber`, `status`, `trackingUrl` |
+| `PaymentFailed` | `name`, `updateUrl` |
+| `Subscription` | `name`, `event`, `planName`, `actionUrl` |
+| `TeamInvite` | `inviterName`, `teamName`, `inviteUrl` |
+| `AccountDeactivated` | `name`, `reactivateUrl` |
 | `Notification` | `title`, `body` |
 
 ### String overrides (i18n)
@@ -293,7 +304,7 @@ npx tierde eject --template welcome ./emails/Welcome.tsx
 npx tierde eject --template password-reset ./emails/PasswordReset.tsx
 ```
 
-Available template names: `welcome`, `password-reset`, `email-verification`, `two-factor-auth`, `invoice`, `magic-link`, `notification`.
+Available template names: `welcome`, `password-reset`, `email-verification`, `two-factor-auth`, `magic-link`, `passwordless-otp`, `invoice`, `order-confirmation`, `shipping-update`, `payment-failed`, `subscription`, `team-invite`, `account-deactivated`, `notification`.
 
 The ejected file imports only from `@yedoma-labs/tierde-mail` — no internal paths.
 
@@ -373,10 +384,12 @@ Build the library and render a template to an HTML file:
 # Build first (required for Vite ?raw imports)
 pnpm build
 
-# Preview a template by name
+# Preview any template by name
 pnpm preview Welcome
-pnpm preview PasswordReset
-pnpm preview EmailVerification
+pnpm preview OrderConfirmation
+pnpm preview ShippingUpdate
+pnpm preview PasswordlessOtp
+# etc — any template name works
 ```
 
 This generates an HTML file in the `preview/` directory that can be opened in any browser. Templates are rendered with sample data and can be inspected for layout, styling, and dark mode support.

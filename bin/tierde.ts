@@ -10,6 +10,13 @@ import TwoFactorAuthRaw from '../src/templates/TwoFactorAuth.tsx?raw';
 import InvoiceRaw from '../src/templates/Invoice.tsx?raw';
 import MagicLinkRaw from '../src/templates/MagicLink.tsx?raw';
 import NotificationRaw from '../src/templates/Notification.tsx?raw';
+import OrderConfirmationRaw from '../src/templates/OrderConfirmation.tsx?raw';
+import ShippingUpdateRaw from '../src/templates/ShippingUpdate.tsx?raw';
+import TeamInviteRaw from '../src/templates/TeamInvite.tsx?raw';
+import PaymentFailedRaw from '../src/templates/PaymentFailed.tsx?raw';
+import SubscriptionRaw from '../src/templates/Subscription.tsx?raw';
+import AccountDeactivatedRaw from '../src/templates/AccountDeactivated.tsx?raw';
+import PasswordlessOtpRaw from '../src/templates/PasswordlessOtp.tsx?raw';
 
 const TEMPLATES: Record<string, string> = {
   welcome: WelcomeRaw,
@@ -19,6 +26,13 @@ const TEMPLATES: Record<string, string> = {
   invoice: InvoiceRaw,
   'magic-link': MagicLinkRaw,
   notification: NotificationRaw,
+  'order-confirmation': OrderConfirmationRaw,
+  'shipping-update': ShippingUpdateRaw,
+  'team-invite': TeamInviteRaw,
+  'payment-failed': PaymentFailedRaw,
+  subscription: SubscriptionRaw,
+  'account-deactivated': AccountDeactivatedRaw,
+  'passwordless-otp': PasswordlessOtpRaw,
 };
 
 /**

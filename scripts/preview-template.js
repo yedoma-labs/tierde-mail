@@ -23,6 +23,13 @@ const {
   Invoice,
   MagicLink,
   Notification,
+  OrderConfirmation,
+  ShippingUpdate,
+  TeamInvite,
+  PaymentFailed,
+  Subscription,
+  AccountDeactivated,
+  PasswordlessOtp,
 } = await import(resolve(pkgDir, 'dist/templates/index.js'));
 
 const templates = {
@@ -33,6 +40,13 @@ const templates = {
   Invoice,
   MagicLink,
   Notification,
+  OrderConfirmation,
+  ShippingUpdate,
+  TeamInvite,
+  PaymentFailed,
+  Subscription,
+  AccountDeactivated,
+  PasswordlessOtp,
 };
 
 const template = templates[templateName];
@@ -161,6 +175,58 @@ const sampleProps = {
   Notification: {
     title: 'Important Alert',
     body: 'Your password was changed successfully.',
+  },
+  OrderConfirmation: {
+    name: 'Alice Smith',
+    orderNumber: 'ORD-2024-001',
+    orderUrl: 'https://example.com/orders/ORD-2024-001',
+    items: [
+      { name: 'Wireless Headphones', quantity: 1, price: 99.99 },
+      { name: 'Phone Case', description: 'Black, slim fit', quantity: 2, price: 14.99 },
+    ],
+  },
+  ShippingUpdate: {
+    name: 'Alice Smith',
+    orderNumber: 'ORD-2024-001',
+    status: 'shipped',
+    trackingUrl: 'https://example.com/track/TRK123456',
+    trackingNumber: 'TRK123456',
+    carrier: 'FedEx',
+    estimatedDelivery: 'Tuesday, June 18',
+  },
+  TeamInvite: {
+    inviterName: 'Bob Johnson',
+    teamName: 'Acme Engineering',
+    inviteUrl: 'https://example.com/invite/abc123',
+    role: 'Developer',
+    expiresInHours: 72,
+  },
+  PaymentFailed: {
+    name: 'Alice Smith',
+    updateUrl: 'https://example.com/billing',
+    amount: '$49.99',
+    failureReason: 'Insufficient funds',
+    retryInDays: 3,
+    supportEmail: 'billing@example.com',
+  },
+  Subscription: {
+    name: 'Alice Smith',
+    event: 'upgraded',
+    planName: 'Pro',
+    actionUrl: 'https://example.com/dashboard',
+    nextBillingDate: 'July 16, 2026',
+  },
+  AccountDeactivated: {
+    name: 'Alice Smith',
+    reactivateUrl: 'https://example.com/reactivate',
+    reason: 'Requested by user',
+    dataRetentionDays: 30,
+    supportEmail: 'support@example.com',
+  },
+  PasswordlessOtp: {
+    code: '847 293',
+    expiresInMinutes: 10,
+    appName: 'Acme',
   },
 };
 
