@@ -118,4 +118,34 @@ describe('createMailer', () => {
     expect(provider.calls[0]?.text).toBeTruthy();
     expect(provider.calls[0]?.text).toContain('Alice');
   });
+
+  it('round-robin distributes sends across providers', async () => {
+    const p1 = mockProvider('p1');
+    const p2 = mockProvider('p2');
+    const mailer = createMailer({
+      providers: [p1, p2],
+      strategy: 'round-robin',
+      from: 'sender@example.com',
+    });
+
+    const results = await Promise.all([
+      mailer.send(TestEmail, { to: 'a@a.com', props: { name: 'A' } }),
+      mailer.send(TestEmail, { to: 'b@b.com', props: { name: 'B' } }),
+      mailer.send(TestEmail, { to: 'c@c.com', props: { name: 'C' } }),
+    ]);
+
+    const providers = results.map((r) => r.provider);
+    expect(providers).toContain('p1');
+    expect(providers).toContain('p2');
+    expect(p1.calls.length + p2.calls.length).toBe(3);
+  });
+
+  it('rejects empty to array', async () => {
+    const provider = mockProvider();
+    const mailer = createMailer({ provider, from: 'sender@example.com' });
+
+    await expect(
+      mailer.send(TestEmail, { to: [] as unknown as string, props: { name: 'F' } }),
+    ).rejects.toThrow(TypeError);
+  });
 });
