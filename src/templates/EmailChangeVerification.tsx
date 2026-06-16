@@ -1,4 +1,5 @@
 import { currentYear } from './utils.js';
+import type { BaseTemplateProps } from './shared.js';
 import { defineEmail } from '../define-email.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
@@ -7,7 +8,6 @@ import { Button } from '../components/Button.js';
 import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import type { CSSProperties } from 'react';
-import type { Theme } from '../theme.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export interface EmailChangeVerificationStrings {
@@ -32,16 +32,11 @@ export const EMAIL_CHANGE_VERIFICATION_STRINGS: EmailChangeVerificationStrings =
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface EmailChangeVerificationProps {
+export interface EmailChangeVerificationProps extends BaseTemplateProps<EmailChangeVerificationStrings> {
   name: string;
   newEmail: string;
   verifyUrl: string;
   expiresInMinutes?: number;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<EmailChangeVerificationStrings>;
-  theme?: Theme;
 }
 
 const addressBoxStyle: CSSProperties = {
@@ -60,20 +55,9 @@ export const EmailChangeVerification: EmailTemplateType<EmailChangeVerificationP
     const s = { ...EMAIL_CHANGE_VERIFICATION_STRINGS, ...strings };
     return s.subject(appName);
   },
-  component: ({
-    name,
-    newEmail,
-    verifyUrl,
-    expiresInMinutes = 60,
-    appName = 'Our App',
-    locale,
-    dir,
-    strings,
-    theme,
-  }) => {
+  component: ({ name, newEmail, verifyUrl, expiresInMinutes = 60, appName = 'Our App', locale, dir, strings, theme }) => {
     const s = { ...EMAIL_CHANGE_VERIFICATION_STRINGS, ...strings };
     const year = currentYear(locale);
-
     return (
       <EmailTemplate preview={s.subject(appName)} lang={locale} dir={dir} theme={theme}>
         <Heading>{s.heading}</Heading>

@@ -1,4 +1,5 @@
 import { currentYear } from './utils.js';
+import type { BaseTemplateProps } from './shared.js';
 import { defineEmail } from '../define-email.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
@@ -6,7 +7,6 @@ import { Text } from '../components/Text.js';
 import { Button } from '../components/Button.js';
 import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
-import type { Theme } from '../theme.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export type DataExportRequestEvent = 'requested' | 'processing' | 'ready' | 'expired';
@@ -65,16 +65,11 @@ export const DATA_EXPORT_REQUEST_STRINGS: DataExportRequestStrings = {
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface DataExportRequestProps {
+export interface DataExportRequestProps extends BaseTemplateProps<DataExportRequestStrings> {
   name: string;
   event: DataExportRequestEvent;
   actionUrl: string;
   expiresInHours?: number;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<DataExportRequestStrings>;
-  theme?: Theme;
 }
 
 export const DataExportRequest: EmailTemplateType<DataExportRequestProps> = defineEmail<DataExportRequestProps>({
@@ -82,31 +77,16 @@ export const DataExportRequest: EmailTemplateType<DataExportRequestProps> = defi
     const s = { ...DATA_EXPORT_REQUEST_STRINGS, ...strings };
     return s.subject(event, appName);
   },
-  component: ({
-    name,
-    event,
-    actionUrl,
-    expiresInHours = 24,
-    appName = 'Our App',
-    locale,
-    dir,
-    strings,
-    theme,
-  }) => {
+  component: ({ name, event, actionUrl, expiresInHours = 24, appName = 'Our App', locale, dir, strings, theme }) => {
     const s = { ...DATA_EXPORT_REQUEST_STRINGS, ...strings };
     const year = currentYear(locale);
-
     return (
       <EmailTemplate preview={s.subject(event, appName)} lang={locale} dir={dir} theme={theme}>
         <Heading>{s.heading(event)}</Heading>
         <Text>{s.greeting(name)}</Text>
         <Text>{s.body(event)}</Text>
-        {event === 'processing' && (
-          <Text muted size="sm">{s.processingNote}</Text>
-        )}
-        {event === 'ready' && (
-          <Text muted size="sm">{s.expiryNote(expiresInHours)}</Text>
-        )}
+        {event === 'processing' && <Text muted size="sm">{s.processingNote}</Text>}
+        {event === 'ready' && <Text muted size="sm">{s.expiryNote(expiresInHours)}</Text>}
         <Button href={actionUrl}>{s.ctaLabel(event)}</Button>
         <Hr />
         <Footer>{s.footer(year, appName)}</Footer>

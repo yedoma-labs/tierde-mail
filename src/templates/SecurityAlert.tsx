@@ -1,4 +1,5 @@
 import { currentYear } from './utils.js';
+import type { BaseTemplateProps, SecurityDetails } from './shared.js';
 import { defineEmail } from '../define-email.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
@@ -8,7 +9,6 @@ import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
 import type { CSSProperties } from 'react';
-import type { Theme } from '../theme.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export type SecurityEventType =
@@ -73,19 +73,10 @@ export const SECURITY_ALERT_STRINGS: SecurityAlertStrings = {
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface SecurityAlertProps {
+export interface SecurityAlertProps extends BaseTemplateProps<SecurityAlertStrings>, SecurityDetails {
   name: string;
   event: SecurityEventType;
   reviewUrl: string;
-  ipAddress?: string;
-  location?: string;
-  device?: string;
-  timestamp?: string;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<SecurityAlertStrings>;
-  theme?: Theme;
 }
 
 const alertStyle: CSSProperties = {
@@ -135,12 +126,7 @@ export const SecurityAlert: EmailTemplateType<SecurityAlertProps> = defineEmail<
     const hasDetails = ipAddress || location || device || timestamp;
 
     return (
-      <EmailTemplate
-        preview={s.subject(event, appName)}
-        lang={locale}
-        dir={dir}
-        theme={theme}
-      >
+      <EmailTemplate preview={s.subject(event, appName)} lang={locale} dir={dir} theme={theme}>
         <Heading>{s.heading(event)}</Heading>
         <Text>{s.greeting(name)}</Text>
         {isHighRisk ? (
@@ -177,8 +163,8 @@ export const SecurityAlert: EmailTemplateType<SecurityAlertProps> = defineEmail<
                 )}
                 {ipAddress && (
                   <tr>
-                    <td style={{ padding: '8px 0', color: '#6b7280' }}>IP Address</td>
-                    <td style={{ padding: '8px 0', color: '#0f172a', fontWeight: '500', fontFamily: 'monospace' }}>{ipAddress}</td>
+                    <td style={{ ...detailRowStyle, color: '#6b7280' }}>IP Address</td>
+                    <td style={{ ...detailRowStyle, color: '#0f172a', fontWeight: '500', fontFamily: 'monospace' }}>{ipAddress}</td>
                   </tr>
                 )}
               </tbody>

@@ -118,7 +118,7 @@ function rewriteImports(source: string): string {
   // Collect type-only imports from internal paths and consolidate into a single type import
   const typeNames: string[] = [];
   result = result.replace(
-    /^import type \{ ([^}]+) \} from '(?:\.\.\/theme\.js|\.\.\/define-email\.js|\.\.\/components\/[^']+)';\n/gm,
+    /^import type \{ ([^}]+) \} from '(?:\.\.\/theme\.js|\.\.\/define-email\.js|\.\.\/components\/[^']+|\.\/shared\.js)';\n/gm,
     (_, captured: string) => {
       typeNames.push(...captured.split(',').map((s: string) => s.trim()));
       return '';

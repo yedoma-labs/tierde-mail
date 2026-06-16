@@ -1,3 +1,5 @@
+export type { BaseTemplateProps, SecurityDetails, ChangeRecord, LoginEvent } from './shared.js';
+
 export { Welcome, WELCOME_STRINGS } from './Welcome.js';
 export type { WelcomeProps, WelcomeStrings } from './Welcome.js';
 
@@ -104,13 +106,13 @@ export { PhoneVerification, PHONE_VERIFICATION_STRINGS } from './PhoneVerificati
 export type { PhoneVerificationProps, PhoneVerificationStrings } from './PhoneVerification.js';
 
 export { ProfileUpdated, PROFILE_UPDATED_STRINGS } from './ProfileUpdated.js';
-export type { ProfileUpdatedProps, ProfileUpdatedStrings, ProfileChange } from './ProfileUpdated.js';
+export type { ProfileUpdatedProps, ProfileUpdatedStrings } from './ProfileUpdated.js';
 
 export { PasswordChangedConfirmation, PASSWORD_CHANGED_CONFIRMATION_STRINGS } from './PasswordChangedConfirmation.js';
 export type { PasswordChangedConfirmationProps, PasswordChangedConfirmationStrings } from './PasswordChangedConfirmation.js';
 
 export { LoginActivity, LOGIN_ACTIVITY_STRINGS } from './LoginActivity.js';
-export type { LoginActivityProps, LoginActivityStrings, LoginEvent } from './LoginActivity.js';
+export type { LoginActivityProps, LoginActivityStrings } from './LoginActivity.js';
 
 export { DataExportRequest, DATA_EXPORT_REQUEST_STRINGS } from './DataExportRequest.js';
 export type { DataExportRequestProps, DataExportRequestStrings, DataExportRequestEvent } from './DataExportRequest.js';

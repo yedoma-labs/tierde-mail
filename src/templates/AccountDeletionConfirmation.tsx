@@ -1,4 +1,5 @@
 import { currentYear } from './utils.js';
+import type { BaseTemplateProps } from './shared.js';
 import { defineEmail } from '../define-email.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
@@ -8,7 +9,6 @@ import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
 import type { CSSProperties } from 'react';
-import type { Theme } from '../theme.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export type AccountDeletionEvent = 'requested' | 'scheduled' | 'completed' | 'cancelled';
@@ -20,7 +20,7 @@ export interface AccountDeletionConfirmationStrings {
   body: (event: AccountDeletionEvent, deletionDate?: string) => string;
   cancelCtaLabel: string;
   dataNote: (days: number) => string;
-  completedNote: string;
+  permanentNote: string;
   footer: (year: string, appName: string) => string;
 }
 
@@ -55,21 +55,16 @@ export const ACCOUNT_DELETION_CONFIRMATION_STRINGS: AccountDeletionConfirmationS
   },
   cancelCtaLabel: 'Cancel Deletion',
   dataNote: (days) => `All your data will be permanently removed after ${days} days.`,
-  completedNote: 'This action is permanent and cannot be undone.',
+  permanentNote: 'This action is permanent and cannot be undone.',
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface AccountDeletionConfirmationProps {
+export interface AccountDeletionConfirmationProps extends BaseTemplateProps<AccountDeletionConfirmationStrings> {
   name: string;
   event: AccountDeletionEvent;
   cancelUrl?: string;
   deletionDate?: string;
   dataRetentionDays?: number;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<AccountDeletionConfirmationStrings>;
-  theme?: Theme;
 }
 
 const warningBoxStyle: CSSProperties = {
@@ -91,41 +86,22 @@ export const AccountDeletionConfirmation: EmailTemplateType<AccountDeletionConfi
     const s = { ...ACCOUNT_DELETION_CONFIRMATION_STRINGS, ...strings };
     return s.subject(event, appName);
   },
-  component: ({
-    name,
-    event,
-    cancelUrl,
-    deletionDate,
-    dataRetentionDays = 30,
-    appName = 'Our App',
-    locale,
-    dir,
-    strings,
-    theme,
-  }) => {
+  component: ({ name, event, cancelUrl, deletionDate, dataRetentionDays = 30, appName = 'Our App', locale, dir, strings, theme }) => {
     const s = { ...ACCOUNT_DELETION_CONFIRMATION_STRINGS, ...strings };
     const year = currentYear(locale);
+    const showWarning = event === 'requested' || event === 'scheduled' || event === 'completed';
 
     return (
       <EmailTemplate preview={s.subject(event, appName)} lang={locale} dir={dir} theme={theme}>
         <Heading>{s.heading(event)}</Heading>
         <Text>{s.greeting(name)}</Text>
         <Text>{s.body(event, deletionDate)}</Text>
-        {(event === 'requested' || event === 'scheduled') && (
+        {showWarning && (
           <Section>
             <div style={warningBoxStyle}>
               <p style={warningTextStyle}>
-                {event === 'scheduled'
-                  ? s.dataNote(dataRetentionDays)
-                  : s.completedNote}
+                {event === 'scheduled' ? s.dataNote(dataRetentionDays) : s.permanentNote}
               </p>
-            </div>
-          </Section>
-        )}
-        {event === 'completed' && (
-          <Section>
-            <div style={warningBoxStyle}>
-              <p style={warningTextStyle}>{s.completedNote}</p>
             </div>
           </Section>
         )}

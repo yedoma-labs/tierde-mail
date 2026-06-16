@@ -1,4 +1,5 @@
 import { currentYear } from './utils.js';
+import type { BaseTemplateProps, ChangeRecord } from './shared.js';
 import { defineEmail } from '../define-email.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
@@ -8,23 +9,14 @@ import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
 import type { CSSProperties } from 'react';
-import type { Theme } from '../theme.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
-
-export interface ProfileChange {
-  field: string;
-  oldValue?: string;
-  newValue: string;
-}
 
 export interface ProfileUpdatedStrings {
   subject: (appName: string) => string;
   heading: string;
   greeting: (name: string) => string;
   body: string;
-  changesHeading: string;
   fieldLabel: string;
-  fromLabel: string;
   toLabel: string;
   reviewCtaLabel: string;
   notYouNote: string;
@@ -36,24 +28,17 @@ export const PROFILE_UPDATED_STRINGS: ProfileUpdatedStrings = {
   heading: 'Profile updated',
   greeting: (name) => `Hi ${name},`,
   body: 'The following changes were made to your account profile.',
-  changesHeading: 'Changes made',
   fieldLabel: 'Field',
-  fromLabel: 'From',
-  toLabel: 'To',
+  toLabel: 'New value',
   reviewCtaLabel: 'Review Account',
   notYouNote: 'If you did not make these changes, please secure your account immediately.',
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface ProfileUpdatedProps {
+export interface ProfileUpdatedProps extends BaseTemplateProps<ProfileUpdatedStrings> {
   name: string;
-  changes: ProfileChange[];
+  changes: ChangeRecord[];
   accountUrl: string;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<ProfileUpdatedStrings>;
-  theme?: Theme;
 }
 
 const thStyle: CSSProperties = {
@@ -85,19 +70,9 @@ export const ProfileUpdated: EmailTemplateType<ProfileUpdatedProps> = defineEmai
     const s = { ...PROFILE_UPDATED_STRINGS, ...strings };
     return s.subject(appName);
   },
-  component: ({
-    name,
-    changes,
-    accountUrl,
-    appName = 'Our App',
-    locale,
-    dir,
-    strings,
-    theme,
-  }) => {
+  component: ({ name, changes, accountUrl, appName = 'Our App', locale, dir, strings, theme }) => {
     const s = { ...PROFILE_UPDATED_STRINGS, ...strings };
     const year = currentYear(locale);
-
     return (
       <EmailTemplate preview={s.subject(appName)} lang={locale} dir={dir} theme={theme}>
         <Heading>{s.heading}</Heading>
@@ -112,8 +87,8 @@ export const ProfileUpdated: EmailTemplateType<ProfileUpdatedProps> = defineEmai
               </tr>
             </thead>
             <tbody>
-              {changes.map((change, i) => (
-                <tr key={i}>
+              {changes.map((change) => (
+                <tr key={change.field}>
                   <td style={tdStyle}><strong>{change.field}</strong></td>
                   <td style={{ ...tdStyle, paddingLeft: '8px' }}>
                     {change.oldValue && (

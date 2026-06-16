@@ -1,4 +1,5 @@
 import { currentYear } from './utils.js';
+import type { BaseTemplateProps, SecurityDetails } from './shared.js';
 import { defineEmail } from '../define-email.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
@@ -8,7 +9,6 @@ import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
 import type { CSSProperties } from 'react';
-import type { Theme } from '../theme.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
 export type LockReason = 'too_many_attempts' | 'suspicious_activity' | 'admin_action' | 'policy_violation';
@@ -41,19 +41,11 @@ export const ACCOUNT_LOCKED_STRINGS: AccountLockedStrings = {
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface AccountLockedProps {
+export interface AccountLockedProps extends BaseTemplateProps<AccountLockedStrings>, SecurityDetails {
   name: string;
   reason: LockReason;
   unlockUrl: string;
-  ipAddress?: string;
-  location?: string;
-  timestamp?: string;
   supportEmail?: string;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<AccountLockedStrings>;
-  theme?: Theme;
 }
 
 const alertBoxStyle: CSSProperties = {
@@ -133,8 +125,8 @@ export const AccountLocked: EmailTemplateType<AccountLockedProps> = defineEmail<
                 )}
                 {ipAddress && (
                   <tr>
-                    <td style={{ padding: '8px 0', fontSize: '14px' }}><span style={{ color: '#6b7280' }}>IP Address</span></td>
-                    <td style={{ padding: '8px 0', textAlign: 'right', fontWeight: '600', color: '#0f172a', fontFamily: 'monospace', fontSize: '13px' }}>{ipAddress}</td>
+                    <td style={detailRowStyle}><span style={{ color: '#6b7280' }}>IP Address</span></td>
+                    <td style={{ ...detailRowStyle, textAlign: 'right', fontWeight: '600', color: '#0f172a', fontFamily: 'monospace', fontSize: '13px' }}>{ipAddress}</td>
                   </tr>
                 )}
               </tbody>
@@ -143,9 +135,9 @@ export const AccountLocked: EmailTemplateType<AccountLockedProps> = defineEmail<
         )}
         <Button href={unlockUrl}>{s.unlockCtaLabel}</Button>
         <Hr />
-        <Text muted size="sm">
-          {supportEmail && s.supportNote(supportEmail)}
-        </Text>
+        {supportEmail && (
+          <Text muted size="sm">{s.supportNote(supportEmail)}</Text>
+        )}
         <Footer>{s.footer(year, appName)}</Footer>
       </EmailTemplate>
     );

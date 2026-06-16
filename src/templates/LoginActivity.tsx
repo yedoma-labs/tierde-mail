@@ -1,4 +1,5 @@
 import { currentYear } from './utils.js';
+import type { BaseTemplateProps, LoginEvent } from './shared.js';
 import { defineEmail } from '../define-email.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
@@ -8,16 +9,7 @@ import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
 import type { CSSProperties } from 'react';
-import type { Theme } from '../theme.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
-
-export interface LoginEvent {
-  timestamp: string;
-  location?: string;
-  device?: string;
-  ipAddress?: string;
-  status: 'success' | 'failed';
-}
 
 export interface LoginActivityStrings {
   subject: (appName: string) => string;
@@ -27,7 +19,6 @@ export interface LoginActivityStrings {
   timestampLabel: string;
   locationLabel: string;
   deviceLabel: string;
-  ipLabel: string;
   statusLabel: string;
   statusSuccess: string;
   statusFailed: string;
@@ -44,7 +35,6 @@ export const LOGIN_ACTIVITY_STRINGS: LoginActivityStrings = {
   timestampLabel: 'Time',
   locationLabel: 'Location',
   deviceLabel: 'Device',
-  ipLabel: 'IP',
   statusLabel: 'Status',
   statusSuccess: 'Success',
   statusFailed: 'Failed',
@@ -53,15 +43,10 @@ export const LOGIN_ACTIVITY_STRINGS: LoginActivityStrings = {
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface LoginActivityProps {
+export interface LoginActivityProps extends BaseTemplateProps<LoginActivityStrings> {
   name: string;
   events: LoginEvent[];
   securityUrl: string;
-  appName?: string;
-  locale?: string;
-  dir?: 'ltr' | 'rtl';
-  strings?: Partial<LoginActivityStrings>;
-  theme?: Theme;
 }
 
 const thStyle: CSSProperties = {
@@ -97,19 +82,9 @@ export const LoginActivity: EmailTemplateType<LoginActivityProps> = defineEmail<
     const s = { ...LOGIN_ACTIVITY_STRINGS, ...strings };
     return s.subject(appName);
   },
-  component: ({
-    name,
-    events,
-    securityUrl,
-    appName = 'Our App',
-    locale,
-    dir,
-    strings,
-    theme,
-  }) => {
+  component: ({ name, events, securityUrl, appName = 'Our App', locale, dir, strings, theme }) => {
     const s = { ...LOGIN_ACTIVITY_STRINGS, ...strings };
     const year = currentYear(locale);
-
     return (
       <EmailTemplate preview={s.subject(appName)} lang={locale} dir={dir} theme={theme}>
         <Heading>{s.heading}</Heading>
@@ -127,7 +102,7 @@ export const LoginActivity: EmailTemplateType<LoginActivityProps> = defineEmail<
             </thead>
             <tbody>
               {events.map((ev, i) => (
-                <tr key={i}>
+                <tr key={`${ev.timestamp}-${i}`}>
                   <td style={tdStyle}>{ev.timestamp}</td>
                   <td style={tdStyle}>{ev.location ?? '—'}</td>
                   <td style={tdStyle}>{ev.device ?? '—'}</td>
