@@ -1,6 +1,6 @@
 {
   "name": "@yedoma-labs/tierde-mail",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Modern email library — JSX templates, multi-provider, TypeScript-first",
   "repository": "https://github.com/yedoma-labs/tierde-mail",
   "type": "module",
@@ -147,7 +147,7 @@
     "react-dom": ">=19.2.7"
   },
   "dependencies": {
-    "@css-inline/css-inline": "^0.20.2",
+    "@css-inline/css-inline": "^0.21.0",
     "@yedoma-labs/bylyt-env-guard": "^0.3.5",
     "@yedoma-labs/suruk-logger": "^0.2.0",
     "@yedoma-labs/tuuru-chrono-tz": "^0.3.1",
@@ -158,7 +158,7 @@
     "nodemailer": "^9.0.0"
   },
   "devDependencies": {
-    "@aws-sdk/client-ses": "^3.1069.0",
+    "@aws-sdk/client-ses": "^3.1070.0",
     "@biomejs/biome": "^2.5.0",
     "@types/node": "^25.9.3",
     "@types/nodemailer": "^8.0.1",

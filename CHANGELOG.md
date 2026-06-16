@@ -8,18 +8,23 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+---
+
+## [0.4.0] — 2026-06-17
+
 ### Added
 
 **`tierde dev`**
-- `npx tierde dev [--port 3000]` — starts the built-in preview server with all 41 templates and sample data; no script required
-- `src/templates/sample-props.ts` — canonical sample props for every built-in template; consumed by `tierde dev` and available for import in custom preview scripts
+- `npx tierde dev [--port 3000]` — starts the built-in preview server with all 41 templates and sample data; no script or boilerplate required
+- `src/templates/sample-props.ts` — canonical sample props for every built-in template; consumed by `tierde dev` and available to import in custom preview scripts
 
 **`tierde send`**
-- `npx tierde send <name> --to <email> [--props '<json>']` — fires a real send via `TIERDE_PROVIDER` env config; useful for smoke-testing provider credentials and end-to-end delivery
+- `npx tierde send <name> --to <email> [--props '<json>']` — fires a real send via `TIERDE_PROVIDER` env config; useful for smoke-testing provider credentials and verifying end-to-end delivery
 
 **`sendBatch` rate limiting**
 - `maxPerSecond` option on `BatchSendOptions` — token-bucket rate limiter across the entire batch; ensures ≤N sends per second regardless of chunk size (e.g. `maxPerSecond: 2` for Resend free tier)
-- When `maxPerSecond` is set, concurrency slots rotate on a `1000/maxPerSecond` ms schedule; result order is preserved
+- When `maxPerSecond` is set, concurrency slots rotate on a `1000/maxPerSecond` ms schedule; result order is always preserved
+- `maxPerSecond` takes precedence over `delayMs` when both are provided
 
 ---
 
