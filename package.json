@@ -143,6 +143,9 @@
     "wcag": "tsx scripts/wcag-check.ts",
     "prepublishOnly": "pnpm run build && pnpm run typecheck"
   },
+  "simple-git-hooks": {
+    "pre-push": "npm run lint && npm run typecheck && npm run test && npm run build"
+  },
   "peerDependencies": {
     "react": ">=19.2.7",
     "react-dom": ">=19.2.7"
@@ -169,6 +172,7 @@
     "@vitest/coverage-v8": "^4.1.9",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
+    "simple-git-hooks": "^2.13.1",
     "tsx": "^4.22.4",
     "typescript": "6.0.3",
     "vite": "^8.0.16",
