@@ -6,6 +6,7 @@ import { Text } from '../components/Text.js';
 import { Button } from '../components/Button.js';
 import { Footer } from '../components/Footer.js';
 import { Hr } from '../components/Hr.js';
+import { Section } from '../components/Section.js';
 import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 
@@ -85,16 +86,22 @@ export const PolicyUpdate: EmailTemplateType<PolicyUpdateProps> = defineEmail<Po
         <Text>{s.intro}</Text>
         <Text>{s.effectiveDate(effectiveDate)}</Text>
         {changes && changes.length > 0 && (
-          <>
+          <Section>
             {changes.map((change, i) => (
-              <div key={i} style={{ marginBottom: '12px', padding: '12px 0', borderBottom: i < changes.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
-                <strong style={{ fontSize: '14px', color: '#0f172a', display: 'block', marginBottom: '4px' }}>
-                  {change.section}
-                </strong>
-                <span style={{ fontSize: '14px', color: '#64748b' }}>{change.summary}</span>
-              </div>
+              <table key={i} width="100%" cellPadding="0" cellSpacing="0" style={{ marginBottom: '0' }}>
+                <tbody>
+                  <tr>
+                    <td style={{ padding: '10px 0', borderBottom: i < changes.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
+                      <strong style={{ fontSize: '14px', color: '#0f172a', display: 'block', marginBottom: '4px' }}>
+                        {change.section}
+                      </strong>
+                      <span style={{ fontSize: '14px', color: '#64748b' }}>{change.summary}</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             ))}
-          </>
+          </Section>
         )}
         <Button href={policyUrl}>{s.ctaLabel}</Button>
         <Hr />
