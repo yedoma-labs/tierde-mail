@@ -1,5 +1,6 @@
 import { currentYear } from './utils.js';
 import { defineEmail } from '../define-email.js';
+import { defaultTheme } from '../theme.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
 import { Text } from '../components/Text.js';
@@ -46,32 +47,6 @@ export interface AbandonedCartProps extends BaseTemplateProps<AbandonedCartStrin
   currency?: string;
 }
 
-const itemRowStyle: CSSProperties = {
-  padding: '12px 0',
-  borderBottom: '1px solid #f3f4f6',
-};
-
-const itemNameStyle: CSSProperties = {
-  fontWeight: '600',
-  color: '#0f172a',
-  fontSize: '14px',
-  margin: '0 0 2px',
-};
-
-const itemDescStyle: CSSProperties = {
-  color: '#6b7280',
-  fontSize: '12px',
-  margin: 0,
-};
-
-const itemPriceStyle: CSSProperties = {
-  fontWeight: '700',
-  color: '#0f172a',
-  fontSize: '14px',
-  textAlign: 'right',
-  whiteSpace: 'nowrap',
-};
-
 function formatCurrency(amount: number, currency: string, locale?: string): string {
   return new Intl.NumberFormat(locale ?? 'en-US', { style: 'currency', currency }).format(amount);
 }
@@ -93,8 +68,35 @@ export const AbandonedCart: EmailTemplateType<AbandonedCartProps> = defineEmail<
     theme,
   }) => {
     const s = { ...ABANDONED_CART_STRINGS, ...strings };
+    const t = { ...defaultTheme, ...theme };
     const year = currentYear(locale);
     const total = items.reduce((sum, item) => sum + item.price * (item.quantity ?? 1), 0);
+
+    const itemRowStyle: CSSProperties = {
+      padding: '12px 0',
+      borderBottom: `1px solid ${t.borderSubtle}`,
+    };
+
+    const itemNameStyle: CSSProperties = {
+      fontWeight: '600',
+      color: t.textPrimary,
+      fontSize: '14px',
+      margin: '0 0 2px',
+    };
+
+    const itemDescStyle: CSSProperties = {
+      color: t.textMuted,
+      fontSize: '12px',
+      margin: 0,
+    };
+
+    const itemPriceStyle: CSSProperties = {
+      fontWeight: '700',
+      color: t.textPrimary,
+      fontSize: '14px',
+      textAlign: 'right',
+      whiteSpace: 'nowrap',
+    };
 
     return (
       <EmailTemplate
@@ -121,10 +123,10 @@ export const AbandonedCart: EmailTemplateType<AbandonedCartProps> = defineEmail<
                 </tr>
               ))}
               <tr>
-                <td style={{ padding: '14px 0 0', fontWeight: '700', fontSize: '16px', color: '#0f172a' }}>
+                <td style={{ padding: '14px 0 0', fontWeight: '700', fontSize: '16px', color: t.textPrimary }}>
                   Total
                 </td>
-                <td style={{ padding: '14px 0 0', fontWeight: '700', fontSize: '16px', color: '#0f172a', textAlign: 'right' }}>
+                <td style={{ padding: '14px 0 0', fontWeight: '700', fontSize: '16px', color: t.textPrimary, textAlign: 'right' }}>
                   {formatCurrency(total, currency, locale)}
                 </td>
               </tr>

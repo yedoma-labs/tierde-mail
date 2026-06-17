@@ -1,5 +1,6 @@
 import { currentYear } from './utils.js';
 import { defineEmail } from '../define-email.js';
+import { defaultTheme } from '../theme.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
 import { Text } from '../components/Text.js';
@@ -61,31 +62,6 @@ const tableStyle: CSSProperties = {
   fontSize: '14px',
 };
 
-const thStyle: CSSProperties = {
-  textAlign: 'left',
-  padding: '8px 0',
-  borderBottom: '2px solid #e5e7eb',
-  color: '#6b7280',
-  fontWeight: '600',
-  fontSize: '12px',
-  textTransform: 'uppercase',
-  letterSpacing: '0.05em',
-};
-
-const tdStyle: CSSProperties = {
-  padding: '12px 0',
-  borderBottom: '1px solid #f3f4f6',
-  color: '#374151',
-};
-
-const totalRowStyle: CSSProperties = {
-  ...tdStyle,
-  fontWeight: '700',
-  fontSize: '16px',
-  borderBottom: 'none',
-  borderTop: '2px solid #e5e7eb',
-};
-
 function formatCurrency(amount: number, currency: string, locale?: string): string {
   return new Intl.NumberFormat(locale ?? 'en-US', { style: 'currency', currency }).format(amount);
 }
@@ -108,8 +84,34 @@ export const Invoice: EmailTemplateType<InvoiceProps> = defineEmail<InvoiceProps
     theme,
   }) => {
     const s = { ...INVOICE_STRINGS, ...strings };
+    const t = { ...defaultTheme, ...theme };
     const year = currentYear(locale);
     const total = items.reduce((sum, item) => sum + item.price * (item.quantity ?? 1), 0);
+
+    const thStyle: CSSProperties = {
+      textAlign: 'left',
+      padding: '8px 0',
+      borderBottom: `2px solid ${t.border}`,
+      color: t.textMuted,
+      fontWeight: '600',
+      fontSize: '12px',
+      textTransform: 'uppercase',
+      letterSpacing: '0.05em',
+    };
+
+    const tdStyle: CSSProperties = {
+      padding: '12px 0',
+      borderBottom: `1px solid ${t.borderSubtle}`,
+      color: t.textSecondary,
+    };
+
+    const totalRowStyle: CSSProperties = {
+      ...tdStyle,
+      fontWeight: '700',
+      fontSize: '16px',
+      borderBottom: 'none',
+      borderTop: `2px solid ${t.border}`,
+    };
 
     return (
       <EmailTemplate
@@ -139,7 +141,7 @@ export const Invoice: EmailTemplateType<InvoiceProps> = defineEmail<InvoiceProps
                     {item.description && (
                       <>
                         <br />
-                        <span style={{ color: '#6b7280', fontSize: '12px' }}>
+                        <span style={{ color: t.textMuted, fontSize: '12px' }}>
                           {item.description}
                         </span>
                       </>

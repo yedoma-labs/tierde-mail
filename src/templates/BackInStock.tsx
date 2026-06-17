@@ -1,5 +1,6 @@
 import { currentYear } from './utils.js';
 import { defineEmail } from '../define-email.js';
+import { defaultTheme } from '../theme.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
 import { Text } from '../components/Text.js';
@@ -40,33 +41,6 @@ export interface BackInStockProps extends BaseTemplateProps<BackInStockStrings> 
   variant?: string;
 }
 
-const productCardStyle: CSSProperties = {
-  backgroundColor: '#f8fafc',
-  borderRadius: '8px',
-  padding: '20px',
-  textAlign: 'center',
-};
-
-const productNameStyle: CSSProperties = {
-  fontSize: '18px',
-  fontWeight: '700',
-  color: '#0f172a',
-  margin: '0 0 4px',
-};
-
-const variantStyle: CSSProperties = {
-  fontSize: '13px',
-  color: '#64748b',
-  margin: '0 0 8px',
-};
-
-const priceStyle: CSSProperties = {
-  fontSize: '22px',
-  fontWeight: '800',
-  color: '#0f172a',
-  margin: 0,
-};
-
 export const BackInStock: EmailTemplateType<BackInStockProps> = defineEmail<BackInStockProps>({
   subject: ({ productName, strings }) => {
     const s = { ...BACK_IN_STOCK_STRINGS, ...strings };
@@ -86,7 +60,35 @@ export const BackInStock: EmailTemplateType<BackInStockProps> = defineEmail<Back
     theme,
   }) => {
     const s = { ...BACK_IN_STOCK_STRINGS, ...strings };
+    const t = { ...defaultTheme, ...theme };
     const year = currentYear(locale);
+
+    const productCardStyle: CSSProperties = {
+      backgroundColor: t.surfaceSubtle,
+      borderRadius: '8px',
+      padding: '20px',
+      textAlign: 'center',
+    };
+
+    const productNameStyle: CSSProperties = {
+      fontSize: '18px',
+      fontWeight: '700',
+      color: t.textPrimary,
+      margin: '0 0 4px',
+    };
+
+    const variantStyle: CSSProperties = {
+      fontSize: '13px',
+      color: t.textMuted,
+      margin: '0 0 8px',
+    };
+
+    const priceStyle: CSSProperties = {
+      fontSize: '22px',
+      fontWeight: '800',
+      color: t.textPrimary,
+      margin: 0,
+    };
 
     return (
       <EmailTemplate preview={s.subject(productName)} lang={locale} dir={dir} theme={theme}>

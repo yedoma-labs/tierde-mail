@@ -1,5 +1,6 @@
 import { currentYear } from './utils.js';
 import { defineEmail } from '../define-email.js';
+import { defaultTheme } from '../theme.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
 import { Text } from '../components/Text.js';
@@ -73,6 +74,7 @@ export const PolicyUpdate: EmailTemplateType<PolicyUpdateProps> = defineEmail<Po
     theme,
   }) => {
     const s = { ...POLICY_UPDATE_STRINGS, ...strings };
+    const t = { ...defaultTheme, ...theme };
     const year = currentYear(locale);
 
     return (
@@ -91,11 +93,11 @@ export const PolicyUpdate: EmailTemplateType<PolicyUpdateProps> = defineEmail<Po
               <table key={i} width="100%" cellPadding="0" cellSpacing="0" style={{ marginBottom: '0' }}>
                 <tbody>
                   <tr>
-                    <td style={{ padding: '10px 0', borderBottom: i < changes.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
-                      <strong style={{ fontSize: '14px', color: '#0f172a', display: 'block', marginBottom: '4px' }}>
+                    <td style={{ padding: '10px 0', borderBottom: i < changes.length - 1 ? `1px solid ${t.borderSubtle}` : 'none' }}>
+                      <strong style={{ fontSize: '14px', color: t.textPrimary, display: 'block', marginBottom: '4px' }}>
                         {change.section}
                       </strong>
-                      <span style={{ fontSize: '14px', color: '#64748b' }}>{change.summary}</span>
+                      <span style={{ fontSize: '14px', color: t.textMuted }}>{change.summary}</span>
                     </td>
                   </tr>
                 </tbody>

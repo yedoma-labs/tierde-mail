@@ -1,5 +1,6 @@
 import { currentYear } from './utils.js';
 import { defineEmail } from '../define-email.js';
+import { PALETTE } from '../theme.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
 import { Text } from '../components/Text.js';
@@ -129,7 +130,7 @@ export const Subscription: EmailTemplateType<SubscriptionProps> = defineEmail<Su
         <Text>{s.body(event, planName, nextBillingDate)}</Text>
         {trialDaysRemaining !== undefined && event === 'trial_ending' && (
           <Section>
-            <div style={{ ...planBadgeStyle, backgroundColor: '#fef3c7', color: '#92400e' }}>
+            <div style={{ ...planBadgeStyle, backgroundColor: PALETTE.trial.bg, color: PALETTE.trial.text }}>
               {s.trialDaysNote(trialDaysRemaining)}
             </div>
           </Section>

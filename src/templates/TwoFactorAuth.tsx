@@ -1,5 +1,6 @@
 import { currentYear } from './utils.js';
 import { defineEmail } from '../define-email.js';
+import { defaultTheme } from '../theme.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
 import { Text } from '../components/Text.js';
@@ -37,15 +38,6 @@ export interface TwoFactorAuthProps extends BaseTemplateProps<TwoFactorAuthStrin
   expiresIn?: string;
 }
 
-const codeStyle: CSSProperties = {
-  fontSize: '36px',
-  fontWeight: '700',
-  letterSpacing: '8px',
-  color: '#1a1a1a',
-  textAlign: 'center',
-  fontFamily: 'monospace',
-};
-
 export const TwoFactorAuth: EmailTemplateType<TwoFactorAuthProps> = defineEmail<TwoFactorAuthProps>({
   subject: ({ appName = 'verification', strings }) => {
     const s = { ...TWO_FACTOR_AUTH_STRINGS, ...strings };
@@ -53,7 +45,18 @@ export const TwoFactorAuth: EmailTemplateType<TwoFactorAuthProps> = defineEmail<
   },
   component: ({ username, code, expiresIn = '10 minutes', appName = 'Our App', locale, dir, strings, theme }) => {
     const s = { ...TWO_FACTOR_AUTH_STRINGS, ...strings };
+    const t = { ...defaultTheme, ...theme };
     const year = currentYear(locale);
+
+    const codeStyle: CSSProperties = {
+      fontSize: '36px',
+      fontWeight: '700',
+      letterSpacing: '8px',
+      color: t.textPrimary,
+      textAlign: 'center',
+      fontFamily: 'monospace',
+    };
+
     return (
       <EmailTemplate
         preview={`Your ${appName} verification code: ${code}`}
@@ -64,8 +67,8 @@ export const TwoFactorAuth: EmailTemplateType<TwoFactorAuthProps> = defineEmail<
         <Heading>{s.heading}</Heading>
         <Text>{s.greeting(username)}</Text>
         <Text>{s.body}</Text>
-        <Section backgroundColor="#f3f4f6">
-          <p style={codeStyle}>{code}</p>
+        <Section backgroundColor={t.surfaceSubtle}>
+          <p className="tierde-code" style={codeStyle}>{code}</p>
         </Section>
         <Text muted size="sm" align="center">
           {s.expiryNote(expiresIn)}

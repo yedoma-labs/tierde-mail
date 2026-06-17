@@ -1,6 +1,7 @@
 import { currentYear } from './utils.js';
 import type { BaseTemplateProps, LoginEvent } from './shared.js';
 import { defineEmail } from '../define-email.js';
+import { defaultTheme } from '../theme.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
 import { Text } from '../components/Text.js';
@@ -49,26 +50,6 @@ export interface LoginActivityProps extends BaseTemplateProps<LoginActivityStrin
   securityUrl: string;
 }
 
-const thStyle: CSSProperties = {
-  textAlign: 'left',
-  fontSize: '11px',
-  fontWeight: '600',
-  textTransform: 'uppercase',
-  letterSpacing: '0.05em',
-  color: '#6b7280',
-  padding: '0 8px 8px 0',
-  borderBottom: '2px solid #e5e7eb',
-  whiteSpace: 'nowrap',
-};
-
-const tdStyle: CSSProperties = {
-  fontSize: '13px',
-  color: '#374151',
-  padding: '8px 8px 8px 0',
-  borderBottom: '1px solid #f3f4f6',
-  verticalAlign: 'top',
-};
-
 const badgeBase: CSSProperties = {
   display: 'inline-block',
   padding: '2px 8px',
@@ -84,7 +65,29 @@ export const LoginActivity: EmailTemplateType<LoginActivityProps> = defineEmail<
   },
   component: ({ name, events, securityUrl, appName = 'Our App', locale, dir, strings, theme }) => {
     const s = { ...LOGIN_ACTIVITY_STRINGS, ...strings };
+    const t = { ...defaultTheme, ...theme };
     const year = currentYear(locale);
+
+    const thStyle: CSSProperties = {
+      textAlign: 'left',
+      fontSize: '11px',
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      letterSpacing: '0.05em',
+      color: t.textMuted,
+      padding: '0 8px 8px 0',
+      borderBottom: `2px solid ${t.border}`,
+      whiteSpace: 'nowrap',
+    };
+
+    const tdStyle: CSSProperties = {
+      fontSize: '13px',
+      color: t.textSecondary,
+      padding: '8px 8px 8px 0',
+      borderBottom: `1px solid ${t.borderSubtle}`,
+      verticalAlign: 'top',
+    };
+
     return (
       <EmailTemplate preview={s.subject(appName)} lang={locale} dir={dir} theme={theme}>
         <Heading>{s.heading}</Heading>
@@ -107,10 +110,10 @@ export const LoginActivity: EmailTemplateType<LoginActivityProps> = defineEmail<
                   <td style={tdStyle}>{ev.location ?? '—'}</td>
                   <td style={tdStyle}>{ev.device ?? '—'}</td>
                   <td style={tdStyle}>
-                    <span style={{
+                    <span className="tierde-badge" style={{
                       ...badgeBase,
-                      backgroundColor: ev.status === 'success' ? '#dcfce7' : '#fee2e2',
-                      color: ev.status === 'success' ? '#166534' : '#991b1b',
+                      backgroundColor: ev.status === 'success' ? t.successBg : t.dangerBg,
+                      color: ev.status === 'success' ? t.successText : t.dangerText,
                     }}>
                       {ev.status === 'success' ? s.statusSuccess : s.statusFailed}
                     </span>

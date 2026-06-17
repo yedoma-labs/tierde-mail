@@ -1,5 +1,6 @@
 import { currentYear } from './utils.js';
 import { defineEmail } from '../define-email.js';
+import { defaultTheme } from '../theme.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
 import { Text } from '../components/Text.js';
@@ -54,14 +55,6 @@ export interface RefundConfirmationProps extends BaseTemplateProps<RefundConfirm
   currency?: string;
 }
 
-const successBoxStyle: CSSProperties = {
-  backgroundColor: '#f0fdf4',
-  border: '1px solid #bbf7d0',
-  borderRadius: '8px',
-  padding: '20px',
-  textAlign: 'center',
-};
-
 export const RefundConfirmation: EmailTemplateType<RefundConfirmationProps> = defineEmail<RefundConfirmationProps>({
   subject: ({ appName = 'Our Store', strings }) => {
     const s = { ...REFUND_CONFIRMATION_STRINGS, ...strings };
@@ -73,7 +66,16 @@ export const RefundConfirmation: EmailTemplateType<RefundConfirmationProps> = de
     appName = 'Our Store', locale, dir, strings, theme,
   }) => {
     const s = { ...REFUND_CONFIRMATION_STRINGS, ...strings };
+    const t = { ...defaultTheme, ...theme };
     const year = currentYear(locale);
+
+    const successBoxStyle: CSSProperties = {
+      backgroundColor: t.successBg,
+      border: `1px solid ${t.successBorder}`,
+      borderRadius: '8px',
+      padding: '20px',
+      textAlign: 'center',
+    };
 
     const detailRows = [
       refundId ? { label: s.refundIdLabel, value: refundId, mono: true } : null,
@@ -89,8 +91,8 @@ export const RefundConfirmation: EmailTemplateType<RefundConfirmationProps> = de
         <Text>{s.body(refundAmount)}</Text>
         <Section>
           <div style={successBoxStyle}>
-            <span style={{ fontSize: '32px', fontWeight: '800', color: '#16a34a' }}>{refundAmount}</span>
-            <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#15803d' }}>{s.heading}</p>
+            <span className="tierde-positive" style={{ fontSize: '32px', fontWeight: '800', color: t.successText }}>{refundAmount}</span>
+            <p style={{ margin: '4px 0 0', fontSize: '13px', color: t.successText }}>{s.heading}</p>
           </div>
         </Section>
         {detailRows.length > 0 && (

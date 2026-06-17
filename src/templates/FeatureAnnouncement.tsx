@@ -1,5 +1,6 @@
 import { currentYear } from './utils.js';
 import { defineEmail } from '../define-email.js';
+import { defaultTheme, PALETTE } from '../theme.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
 import { Text } from '../components/Text.js';
@@ -50,17 +51,12 @@ export interface FeatureAnnouncementProps extends BaseTemplateProps<FeatureAnnou
 
 const typeBadge = (type: ChangelogItem['type'], strings: FeatureAnnouncementStrings): CSSProperties & { label: string } => {
   const map: Record<ChangelogItem['type'], [string, string, string]> = {
-    new: ['#eff6ff', '#1d4ed8', strings.typeLabelNew],
-    improvement: ['#f0fdf4', '#15803d', strings.typeLabelImprovement],
-    fix: ['#faf5ff', '#7e22ce', strings.typeLabelFix],
+    new: [PALETTE.changelog.new.bg, PALETTE.changelog.new.text, strings.typeLabelNew],
+    improvement: [PALETTE.changelog.improvement.bg, PALETTE.changelog.improvement.text, strings.typeLabelImprovement],
+    fix: [PALETTE.changelog.fix.bg, PALETTE.changelog.fix.text, strings.typeLabelFix],
   };
   const [bg, color, label] = map[type];
   return { display: 'inline-block', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: '700', backgroundColor: bg, color, label } as any;
-};
-
-const changeRowStyle: CSSProperties = {
-  padding: '12px 0',
-  borderBottom: '1px solid #f3f4f6',
 };
 
 const heroStyle: CSSProperties = {
@@ -88,7 +84,13 @@ export const FeatureAnnouncement: EmailTemplateType<FeatureAnnouncementProps> = 
     theme,
   }) => {
     const s = { ...FEATURE_ANNOUNCEMENT_STRINGS, ...strings };
+    const t = { ...defaultTheme, ...theme };
     const year = currentYear(locale);
+
+    const changeRowStyle: CSSProperties = {
+      padding: '12px 0',
+      borderBottom: `1px solid ${t.borderSubtle}`,
+    };
 
     return (
       <EmailTemplate preview={s.subject(featureName, appName)} lang={locale} dir={dir} theme={theme}>
@@ -110,11 +112,11 @@ export const FeatureAnnouncement: EmailTemplateType<FeatureAnnouncementProps> = 
               return (
                 <div key={i} style={changeRowStyle}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                    <span style={badgeStyle as CSSProperties}>{label}</span>
+                    <span className="tierde-badge" style={badgeStyle as CSSProperties}>{label}</span>
                     <div style={{ flex: 1 }}>
-                      <strong style={{ fontSize: '14px', color: '#0f172a' }}>{item.title}</strong>
+                      <strong style={{ fontSize: '14px', color: t.textPrimary }}>{item.title}</strong>
                       {item.description && (
-                        <p style={{ margin: '2px 0 0', fontSize: '13px', color: '#64748b' }}>{item.description}</p>
+                        <p style={{ margin: '2px 0 0', fontSize: '13px', color: t.textMuted }}>{item.description}</p>
                       )}
                     </div>
                   </div>

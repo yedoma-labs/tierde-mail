@@ -1,6 +1,7 @@
 import { currentYear } from './utils.js';
 import type { BaseTemplateProps } from './shared.js';
 import { defineEmail } from '../define-email.js';
+import { defaultTheme } from '../theme.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
 import { Text } from '../components/Text.js';
@@ -39,24 +40,6 @@ export interface PhoneVerificationProps extends BaseTemplateProps<PhoneVerificat
   expiresInMinutes?: number;
 }
 
-const codeLabelStyle: CSSProperties = {
-  fontSize: '12px',
-  fontWeight: '600',
-  textTransform: 'uppercase',
-  letterSpacing: '0.05em',
-  color: '#6b7280',
-  marginBottom: '8px',
-  display: 'block',
-};
-
-const codeStyle: CSSProperties = {
-  fontSize: '36px',
-  fontWeight: '700',
-  letterSpacing: '0.15em',
-  color: '#0f172a',
-  fontFamily: 'monospace',
-};
-
 export const PhoneVerification: EmailTemplateType<PhoneVerificationProps> = defineEmail<PhoneVerificationProps>({
   subject: ({ appName = 'Our App', strings }) => {
     const s = { ...PHONE_VERIFICATION_STRINGS, ...strings };
@@ -64,7 +47,27 @@ export const PhoneVerification: EmailTemplateType<PhoneVerificationProps> = defi
   },
   component: ({ name, phone, code, expiresInMinutes = 10, appName = 'Our App', locale, dir, strings, theme }) => {
     const s = { ...PHONE_VERIFICATION_STRINGS, ...strings };
+    const t = { ...defaultTheme, ...theme };
     const year = currentYear(locale);
+
+    const codeLabelStyle: CSSProperties = {
+      fontSize: '12px',
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      letterSpacing: '0.05em',
+      color: t.textMuted,
+      marginBottom: '8px',
+      display: 'block',
+    };
+
+    const codeStyle: CSSProperties = {
+      fontSize: '36px',
+      fontWeight: '700',
+      letterSpacing: '0.15em',
+      color: t.textPrimary,
+      fontFamily: 'monospace',
+    };
+
     return (
       <EmailTemplate preview={s.subject(appName)} lang={locale} dir={dir} theme={theme}>
         <Heading>{s.heading}</Heading>

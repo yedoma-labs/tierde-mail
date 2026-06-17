@@ -1,5 +1,6 @@
 import { currentYear } from './utils.js';
 import { defineEmail } from '../define-email.js';
+import { defaultTheme } from '../theme.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
 import { Text } from '../components/Text.js';
@@ -41,18 +42,6 @@ export interface ExportReadyProps extends BaseTemplateProps<ExportReadyStrings> 
   expiresInHours?: number;
 }
 
-const metaBoxStyle: CSSProperties = {
-  backgroundColor: '#f8fafc',
-  borderRadius: '8px',
-  padding: '16px',
-};
-
-const metaRowStyle: CSSProperties = {
-  padding: '8px 0',
-  borderBottom: '1px solid #e2e8f0',
-  fontSize: '14px',
-};
-
 export const ExportReady: EmailTemplateType<ExportReadyProps> = defineEmail<ExportReadyProps>({
   subject: ({ exportName, appName = 'Our App', strings }) => {
     const s = { ...EXPORT_READY_STRINGS, ...strings };
@@ -73,8 +62,21 @@ export const ExportReady: EmailTemplateType<ExportReadyProps> = defineEmail<Expo
     theme,
   }) => {
     const s = { ...EXPORT_READY_STRINGS, ...strings };
+    const t = { ...defaultTheme, ...theme };
     const year = currentYear(locale);
     const hasMeta = fileSize || fileFormat || rowCount !== undefined;
+
+    const metaBoxStyle: CSSProperties = {
+      backgroundColor: t.surfaceSubtle,
+      borderRadius: '8px',
+      padding: '16px',
+    };
+
+    const metaRowStyle: CSSProperties = {
+      padding: '8px 0',
+      borderBottom: `1px solid ${t.border}`,
+      fontSize: '14px',
+    };
 
     return (
       <EmailTemplate preview={s.subject(exportName, appName)} lang={locale} dir={dir} theme={theme}>
@@ -88,20 +90,20 @@ export const ExportReady: EmailTemplateType<ExportReadyProps> = defineEmail<Expo
                 <tbody>
                   {fileFormat && (
                     <tr>
-                      <td style={metaRowStyle}><span style={{ color: '#6b7280' }}>Format</span></td>
-                      <td style={{ ...metaRowStyle, textAlign: 'right', fontWeight: '600', color: '#0f172a' }}>{fileFormat}</td>
+                      <td style={metaRowStyle}><span style={{ color: t.textMuted }}>Format</span></td>
+                      <td style={{ ...metaRowStyle, textAlign: 'right', fontWeight: '600', color: t.textPrimary }}>{fileFormat}</td>
                     </tr>
                   )}
                   {rowCount !== undefined && (
                     <tr>
-                      <td style={metaRowStyle}><span style={{ color: '#6b7280' }}>Rows</span></td>
-                      <td style={{ ...metaRowStyle, textAlign: 'right', fontWeight: '600', color: '#0f172a' }}>{rowCount.toLocaleString()}</td>
+                      <td style={metaRowStyle}><span style={{ color: t.textMuted }}>Rows</span></td>
+                      <td style={{ ...metaRowStyle, textAlign: 'right', fontWeight: '600', color: t.textPrimary }}>{rowCount.toLocaleString()}</td>
                     </tr>
                   )}
                   {fileSize && (
                     <tr>
-                      <td style={{ padding: '8px 0', fontSize: '14px' }}><span style={{ color: '#6b7280' }}>File Size</span></td>
-                      <td style={{ padding: '8px 0', textAlign: 'right', fontWeight: '600', color: '#0f172a', fontSize: '14px' }}>{fileSize}</td>
+                      <td style={{ padding: '8px 0', fontSize: '14px' }}><span style={{ color: t.textMuted }}>File Size</span></td>
+                      <td style={{ padding: '8px 0', textAlign: 'right', fontWeight: '600', color: t.textPrimary, fontSize: '14px' }}>{fileSize}</td>
                     </tr>
                   )}
                 </tbody>

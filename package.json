@@ -140,6 +140,7 @@
     "lint:fix": "biome check src --write",
     "typecheck": "tsc --noEmit",
     "preview": "node scripts/preview-template.js",
+    "wcag": "tsx scripts/wcag-check.ts",
     "prepublishOnly": "pnpm run build && pnpm run typecheck"
   },
   "peerDependencies": {

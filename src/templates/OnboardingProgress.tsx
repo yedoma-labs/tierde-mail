@@ -1,5 +1,6 @@
 import { currentYear } from './utils.js';
 import { defineEmail } from '../define-email.js';
+import { defaultTheme } from '../theme.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
 import { Text } from '../components/Text.js';
@@ -57,35 +58,6 @@ export interface OnboardingProgressProps extends BaseTemplateProps<OnboardingPro
   dashboardUrl: string;
 }
 
-const stepRowStyle: CSSProperties = {
-  padding: '12px 0',
-  borderBottom: '1px solid #f3f4f6',
-};
-
-const stepTitleStyle = (completed: boolean): CSSProperties => ({
-  fontWeight: '600',
-  fontSize: '14px',
-  color: completed ? '#16a34a' : '#0f172a',
-  margin: '0 0 2px',
-});
-
-const stepDescStyle: CSSProperties = {
-  fontSize: '13px',
-  color: '#64748b',
-  margin: 0,
-};
-
-const badgeStyle = (completed: boolean): CSSProperties => ({
-  display: 'inline-block',
-  padding: '2px 8px',
-  borderRadius: '12px',
-  fontSize: '11px',
-  fontWeight: '700',
-  backgroundColor: completed ? '#dcfce7' : '#f1f5f9',
-  color: completed ? '#166534' : '#475569',
-  whiteSpace: 'nowrap',
-});
-
 export const OnboardingProgress: EmailTemplateType<OnboardingProgressProps> = defineEmail<OnboardingProgressProps>({
   subject: ({ steps, appName = 'Our App', strings }) => {
     const s = { ...ONBOARDING_PROGRESS_STRINGS, ...strings };
@@ -103,7 +75,38 @@ export const OnboardingProgress: EmailTemplateType<OnboardingProgressProps> = de
     theme,
   }) => {
     const s = { ...ONBOARDING_PROGRESS_STRINGS, ...strings };
+    const t = { ...defaultTheme, ...theme };
     const year = currentYear(locale);
+
+    const stepRowStyle: CSSProperties = {
+      padding: '12px 0',
+      borderBottom: `1px solid ${t.borderSubtle}`,
+    };
+
+    const stepTitleStyle = (completed: boolean): CSSProperties => ({
+      fontWeight: '600',
+      fontSize: '14px',
+      color: completed ? t.successText : t.textPrimary,
+      margin: '0 0 2px',
+    });
+
+    const stepDescStyle: CSSProperties = {
+      fontSize: '13px',
+      color: t.textMuted,
+      margin: 0,
+    };
+
+    const badgeStyle = (completed: boolean): CSSProperties => ({
+      display: 'inline-block',
+      padding: '2px 8px',
+      borderRadius: '12px',
+      fontSize: '11px',
+      fontWeight: '700',
+      backgroundColor: completed ? t.successBg : t.secondary,
+      color: completed ? t.successText : t.textSecondary,
+      whiteSpace: 'nowrap',
+    });
+
     const completedCount = steps.filter((st) => st.completed).length;
     const totalCount = steps.length;
     const allDone = completedCount === totalCount;
@@ -126,13 +129,13 @@ export const OnboardingProgress: EmailTemplateType<OnboardingProgressProps> = de
                   <td style={stepRowStyle}>
                     <p style={stepTitleStyle(step.completed)}>
                       {step.url && !step.completed ? (
-                        <a href={step.url} style={{ color: '#0f172a', textDecoration: 'none' }}>{step.title}</a>
+                        <a href={step.url} style={{ color: t.textPrimary, textDecoration: 'none' }}>{step.title}</a>
                       ) : step.title}
                     </p>
                     {step.description && <p style={stepDescStyle}>{step.description}</p>}
                   </td>
                   <td style={{ ...stepRowStyle, textAlign: 'right', verticalAlign: 'top', paddingLeft: '12px' }}>
-                    <span style={badgeStyle(step.completed)}>
+                    <span className="tierde-badge" style={badgeStyle(step.completed)}>
                       {step.completed ? s.completedLabel : s.pendingLabel}
                     </span>
                   </td>

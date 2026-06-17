@@ -1,5 +1,6 @@
 import { currentYear } from './utils.js';
 import { defineEmail } from '../define-email.js';
+import { defaultTheme, PALETTE } from '../theme.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
 import { Text } from '../components/Text.js';
@@ -67,28 +68,6 @@ export interface MaintenanceNotificationProps extends BaseTemplateProps<Maintena
   statusPageUrl?: string;
 }
 
-const windowBoxStyle: CSSProperties = {
-  backgroundColor: '#f8fafc',
-  borderRadius: '8px',
-  padding: '16px',
-};
-
-const timeRowStyle: CSSProperties = {
-  padding: '8px 0',
-  borderBottom: '1px solid #e2e8f0',
-  fontSize: '14px',
-};
-
-const impactBadge = (impact: AffectedService['impact']): CSSProperties => ({
-  display: 'inline-block',
-  padding: '2px 8px',
-  borderRadius: '12px',
-  fontSize: '11px',
-  fontWeight: '700',
-  backgroundColor: impact === 'full_outage' ? '#fee2e2' : impact === 'partial_outage' ? '#ffedd5' : '#fef9c3',
-  color: impact === 'full_outage' ? '#991b1b' : impact === 'partial_outage' ? '#9a3412' : '#854d0e',
-});
-
 const IMPACT_LABELS: Record<AffectedService['impact'], string> = {
   full_outage: 'Outage',
   partial_outage: 'Partial',
@@ -114,8 +93,31 @@ export const MaintenanceNotification: EmailTemplateType<MaintenanceNotificationP
     theme,
   }) => {
     const s = { ...MAINTENANCE_NOTIFICATION_STRINGS, ...strings };
+    const t = { ...defaultTheme, ...theme };
     const year = currentYear(locale);
     const hasWindow = startTime || endTime || duration;
+
+    const windowBoxStyle: CSSProperties = {
+      backgroundColor: t.surfaceSubtle,
+      borderRadius: '8px',
+      padding: '16px',
+    };
+
+    const timeRowStyle: CSSProperties = {
+      padding: '8px 0',
+      borderBottom: `1px solid ${t.border}`,
+      fontSize: '14px',
+    };
+
+    const impactBadge = (impact: AffectedService['impact']): CSSProperties => ({
+      display: 'inline-block',
+      padding: '2px 8px',
+      borderRadius: '12px',
+      fontSize: '11px',
+      fontWeight: '700',
+      backgroundColor: impact === 'full_outage' ? PALETTE.impact.full_outage.bg : impact === 'partial_outage' ? PALETTE.impact.partial_outage.bg : PALETTE.impact.degraded.bg,
+      color: impact === 'full_outage' ? PALETTE.impact.full_outage.text : impact === 'partial_outage' ? PALETTE.impact.partial_outage.text : PALETTE.impact.degraded.text,
+    });
 
     return (
       <EmailTemplate preview={s.subject(type, appName)} lang={locale} dir={dir} theme={theme}>
@@ -128,20 +130,20 @@ export const MaintenanceNotification: EmailTemplateType<MaintenanceNotificationP
                 <tbody>
                   {startTime && (
                     <tr>
-                      <td style={timeRowStyle}><span style={{ color: '#6b7280' }}>Start</span></td>
-                      <td style={{ ...timeRowStyle, textAlign: 'right', fontWeight: '600', color: '#0f172a' }}>{startTime}</td>
+                      <td style={timeRowStyle}><span style={{ color: t.textMuted }}>Start</span></td>
+                      <td style={{ ...timeRowStyle, textAlign: 'right', fontWeight: '600', color: t.textPrimary }}>{startTime}</td>
                     </tr>
                   )}
                   {endTime && (
                     <tr>
-                      <td style={timeRowStyle}><span style={{ color: '#6b7280' }}>End</span></td>
-                      <td style={{ ...timeRowStyle, textAlign: 'right', fontWeight: '600', color: '#0f172a' }}>{endTime}</td>
+                      <td style={timeRowStyle}><span style={{ color: t.textMuted }}>End</span></td>
+                      <td style={{ ...timeRowStyle, textAlign: 'right', fontWeight: '600', color: t.textPrimary }}>{endTime}</td>
                     </tr>
                   )}
                   {duration && (
                     <tr>
-                      <td style={{ padding: '8px 0', fontSize: '14px' }}><span style={{ color: '#6b7280' }}>Duration</span></td>
-                      <td style={{ padding: '8px 0', textAlign: 'right', fontWeight: '600', color: '#0f172a', fontSize: '14px' }}>{duration}</td>
+                      <td style={{ padding: '8px 0', fontSize: '14px' }}><span style={{ color: t.textMuted }}>Duration</span></td>
+                      <td style={{ padding: '8px 0', textAlign: 'right', fontWeight: '600', color: t.textPrimary, fontSize: '14px' }}>{duration}</td>
                     </tr>
                   )}
                 </tbody>
@@ -155,9 +157,9 @@ export const MaintenanceNotification: EmailTemplateType<MaintenanceNotificationP
               <tbody>
                 {affectedServices.map((svc, i) => (
                   <tr key={i}>
-                    <td style={{ padding: '10px 0', borderBottom: '1px solid #f3f4f6', fontSize: '14px', color: '#0f172a' }}>{svc.name}</td>
-                    <td style={{ padding: '10px 0', borderBottom: '1px solid #f3f4f6', textAlign: 'right' }}>
-                      <span style={impactBadge(svc.impact)}>{IMPACT_LABELS[svc.impact]}</span>
+                    <td style={{ padding: '10px 0', borderBottom: `1px solid ${t.borderSubtle}`, fontSize: '14px', color: t.textPrimary }}>{svc.name}</td>
+                    <td style={{ padding: '10px 0', borderBottom: `1px solid ${t.borderSubtle}`, textAlign: 'right' }}>
+                      <span className="tierde-badge" style={impactBadge(svc.impact)}>{IMPACT_LABELS[svc.impact]}</span>
                     </td>
                   </tr>
                 ))}

@@ -1,5 +1,6 @@
 import { currentYear } from './utils.js';
 import { defineEmail } from '../define-email.js';
+import { defaultTheme } from '../theme.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
 import { Text } from '../components/Text.js';
@@ -58,57 +59,6 @@ export interface WeeklyDigestProps extends BaseTemplateProps<WeeklyDigestStrings
   items?: DigestItem[];
 }
 
-const statCellStyle: CSSProperties = {
-  textAlign: 'center',
-  padding: '16px',
-  backgroundColor: '#f8fafc',
-  borderRadius: '8px',
-};
-
-const statValueStyle: CSSProperties = {
-  fontSize: '28px',
-  fontWeight: '800',
-  color: '#0f172a',
-  display: 'block',
-  lineHeight: '1',
-  marginBottom: '4px',
-};
-
-const statLabelStyle: CSSProperties = {
-  fontSize: '12px',
-  color: '#64748b',
-  textTransform: 'uppercase',
-  letterSpacing: '0.05em',
-};
-
-const statChangeStyle = (positive?: boolean): CSSProperties => ({
-  fontSize: '12px',
-  fontWeight: '600',
-  color: positive === false ? '#dc2626' : '#16a34a',
-  display: 'block',
-  marginTop: '2px',
-});
-
-const itemTitleStyle: CSSProperties = {
-  fontWeight: '600',
-  fontSize: '15px',
-  color: '#0f172a',
-  margin: '0 0 4px',
-  textDecoration: 'none',
-};
-
-const itemMetaStyle: CSSProperties = {
-  fontSize: '12px',
-  color: '#94a3b8',
-  margin: '0 0 4px',
-};
-
-const itemSummaryStyle: CSSProperties = {
-  fontSize: '14px',
-  color: '#475569',
-  margin: 0,
-};
-
 export const WeeklyDigest: EmailTemplateType<WeeklyDigestProps> = defineEmail<WeeklyDigestProps>({
   subject: ({ weekOf, appName = 'Our App', strings }) => {
     const s = { ...WEEKLY_DIGEST_STRINGS, ...strings };
@@ -127,7 +77,59 @@ export const WeeklyDigest: EmailTemplateType<WeeklyDigestProps> = defineEmail<We
     theme,
   }) => {
     const s = { ...WEEKLY_DIGEST_STRINGS, ...strings };
+    const t = { ...defaultTheme, ...theme };
     const year = currentYear(locale);
+
+    const statCellStyle: CSSProperties = {
+      textAlign: 'center',
+      padding: '16px',
+      backgroundColor: t.surfaceSubtle,
+      borderRadius: '8px',
+    };
+
+    const statValueStyle: CSSProperties = {
+      fontSize: '28px',
+      fontWeight: '800',
+      color: t.textPrimary,
+      display: 'block',
+      lineHeight: '1',
+      marginBottom: '4px',
+    };
+
+    const statLabelStyle: CSSProperties = {
+      fontSize: '12px',
+      color: t.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: '0.05em',
+    };
+
+    const statChangeStyle = (positive?: boolean): CSSProperties => ({
+      fontSize: '12px',
+      fontWeight: '600',
+      color: positive === false ? t.dangerText : t.successText,
+      display: 'block',
+      marginTop: '2px',
+    });
+
+    const itemTitleStyle: CSSProperties = {
+      fontWeight: '600',
+      fontSize: '15px',
+      color: t.textPrimary,
+      margin: '0 0 4px',
+      textDecoration: 'none',
+    };
+
+    const itemMetaStyle: CSSProperties = {
+      fontSize: '12px',
+      color: t.textMuted,
+      margin: '0 0 4px',
+    };
+
+    const itemSummaryStyle: CSSProperties = {
+      fontSize: '14px',
+      color: t.textSecondary,
+      margin: 0,
+    };
 
     return (
       <EmailTemplate
@@ -151,7 +153,7 @@ export const WeeklyDigest: EmailTemplateType<WeeklyDigestProps> = defineEmail<We
                         <span style={statValueStyle}>{stat.value}</span>
                         <span style={statLabelStyle}>{stat.label}</span>
                         {stat.change && (
-                          <span style={statChangeStyle(stat.positive)}>{stat.change}</span>
+                          <span className={stat.positive === false ? 'tierde-negative' : 'tierde-positive'} style={statChangeStyle(stat.positive)}>{stat.change}</span>
                         )}
                       </td>
                     ))}
@@ -170,11 +172,11 @@ export const WeeklyDigest: EmailTemplateType<WeeklyDigestProps> = defineEmail<We
             <Hr />
             <Text size="sm" muted>{s.highlightsHeading}</Text>
             {items.map((item, i) => (
-              <div key={i} style={{ padding: '12px 0', borderBottom: i < items.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
+              <div key={i} style={{ padding: '12px 0', borderBottom: i < items.length - 1 ? `1px solid ${t.borderSubtle}` : 'none' }}>
                 {item.meta && <p style={itemMetaStyle}>{item.category ? `${item.category} · ` : ''}{item.meta}</p>}
                 <a href={item.url} style={itemTitleStyle}>{item.title}</a>
                 {item.summary && <p style={itemSummaryStyle}>{item.summary}</p>}
-                <a href={item.url} style={{ fontSize: '13px', color: '#6366f1', textDecoration: 'none', fontWeight: '500' }}>
+                <a href={item.url} style={{ fontSize: '13px', color: t.primary, textDecoration: 'none', fontWeight: '500' }}>
                   {s.readMore}
                 </a>
               </div>

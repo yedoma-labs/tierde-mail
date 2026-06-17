@@ -21,6 +21,18 @@ const DARK_MEDIA_CSS = `
       .tierde-kv-value { color: ${darkTheme.textPrimary} !important; border-bottom-color: ${darkTheme.border} !important; }
       .tierde-btn-outline { border-color: ${darkTheme.primary} !important; }
       .tierde-btn-outline-text { color: ${darkTheme.textPrimary} !important; }
+      /* Semantic colors for dark mode — use tierde-positive/tierde-negative class on colored indicators */
+      .tierde-positive { color: #4ade80 !important; }
+      .tierde-negative { color: #f87171 !important; }
+      /* Catch-all: unclassed inline body text on the card flips to readable dark colors.
+         Elements on explicit light backgrounds (code blocks, badges) use tierde-badge or tierde-code
+         to opt out of this rule via :not([class]). */
+      .tierde-card strong:not([class]) { color: ${darkTheme.textPrimary} !important; }
+      .tierde-card p:not([class]) { color: ${darkTheme.textSecondary} !important; }
+      .tierde-card td:not([class]) { color: ${darkTheme.textPrimary} !important; }
+      .tierde-card a:not([class]) { color: #a5b4fc !important; }
+      .tierde-card div:not([class]) { color: ${darkTheme.textSecondary} !important; }
+      .tierde-card span:not([class]) { color: ${darkTheme.textSecondary} !important; }
     }
   `;
 

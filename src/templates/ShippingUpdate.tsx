@@ -1,5 +1,6 @@
 import { currentYear } from './utils.js';
 import { defineEmail } from '../define-email.js';
+import { defaultTheme } from '../theme.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
 import { Text } from '../components/Text.js';
@@ -66,24 +67,6 @@ export interface ShippingUpdateProps extends BaseTemplateProps<ShippingUpdateStr
   estimatedDelivery?: string;
 }
 
-const infoRowStyle: CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  padding: '8px 0',
-  borderBottom: '1px solid #f3f4f6',
-  fontSize: '14px',
-};
-
-const labelStyle: CSSProperties = {
-  color: '#6b7280',
-  fontWeight: '500',
-};
-
-const valueStyle: CSSProperties = {
-  color: '#374151',
-  fontWeight: '600',
-};
-
 export const ShippingUpdate: EmailTemplateType<ShippingUpdateProps> = defineEmail<ShippingUpdateProps>({
   subject: ({ status, orderNumber, strings }) => {
     const s = { ...SHIPPING_UPDATE_STRINGS, ...strings };
@@ -104,7 +87,26 @@ export const ShippingUpdate: EmailTemplateType<ShippingUpdateProps> = defineEmai
     theme,
   }) => {
     const s = { ...SHIPPING_UPDATE_STRINGS, ...strings };
+    const t = { ...defaultTheme, ...theme };
     const year = currentYear(locale);
+
+    const infoRowStyle: CSSProperties = {
+      display: 'flex',
+      justifyContent: 'space-between',
+      padding: '8px 0',
+      borderBottom: `1px solid ${t.borderSubtle}`,
+      fontSize: '14px',
+    };
+
+    const labelStyle: CSSProperties = {
+      color: t.textMuted,
+      fontWeight: '500',
+    };
+
+    const valueStyle: CSSProperties = {
+      color: t.textSecondary,
+      fontWeight: '600',
+    };
 
     return (
       <EmailTemplate
@@ -122,20 +124,20 @@ export const ShippingUpdate: EmailTemplateType<ShippingUpdateProps> = defineEmai
               <tbody>
                 {carrier && (
                   <tr>
-                    <td style={{ ...infoRowStyle, display: 'table-cell', padding: '10px 0', borderBottom: '1px solid #f3f4f6' }}>
+                    <td style={{ ...infoRowStyle, display: 'table-cell', padding: '10px 0', borderBottom: `1px solid ${t.borderSubtle}` }}>
                       <span style={labelStyle}>Carrier</span>
                     </td>
-                    <td style={{ ...infoRowStyle, display: 'table-cell', padding: '10px 0', textAlign: 'right', borderBottom: '1px solid #f3f4f6' }}>
+                    <td style={{ ...infoRowStyle, display: 'table-cell', padding: '10px 0', textAlign: 'right', borderBottom: `1px solid ${t.borderSubtle}` }}>
                       <span style={valueStyle}>{carrier}</span>
                     </td>
                   </tr>
                 )}
                 {trackingNumber && (
                   <tr>
-                    <td style={{ padding: '10px 0', borderBottom: '1px solid #f3f4f6' }}>
+                    <td style={{ padding: '10px 0', borderBottom: `1px solid ${t.borderSubtle}` }}>
                       <span style={labelStyle}>Tracking #</span>
                     </td>
-                    <td style={{ padding: '10px 0', textAlign: 'right', borderBottom: '1px solid #f3f4f6' }}>
+                    <td style={{ padding: '10px 0', textAlign: 'right', borderBottom: `1px solid ${t.borderSubtle}` }}>
                       <span style={valueStyle}>{trackingNumber}</span>
                     </td>
                   </tr>

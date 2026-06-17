@@ -1,5 +1,6 @@
 import { currentYear } from './utils.js';
 import { defineEmail } from '../define-email.js';
+import { defaultTheme } from '../theme.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
 import { Text } from '../components/Text.js';
@@ -38,19 +39,6 @@ const codeBlockStyle: CSSProperties = {
   padding: '32px 0',
 };
 
-const codeStyle: CSSProperties = {
-  display: 'inline-block',
-  fontFamily: 'ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace',
-  fontSize: '40px',
-  fontWeight: '700',
-  letterSpacing: '0.25em',
-  color: '#0f172a',
-  padding: '16px 32px',
-  backgroundColor: '#f8fafc',
-  borderRadius: '8px',
-  border: '1px solid #e2e8f0',
-};
-
 export const PasswordlessOtp: EmailTemplateType<PasswordlessOtpProps> = defineEmail<PasswordlessOtpProps>({
   subject: ({ appName = 'Our App', strings }) => {
     const s = { ...PASSWORDLESS_OTP_STRINGS, ...strings };
@@ -66,7 +54,21 @@ export const PasswordlessOtp: EmailTemplateType<PasswordlessOtpProps> = defineEm
     theme,
   }) => {
     const s = { ...PASSWORDLESS_OTP_STRINGS, ...strings };
+    const t = { ...defaultTheme, ...theme };
     const year = currentYear(locale);
+
+    const codeStyle: CSSProperties = {
+      display: 'inline-block',
+      fontFamily: 'ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace',
+      fontSize: '40px',
+      fontWeight: '700',
+      letterSpacing: '0.25em',
+      color: t.textPrimary,
+      padding: '16px 32px',
+      backgroundColor: t.surfaceSubtle,
+      borderRadius: '8px',
+      border: `1px solid ${t.border}`,
+    };
 
     return (
       <EmailTemplate
@@ -79,7 +81,7 @@ export const PasswordlessOtp: EmailTemplateType<PasswordlessOtpProps> = defineEm
         <Text>{s.intro}</Text>
         <Section>
           <div style={codeBlockStyle}>
-            <span style={codeStyle}>{code}</span>
+            <span className="tierde-code" style={codeStyle}>{code}</span>
           </div>
         </Section>
         <Text muted size="sm">{s.expiryNote(expiresInMinutes)}</Text>

@@ -1,4 +1,5 @@
 import type { ReactNode, CSSProperties, ReactElement } from 'react';
+import { useTheme } from '../ThemeContext.js';
 
 export type AlertBoxVariant = 'danger' | 'warning' | 'success' | 'info';
 
@@ -8,13 +9,6 @@ interface AlertBoxProps {
   children: ReactNode;
 }
 
-const variants: Record<AlertBoxVariant, { bg: string; border: string; text: string }> = {
-  danger:  { bg: '#fef2f2', border: '#fecaca', text: '#7f1d1d' },
-  warning: { bg: '#fff7ed', border: '#fed7aa', text: '#7c2d12' },
-  success: { bg: '#f0fdf4', border: '#bbf7d0', text: '#166534' },
-  info:    { bg: '#eff6ff', border: '#bfdbfe', text: '#1e40af' },
-};
-
 const iconStyle: CSSProperties = {
   fontSize: '24px',
   display: 'block',
@@ -22,6 +16,13 @@ const iconStyle: CSSProperties = {
 };
 
 export function AlertBox({ variant = 'info', icon, children }: AlertBoxProps): ReactElement {
+  const theme = useTheme();
+  const variants: Record<AlertBoxVariant, { bg: string; border: string; text: string }> = {
+    danger:  { bg: theme.dangerBg, border: theme.dangerBorder, text: theme.dangerText },
+    warning: { bg: theme.warningBg, border: theme.warningBorder, text: theme.warningText },
+    success: { bg: theme.successBg, border: theme.successBorder, text: theme.successText },
+    info:    { bg: theme.infoBg, border: theme.infoBorder, text: theme.infoText },
+  };
   const v = variants[variant];
   const boxStyle: CSSProperties = {
     backgroundColor: v.bg,

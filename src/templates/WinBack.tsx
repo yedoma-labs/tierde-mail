@@ -1,5 +1,6 @@
 import { currentYear } from './utils.js';
 import { defineEmail } from '../define-email.js';
+import { defaultTheme } from '../theme.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
 import { Text } from '../components/Text.js';
@@ -56,6 +57,7 @@ export const WinBack: EmailTemplateType<WinBackProps> = defineEmail<WinBackProps
     theme,
   }) => {
     const s = { ...WIN_BACK_STRINGS, ...strings };
+    const t = { ...defaultTheme, ...theme };
     const year = currentYear(locale);
 
     return (
@@ -74,7 +76,7 @@ export const WinBack: EmailTemplateType<WinBackProps> = defineEmail<WinBackProps
           {unsubscribeUrl && (
             <>
               {' '}
-              <a href={unsubscribeUrl} style={{ color: '#64748b' }}>Unsubscribe</a>
+              <a href={unsubscribeUrl} style={{ color: t.textMuted }}>Unsubscribe</a>
             </>
           )}
         </Text>

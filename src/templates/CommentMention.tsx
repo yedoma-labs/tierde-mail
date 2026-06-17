@@ -1,5 +1,6 @@
 import { currentYear } from './utils.js';
 import { defineEmail } from '../define-email.js';
+import { defaultTheme } from '../theme.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
 import { Text } from '../components/Text.js';
@@ -65,28 +66,6 @@ export interface CommentMentionProps extends BaseTemplateProps<CommentMentionStr
   commentUrl: string;
 }
 
-const quoteBlockStyle: CSSProperties = {
-  backgroundColor: '#f8fafc',
-  borderLeft: '3px solid #6366f1',
-  borderRadius: '0 6px 6px 0',
-  padding: '12px 16px',
-  margin: '0',
-};
-
-const quoteTextStyle: CSSProperties = {
-  fontSize: '14px',
-  color: '#475569',
-  fontStyle: 'italic',
-  margin: 0,
-  lineHeight: '1.6',
-};
-
-const contextStyle: CSSProperties = {
-  fontSize: '12px',
-  color: '#94a3b8',
-  margin: '8px 0 0',
-};
-
 export const CommentMention: EmailTemplateType<CommentMentionProps> = defineEmail<CommentMentionProps>({
   subject: ({ event, actorName, contextName, strings }) => {
     const s = { ...COMMENT_MENTION_STRINGS, ...strings };
@@ -106,7 +85,30 @@ export const CommentMention: EmailTemplateType<CommentMentionProps> = defineEmai
     theme,
   }) => {
     const s = { ...COMMENT_MENTION_STRINGS, ...strings };
+    const t = { ...defaultTheme, ...theme };
     const year = currentYear(locale);
+
+    const quoteBlockStyle: CSSProperties = {
+      backgroundColor: t.surfaceSubtle,
+      borderLeft: `3px solid ${t.primary}`,
+      borderRadius: '0 6px 6px 0',
+      padding: '12px 16px',
+      margin: '0',
+    };
+
+    const quoteTextStyle: CSSProperties = {
+      fontSize: '14px',
+      color: t.textSecondary,
+      fontStyle: 'italic',
+      margin: 0,
+      lineHeight: '1.6',
+    };
+
+    const contextStyle: CSSProperties = {
+      fontSize: '12px',
+      color: t.textMuted,
+      margin: '8px 0 0',
+    };
 
     return (
       <EmailTemplate

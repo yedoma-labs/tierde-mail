@@ -1,6 +1,7 @@
 import { currentYear } from './utils.js';
 import type { BaseTemplateProps, ChangeRecord } from './shared.js';
 import { defineEmail } from '../define-email.js';
+import { defaultTheme } from '../theme.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
 import { Text } from '../components/Text.js';
@@ -41,30 +42,6 @@ export interface ProfileUpdatedProps extends BaseTemplateProps<ProfileUpdatedStr
   accountUrl: string;
 }
 
-const thStyle: CSSProperties = {
-  textAlign: 'left',
-  fontSize: '11px',
-  fontWeight: '600',
-  textTransform: 'uppercase',
-  letterSpacing: '0.05em',
-  color: '#6b7280',
-  paddingBottom: '8px',
-  borderBottom: '1px solid #e5e7eb',
-};
-
-const tdStyle: CSSProperties = {
-  fontSize: '14px',
-  color: '#0f172a',
-  padding: '8px 8px 8px 0',
-  borderBottom: '1px solid #f3f4f6',
-  verticalAlign: 'top',
-};
-
-const oldValueStyle: CSSProperties = {
-  color: '#6b7280',
-  textDecoration: 'line-through',
-};
-
 export const ProfileUpdated: EmailTemplateType<ProfileUpdatedProps> = defineEmail<ProfileUpdatedProps>({
   subject: ({ appName = 'Our App', strings }) => {
     const s = { ...PROFILE_UPDATED_STRINGS, ...strings };
@@ -72,7 +49,33 @@ export const ProfileUpdated: EmailTemplateType<ProfileUpdatedProps> = defineEmai
   },
   component: ({ name, changes, accountUrl, appName = 'Our App', locale, dir, strings, theme }) => {
     const s = { ...PROFILE_UPDATED_STRINGS, ...strings };
+    const t = { ...defaultTheme, ...theme };
     const year = currentYear(locale);
+
+    const thStyle: CSSProperties = {
+      textAlign: 'left',
+      fontSize: '11px',
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      letterSpacing: '0.05em',
+      color: t.textMuted,
+      paddingBottom: '8px',
+      borderBottom: `1px solid ${t.border}`,
+    };
+
+    const tdStyle: CSSProperties = {
+      fontSize: '14px',
+      color: t.textPrimary,
+      padding: '8px 8px 8px 0',
+      borderBottom: `1px solid ${t.borderSubtle}`,
+      verticalAlign: 'top',
+    };
+
+    const oldValueStyle: CSSProperties = {
+      color: t.textMuted,
+      textDecoration: 'line-through',
+    };
+
     return (
       <EmailTemplate preview={s.subject(appName)} lang={locale} dir={dir} theme={theme}>
         <Heading>{s.heading}</Heading>

@@ -1,5 +1,6 @@
 import { currentYear } from './utils.js';
 import { defineEmail } from '../define-email.js';
+import { defaultTheme } from '../theme.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
 import { Text } from '../components/Text.js';
@@ -74,32 +75,6 @@ export interface ReferralProps extends BaseTemplateProps<ReferralStrings> {
   reward?: string;
 }
 
-const codeBoxStyle: CSSProperties = {
-  backgroundColor: '#f8fafc',
-  border: '2px dashed #cbd5e1',
-  borderRadius: '8px',
-  padding: '20px',
-  textAlign: 'center',
-};
-
-const codeStyle: CSSProperties = {
-  fontFamily: 'ui-monospace, "Cascadia Code", monospace',
-  fontSize: '24px',
-  fontWeight: '800',
-  letterSpacing: '0.15em',
-  color: '#4f46e5',
-  display: 'block',
-};
-
-const codeLabelStyle: CSSProperties = {
-  fontSize: '12px',
-  color: '#94a3b8',
-  textTransform: 'uppercase',
-  letterSpacing: '0.05em',
-  marginTop: '4px',
-  display: 'block',
-};
-
 export const Referral: EmailTemplateType<ReferralProps> = defineEmail<ReferralProps>({
   subject: ({ event, referrerName, appName = 'Our App', strings }) => {
     const s = { ...REFERRAL_STRINGS, ...strings };
@@ -119,7 +94,34 @@ export const Referral: EmailTemplateType<ReferralProps> = defineEmail<ReferralPr
     theme,
   }) => {
     const s = { ...REFERRAL_STRINGS, ...strings };
+    const t = { ...defaultTheme, ...theme };
     const year = currentYear(locale);
+
+    const codeBoxStyle: CSSProperties = {
+      backgroundColor: t.surfaceSubtle,
+      border: `2px dashed ${t.border}`,
+      borderRadius: '8px',
+      padding: '20px',
+      textAlign: 'center',
+    };
+
+    const codeStyle: CSSProperties = {
+      fontFamily: 'ui-monospace, "Cascadia Code", monospace',
+      fontSize: '24px',
+      fontWeight: '800',
+      letterSpacing: '0.15em',
+      color: t.primary,
+      display: 'block',
+    };
+
+    const codeLabelStyle: CSSProperties = {
+      fontSize: '12px',
+      color: t.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: '0.05em',
+      marginTop: '4px',
+      display: 'block',
+    };
 
     return (
       <EmailTemplate preview={s.subject(event, referrerName, appName)} lang={locale} dir={dir} theme={theme}>
@@ -129,8 +131,8 @@ export const Referral: EmailTemplateType<ReferralProps> = defineEmail<ReferralPr
         {referralCode && (
           <Section>
             <div style={codeBoxStyle}>
-              <span style={codeStyle}>{referralCode}</span>
-              <span style={codeLabelStyle}>{s.codeLine(referralCode).split(':')[0]}</span>
+              <span className="tierde-code" style={codeStyle}>{referralCode}</span>
+              <span className="tierde-code" style={codeLabelStyle}>{s.codeLine(referralCode).split(':')[0]}</span>
             </div>
           </Section>
         )}
