@@ -71,13 +71,21 @@ export function Button({ href, children, variant = 'primary', align = 'center' }
     display: 'block',
   };
 
+  const isOutline = variant === 'outline';
+
   return (
     <div style={wrapperStyle}>
-      <table role="presentation" style={tableStyle} cellPadding="0" cellSpacing="0">
+      <table
+        role="presentation"
+        className={isOutline ? 'tierde-btn-outline' : undefined}
+        style={tableStyle}
+        cellPadding="0"
+        cellSpacing="0"
+      >
         <tbody>
           <tr>
             <td style={tdStyle}>
-              <a href={href} style={linkStyle}>
+              <a href={href} className={isOutline ? 'tierde-btn-outline-text' : undefined} style={linkStyle}>
                 {children}
               </a>
             </td>

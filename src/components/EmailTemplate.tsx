@@ -70,6 +70,10 @@ function EmailShell({
       .tierde-footer { background-color: #1e293b !important; border-top-color: #334155 !important; color: #94a3b8 !important; }
       .tierde-border { border-color: #334155 !important; }
       .tierde-logo-bg { background-color: #1e293b !important; }
+      .tierde-kv-label { color: #94a3b8 !important; border-bottom-color: #334155 !important; }
+      .tierde-kv-value { color: #e2e8f0 !important; border-bottom-color: #334155 !important; }
+      .tierde-btn-outline { border-color: #64748b !important; }
+      .tierde-btn-outline-text { color: #f1f5f9 !important; }
     }
   `;
 

@@ -26,8 +26,8 @@ export function KeyValueTable({ rows }: KeyValueTableProps): ReactElement {
       <tbody>
         {filtered.map(({ label, value, mono }) => (
           <tr key={label}>
-            <td style={{ ...cellBase, color: '#6b7280', width: '40%' }}>{label}</td>
-            <td style={{
+            <td className="tierde-kv-label" style={{ ...cellBase, color: '#6b7280', width: '40%' }}>{label}</td>
+            <td className="tierde-kv-value" style={{
               ...cellBase,
               color: '#0f172a',
               fontWeight: '500',
