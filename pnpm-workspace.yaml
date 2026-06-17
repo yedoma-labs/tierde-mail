@@ -1,6 +1,7 @@
 allowBuilds:
   esbuild: true
   '@css-inline/css-inline': true
+  simple-git-hooks: true
 
 minimumReleaseAgeExclude:
   - '@vitest/coverage-v8@4.1.9'

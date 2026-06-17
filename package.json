@@ -188,9 +188,6 @@
   "engines": {
     "node": ">=20.0.0"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": ["esbuild", "simple-git-hooks"]
-  },
   "packageManager": "pnpm@11.7.0",
   "keywords": [
     "email",
