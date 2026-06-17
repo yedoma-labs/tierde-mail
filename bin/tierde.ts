@@ -1,5 +1,7 @@
-import { writeFileSync, mkdirSync } from 'node:fs';
-import { resolve, dirname } from 'node:path';
+import { writeFileSync, mkdirSync, existsSync, statSync } from 'node:fs';
+import { resolve, dirname, extname } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { register } from 'node:module';
 
 // Template sources embedded at build time via Vite's ?raw imports.
 // No file-system access needed at runtime — works correctly when installed from npm.
@@ -147,7 +149,8 @@ function usage(): void {
 tierde — email template CLI
 
 Commands:
-  dev [--port 3000]                       Start preview server (built-in templates)
+  dev [path] [--port 3000] [--include-builtin]
+                                          Start preview server; path = custom template file or dir
   render <name> --props '<json>' [-o <file>] [--text]
                                           Render a template to HTML (or plain text)
   send <name> --to <email> [--props '<json>'] [--subject '<text>']
@@ -159,6 +162,9 @@ Commands:
 Examples:
   npx tierde dev
   npx tierde dev --port 3001
+  npx tierde dev ./emails
+  npx tierde dev ./emails/index.ts --port 3001
+  npx tierde dev ./emails --include-builtin
   npx tierde render welcome --props '{"name":"Alice","loginUrl":"https://app.com"}' -o welcome.html
   npx tierde render invoice --props '{"customerName":"ACME","invoiceNumber":"INV-1","items":[]}' --text
   npx tierde send welcome --to alice@example.com --props '{"name":"Alice","loginUrl":"https://app.com"}'
@@ -297,6 +303,88 @@ async function renderTemplate(args: string[]): Promise<void> {
   }
 }
 
+function toKebabCase(exportName: string): string {
+  return exportName.replace(/([A-Z])/g, (c: string, _: string, i: number) =>
+    i === 0 ? c.toLowerCase() : `-${c.toLowerCase()}`,
+  );
+}
+
+function isTemplate(val: unknown): val is { component: unknown; subject: unknown } {
+  return typeof val === 'object' && val !== null && 'component' in val && 'subject' in val;
+}
+
+function templatesFromModule(
+  mod: Record<string, unknown>,
+  sampleProps: Record<string, unknown>,
+): Record<string, { template: unknown; props: unknown }> {
+  const emails: Record<string, { template: unknown; props: unknown }> = {};
+  for (const [exportName, value] of Object.entries(mod)) {
+    if (isTemplate(value)) {
+      emails[toKebabCase(exportName)] = { template: value, props: sampleProps[exportName] ?? {} };
+    }
+  }
+  return emails;
+}
+
+async function loadCustomTemplates(
+  userPath: string,
+): Promise<Record<string, { template: unknown; props: unknown }>> {
+  const absolutePath = resolve(process.cwd(), userPath);
+
+  // Resolve directory → look for index file
+  let entryPath = absolutePath;
+  if (existsSync(absolutePath) && statSync(absolutePath).isDirectory()) {
+    const candidates = ['index.ts', 'index.tsx', 'index.js'];
+    const found = candidates.find((f) => existsSync(resolve(absolutePath, f)));
+    if (!found) {
+      console.error(`Error: no index.ts / index.tsx / index.js found in ${absolutePath}`);
+      process.exit(1);
+    }
+    entryPath = resolve(absolutePath, found);
+  }
+
+  if (!existsSync(entryPath)) {
+    console.error(`Error: file not found: ${entryPath}`);
+    process.exit(1);
+  }
+
+  // Register tsx loader for TypeScript files (Node 20.6+)
+  const ext = extname(entryPath);
+  if (ext === '.ts' || ext === '.tsx') {
+    try {
+      register('tsx/esm', pathToFileURL('./'));
+    } catch {
+      console.error(
+        'Error: TypeScript template files require tsx to be installed.\n' +
+          'Run: npm install -D tsx\n' +
+          'Or compile your templates to JavaScript first.',
+      );
+      process.exit(1);
+    }
+  }
+
+  let mod: Record<string, unknown>;
+  try {
+    mod = (await import(pathToFileURL(entryPath).href)) as Record<string, unknown>;
+  } catch (err) {
+    console.error(`Error loading templates from ${entryPath}:`);
+    console.error(err instanceof Error ? err.message : String(err));
+    process.exit(1);
+  }
+
+  const sampleProps = (mod['SAMPLE_PROPS'] as Record<string, unknown> | undefined) ?? {};
+  const emails = templatesFromModule(mod, sampleProps);
+
+  if (Object.keys(emails).length === 0) {
+    console.error(
+      `Warning: no templates found in ${entryPath}.\n` +
+        'Make sure you export defineEmail() instances as named exports.',
+    );
+  }
+
+  return emails;
+}
+
 async function devServer(args: string[]): Promise<void> {
   const portIdx = args.indexOf('--port');
   const port = portIdx !== -1 ? Number(args[portIdx + 1]) : 3000;
@@ -305,24 +393,39 @@ async function devServer(args: string[]): Promise<void> {
     process.exit(1);
   }
 
+  const includeBuiltin = args.includes('--include-builtin');
+
+  // First positional arg that isn't a flag or flag value is the custom template path
+  const flagsWithValues = new Set(['--port']);
+  const userPath = args.find((arg, i) => {
+    if (arg.startsWith('-')) return false;
+    const prev = args[i - 1];
+    if (prev && flagsWithValues.has(prev)) return false;
+    return true;
+  });
+
   type PreviewMod = typeof import('../src/preview/index.js');
   type TemplatesMod = typeof import('../src/templates/index.js');
   type SamplePropsMod = typeof import('../src/templates/sample-props.js');
 
-  const [{ createPreviewServer }, allTemplates, { SAMPLE_PROPS }] = await Promise.all([
+  const [{ createPreviewServer }, builtinTemplates, { SAMPLE_PROPS }] = await Promise.all([
     import('../src/preview/index.js') as Promise<PreviewMod>,
     import('../src/templates/index.js') as Promise<TemplatesMod>,
     import('../src/templates/sample-props.js') as Promise<SamplePropsMod>,
   ]);
 
-  const emails: Record<string, { template: unknown; props: unknown }> = {};
-  for (const [exportName, template] of Object.entries(allTemplates)) {
-    if (typeof template === 'object' && template !== null && 'component' in template) {
-      const kebab = exportName.replace(/([A-Z])/g, (c: string, _: string, i: number) =>
-        i === 0 ? c.toLowerCase() : `-${c.toLowerCase()}`,
-      );
-      emails[kebab] = { template, props: SAMPLE_PROPS[exportName] ?? {} };
-    }
+  let emails: Record<string, { template: unknown; props: unknown }> = {};
+
+  if (!userPath || includeBuiltin) {
+    // Load built-in templates
+    Object.assign(emails, templatesFromModule(builtinTemplates as Record<string, unknown>, SAMPLE_PROPS));
+  }
+
+  if (userPath) {
+    const custom = await loadCustomTemplates(userPath);
+    // Custom templates override built-ins with the same key
+    Object.assign(emails, custom);
+    console.log(`Loaded ${Object.keys(custom).length} custom template(s) from ${userPath}`);
   }
 
   const server = createPreviewServer({ port, emails: emails as Parameters<typeof createPreviewServer>[0]['emails'] });
