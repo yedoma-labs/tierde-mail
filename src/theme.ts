@@ -43,3 +43,36 @@ export const defaultTheme: Theme = {
 export function createTheme(overrides: Partial<Theme>): Theme {
   return { ...defaultTheme, ...overrides };
 }
+
+// Dark mode design tokens — single source of truth for all @media (prefers-color-scheme: dark) rules.
+// Senior designer rationale:
+//   background     slate-900 #0f172a — deep navy, avoids harsh pure black, reduces eye strain
+//   cardBackground slate-800 #1e293b — elevated surface with clear depth from bg
+//   primary        indigo-500 #6366f1 — brighter than light-mode indigo-600, pops on dark surface
+//   textPrimary    slate-100 #f1f5f9 — near-white, softer than #fff; ≥12:1 contrast on card
+//   textSecondary  slate-300 #cbd5e1 — clear hierarchy below primary; ≥7:1 on card
+//   textMuted      slate-400 #94a3b8 — readable muted; ~4.5:1 on card (WCAG AA minimum)
+//   border         slate-700 #334155 — visible but not distracting dividers
+export interface DarkTheme {
+  background: string;
+  cardBackground: string;
+  accentBar: string;
+  primary: string;
+  primaryText: string;
+  textPrimary: string;
+  textSecondary: string;
+  textMuted: string;
+  border: string;
+}
+
+export const darkTheme: DarkTheme = {
+  background: '#0f172a',
+  cardBackground: '#1e293b',
+  accentBar: '#6366f1',
+  primary: '#6366f1',
+  primaryText: '#ffffff',
+  textPrimary: '#f1f5f9',
+  textSecondary: '#cbd5e1',
+  textMuted: '#94a3b8',
+  border: '#334155',
+};

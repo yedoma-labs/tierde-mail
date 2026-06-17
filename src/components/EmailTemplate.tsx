@@ -1,7 +1,28 @@
 import type { ReactNode, CSSProperties, ReactElement } from 'react';
 import { ThemeContext, useTheme } from '../ThemeContext.js';
 import type { Theme } from '../theme.js';
-import { defaultTheme } from '../theme.js';
+import { defaultTheme, darkTheme } from '../theme.js';
+
+// Generated once from darkTheme tokens — change darkTheme, all @media rules update automatically.
+const DARK_MEDIA_CSS = `
+    @media only screen and (max-width: 600px) {
+      .email-container { width: 100% !important; }
+    }
+    @media (prefers-color-scheme: dark) {
+      .tierde-bg { background-color: ${darkTheme.background} !important; }
+      .tierde-card { background-color: ${darkTheme.cardBackground} !important; }
+      .tierde-text-primary { color: ${darkTheme.textPrimary} !important; }
+      .tierde-text-secondary { color: ${darkTheme.textSecondary} !important; }
+      .tierde-text-muted { color: ${darkTheme.textMuted} !important; }
+      .tierde-footer { background-color: ${darkTheme.cardBackground} !important; border-top-color: ${darkTheme.border} !important; color: ${darkTheme.textMuted} !important; }
+      .tierde-border { border-color: ${darkTheme.border} !important; }
+      .tierde-logo-bg { background-color: ${darkTheme.cardBackground} !important; }
+      .tierde-kv-label { color: ${darkTheme.textMuted} !important; border-bottom-color: ${darkTheme.border} !important; }
+      .tierde-kv-value { color: ${darkTheme.textPrimary} !important; border-bottom-color: ${darkTheme.border} !important; }
+      .tierde-btn-outline { border-color: ${darkTheme.primary} !important; }
+      .tierde-btn-outline-text { color: ${darkTheme.textPrimary} !important; }
+    }
+  `;
 
 interface EmailTemplateProps {
   children: ReactNode;
@@ -57,25 +78,6 @@ function EmailShell({
     lineHeight: '0',
   };
 
-  const darkMode = `
-    @media only screen and (max-width: 600px) {
-      .email-container { width: 100% !important; }
-    }
-    @media (prefers-color-scheme: dark) {
-      .tierde-bg { background-color: #0f172a !important; }
-      .tierde-card { background-color: #1e293b !important; }
-      .tierde-text-primary { color: #f1f5f9 !important; }
-      .tierde-text-secondary { color: #cbd5e1 !important; }
-      .tierde-text-muted { color: #94a3b8 !important; }
-      .tierde-footer { background-color: #1e293b !important; border-top-color: #334155 !important; color: #94a3b8 !important; }
-      .tierde-border { border-color: #334155 !important; }
-      .tierde-logo-bg { background-color: #1e293b !important; }
-      .tierde-kv-label { color: #94a3b8 !important; border-bottom-color: #334155 !important; }
-      .tierde-kv-value { color: #e2e8f0 !important; border-bottom-color: #334155 !important; }
-      .tierde-btn-outline { border-color: #64748b !important; }
-      .tierde-btn-outline-text { color: #f1f5f9 !important; }
-    }
-  `;
 
   return (
     <html lang={lang ?? 'en'} dir={dir ?? 'ltr'}>
@@ -83,7 +85,7 @@ function EmailShell({
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-        <style>{darkMode}</style>
+        <style>{DARK_MEDIA_CSS}</style>
       </head>
       <body style={bodyStyle} className="tierde-bg">
         {preview && (
