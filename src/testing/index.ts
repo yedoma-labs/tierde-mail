@@ -123,4 +123,66 @@ export function captureEmails(from: string = 'test@example.com'): CaptureResult 
   };
 }
 
+// ─── Assertion helpers ──────────────────────────────────────────────────────
+
+/**
+ * Asserts that a captured email has at least one attachment matching the given
+ * criteria. Throws a descriptive error if no match is found.
+ *
+ * ```ts
+ * const { mailer, inbox } = captureEmails();
+ * await mailer.send(InvoiceEmail, { to: '...', props: { ... }, attachments: [pdf] });
+ * expectAttachment(inbox[0], { filename: 'invoice.pdf', contentType: 'application/pdf' });
+ * ```
+ */
+export function expectAttachment(
+  email: CapturedEmail,
+  criteria: { filename?: string; contentType?: string; minBytes?: number },
+): void {
+  const { filename, contentType, minBytes } = criteria;
+  const match = email.attachments.find((a) => {
+    if (filename && a.filename !== filename) return false;
+    if (contentType && a.contentType !== contentType) return false;
+    if (minBytes !== undefined) {
+      const size = Buffer.isBuffer(a.content) ? a.content.byteLength : Buffer.byteLength(a.content);
+      if (size < minBytes) return false;
+    }
+    return true;
+  });
+
+  if (!match) {
+    const got = email.attachments.map((a) => `${a.filename} (${a.contentType})`).join(', ') || 'none';
+    const wanted = [
+      filename ? `filename="${filename}"` : null,
+      contentType ? `contentType="${contentType}"` : null,
+      minBytes !== undefined ? `minBytes=${minBytes}` : null,
+    ]
+      .filter(Boolean)
+      .join(', ');
+    throw new Error(`Expected attachment matching {${wanted}} but got: ${got}`);
+  }
+}
+
+/**
+ * Asserts that a captured email has exactly N attachments.
+ *
+ * ```ts
+ * expectAttachmentCount(inbox[0], 2);
+ * ```
+ */
+export function expectAttachmentCount(email: CapturedEmail, count: number): void {
+  if (email.attachments.length !== count) {
+    throw new Error(
+      `Expected ${count} attachment(s) but found ${email.attachments.length}`,
+    );
+  }
+}
+
+/**
+ * Asserts that a captured email has no attachments.
+ */
+export function expectNoAttachments(email: CapturedEmail): void {
+  expectAttachmentCount(email, 0);
+}
+
 export type { CreateMailerConfig };

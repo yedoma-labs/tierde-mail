@@ -766,3 +766,215 @@ describe('additional templates', () => {
     expect(html).toContain('20% off');
   });
 });
+
+describe('branch coverage — optional props', () => {
+  // PasswordReset: expiresIn branch
+  it('PasswordReset renders expiry note when expiresIn provided', () => {
+    const html = renderEmail(
+      PasswordReset.component({ username: 'alice', resetUrl: 'https://app.com/reset', expiresIn: '1 hour' }),
+    );
+    expect(html).toContain('1 hour');
+  });
+
+  // EmailVerification: expiresIn branch
+  it('EmailVerification renders expiry note when expiresIn provided', () => {
+    const html = renderEmail(
+      EmailVerification.component({ name: 'Alice', verifyUrl: 'https://app.com/verify', expiresIn: '24 hours' }),
+    );
+    expect(html).toContain('24 hours');
+  });
+
+  // MagicLink: custom expiresIn
+  it('MagicLink renders custom expiresIn', () => {
+    const html = renderEmail(
+      MagicLink.component({ email: 'alice@example.com', loginUrl: 'https://app.com/magic', expiresIn: '30 minutes' }),
+    );
+    expect(html).toContain('30 minutes');
+  });
+
+  // TwoFactorAuth: expiresIn branch
+  it('TwoFactorAuth renders expiry when provided', () => {
+    const html = renderEmail(
+      TwoFactorAuth.component({ username: 'alice', code: '123456', expiresIn: '10 minutes' }),
+    );
+    expect(html).toContain('10 minutes');
+  });
+
+  // PaymentFailed: amount + failureReason + retryInDays + supportEmail branches
+  it('PaymentFailed renders all optional fields', () => {
+    const html = renderEmail(
+      PaymentFailed.component({
+        name: 'Alice',
+        updateUrl: 'https://app.com/billing',
+        amount: '$49.99',
+        failureReason: 'Card expired',
+        retryInDays: 3,
+        supportEmail: 'billing@example.com',
+      }),
+    );
+    expect(html).toContain('$49.99');
+    expect(html).toContain('Card expired');
+    expect(html).toContain('3');
+    expect(html).toContain('billing@example.com');
+  });
+
+  // Invoice: supportEmail branch + tax + discount
+  it('Invoice renders supportEmail note', () => {
+    const html = renderEmail(
+      Invoice.component({
+        customerName: 'Acme',
+        invoiceNumber: 'INV-001',
+        items: [{ name: 'Service', quantity: 1, price: 100 }],
+        supportEmail: 'billing@acme.com',
+      }),
+    );
+    expect(html).toContain('billing@acme.com');
+  });
+
+  it('Invoice renders subtotal/tax/discount rows', () => {
+    const html = renderEmail(
+      Invoice.component({
+        customerName: 'Acme',
+        invoiceNumber: 'INV-002',
+        items: [{ name: 'Item', quantity: 2, price: 50 }],
+      }),
+    );
+    expect(html).toContain('$100');
+    expect(html).toContain('$10');
+    expect(html).toContain('$5');
+  });
+
+  // PolicyUpdate: changes + supportEmail branches
+  it('PolicyUpdate renders changes list and supportEmail', () => {
+    const html = renderEmail(
+      PolicyUpdate.component({
+        policyType: 'privacy',
+        effectiveDate: 'Aug 1, 2026',
+        policyUrl: 'https://app.com/privacy',
+        changes: [{ section: 'Data Retention', summary: 'Now 90 days.' }],
+        supportEmail: 'privacy@app.com',
+      }),
+    );
+    expect(html).toContain('Data Retention');
+    expect(html).toContain('privacy@app.com');
+  });
+
+  // ShippingUpdate: status variants
+  it('ShippingUpdate renders delivered status', () => {
+    const html = renderEmail(
+      ShippingUpdate.component({
+        name: 'Alice',
+        orderNumber: 'ORD-001',
+        status: 'delivered',
+        trackingUrl: 'https://track.example.com',
+        estimatedDelivery: 'Today',
+      }),
+    );
+    expect(html).toContain('delivered');
+  });
+
+  it('ShippingUpdate renders delayed status', () => {
+    const html = renderEmail(
+      ShippingUpdate.component({
+        name: 'Alice',
+        orderNumber: 'ORD-001',
+        status: 'delayed',
+        trackingUrl: 'https://track.example.com',
+      }),
+    );
+    expect(html).toContain('delay');
+  });
+
+  // AccountUnlocked: optional loginActivity
+  it('AccountUnlocked renders without loginUrl still works', () => {
+    const html = renderEmail(AccountUnlocked.component({ name: 'Alice', loginUrl: 'https://app.com/login' }));
+    expect(html).toContain('Alice');
+    expect(html).toContain('https://app.com/login');
+  });
+
+  // SupportTicket: priority badge + agentMessage variant
+  it('SupportTicket renders priority badge for urgent', () => {
+    const html = renderEmail(
+      SupportTicket.component({
+        name: 'Alice',
+        event: 'updated',
+        ticketId: 'TKT-1',
+        ticketTitle: 'Urgent issue',
+        ticketUrl: 'https://support.app.com/1',
+        priority: 'urgent',
+        agentMessage: 'We are looking into this now.',
+        agentName: 'Support',
+      }),
+    );
+    expect(html).toContain('Urgent');
+    expect(html).toContain('We are looking into this now.');
+  });
+
+  // MaintenanceNotification: emergency + extended variants
+  it('MaintenanceNotification emergency renders', () => {
+    const html = renderEmail(
+      MaintenanceNotification.component({
+        type: 'emergency',
+        startTime: 'Now',
+        statusPageUrl: 'https://status.app.com',
+      }),
+    );
+    expect(html).toContain('https://status.app.com');
+  });
+
+  it('MaintenanceNotification extended renders', () => {
+    const html = renderEmail(
+      MaintenanceNotification.component({ type: 'extended', endTime: 'June 22 04:00 UTC' }),
+    );
+    expect(html).toContain('June 22 04:00 UTC');
+  });
+
+  // PasswordlessOtp: appName branch
+  it('PasswordlessOtp renders with custom appName', () => {
+    const html = renderEmail(PasswordlessOtp.component({ code: '999999', appName: 'MyApp' }));
+    expect(html).toContain('999999');
+    expect(html).toContain('MyApp');
+  });
+
+  // TeamInvite: role + expiresInHours branches
+  it('TeamInvite renders role and expiry', () => {
+    const html = renderEmail(
+      TeamInvite.component({
+        inviterName: 'Bob',
+        teamName: 'Engineering',
+        inviteUrl: 'https://app.com/invite',
+        role: 'Admin',
+        expiresInHours: 48,
+      }),
+    );
+    expect(html).toContain('Admin');
+    expect(html).toContain('48');
+  });
+
+  // WinBack: unsubscribeUrl branch
+  it('WinBack renders unsubscribe link', () => {
+    const html = renderEmail(
+      WinBack.component({
+        name: 'Alice',
+        returnUrl: 'https://app.com/login',
+        daysSince: 60,
+        offer: '20% off',
+        unsubscribeUrl: 'https://app.com/unsub',
+      }),
+    );
+    expect(html).toContain('https://app.com/unsub');
+  });
+
+  // ReviewRequest: starRating branch
+  it('ReviewRequest renders productOrService in body', () => {
+    const html = renderEmail(
+      ReviewRequest.component({
+        name: 'Alice',
+        reviewUrl: 'https://reviews.example.com',
+        productOrService: 'Pro Plan',
+      }),
+    );
+    expect(html).toContain('https://reviews.example.com');
+    expect(html).toContain('Pro Plan');
+  });
+});

@@ -1,4 +1,4 @@
-import { resolve } from 'node:path';
+import { resolve, dirname } from 'node:path';
 import { readFileSync, chmodSync } from 'node:fs';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
@@ -21,35 +21,27 @@ const entries = {
   'bin/tierde': resolve(__dirname, 'bin/tierde.ts'),
 };
 
-const rawImportPlugin = {
+// Inlines ?raw imports directly into the importing module so no separate file is emitted.
+// Must run before Vite's built-in ?raw handler (enforce: 'pre'), otherwise Vite creates
+// separate chunk files that get ?raw in the filename — unresolvable by Node at runtime.
+const rawImportInlinePlugin = {
   name: 'raw-import-inline',
-  resolveId(id: string) {
-    if (id.includes('?raw')) {
-      return id;
-    }
-    return null;
-  },
-  load(id: string) {
-    if (id.includes('?raw')) {
-      const path = id.split('?')[0];
-      const content = readFileSync(path, 'utf-8');
-      return `export default ${JSON.stringify(content)};`;
-    }
-    return null;
-  },
-};
-
-const rawImportRenamePlugin = {
-  name: 'raw-import-rename',
-  generateBundle(options: any, bundle: Record<string, any>) {
-    // Rename chunks with ? in filename to use -raw instead
-    for (const [fileName, asset] of Object.entries(bundle)) {
-      if (fileName.includes('?raw')) {
-        const newName = fileName.replace('?raw', '-raw');
-        bundle[newName] = asset;
-        delete bundle[fileName];
-      }
-    }
+  enforce: 'pre' as const,
+  transform(code: string, id: string) {
+    if (!code.includes('?raw')) return null;
+    // Replace `import X from 'path?raw'` (single or double quotes) with inline const
+    const transformed = code.replace(
+      /^import (\w+) from ['"]([^'"]+\?raw)['"];?$/gm,
+      (_match: string, binding: string, specifier: string) => {
+        const rawPath = specifier.replace('?raw', '');
+        const absolutePath = rawPath.startsWith('.')
+          ? resolve(dirname(id), rawPath)
+          : rawPath;
+        const content = readFileSync(absolutePath, 'utf-8');
+        return `const ${binding} = ${JSON.stringify(content)};`;
+      },
+    );
+    return transformed !== code ? { code: transformed, map: null } : null;
   },
 };
 
@@ -72,7 +64,7 @@ const shebangPlugin = {
 
 export default defineConfig({
   plugins: [
-    rawImportPlugin,
+    rawImportInlinePlugin,
     dts({
       include: ['src/**/*'],
       outDir: 'dist',
@@ -86,7 +78,6 @@ export default defineConfig({
       formats: ['es', 'cjs'],
     },
     rollupOptions: {
-      plugins: [rawImportRenamePlugin],
       external: [
         'react',
         'react-dom',
