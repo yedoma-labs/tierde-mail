@@ -37,9 +37,29 @@ function sendHtml(res: ServerResponse, html: string, status = 200): void {
 }
 
 function injectDarkMode(html: string): string {
-  // Inject before </head> — color-scheme:dark forces @media(prefers-color-scheme:dark) to match
-  const tag = '<style>:root{color-scheme:dark}</style>';
-  return html.includes('</head>') ? html.replace('</head>', `${tag}</head>`) : tag + html;
+  // Extract CSS rules from @media (prefers-color-scheme: dark) blocks and inject them
+  // unconditionally. Setting color-scheme:dark via CSS does NOT force the media query
+  // to match — prefers-color-scheme reflects the OS preference, not a CSS property.
+  const darkRules: string[] = [];
+  const mediaRe = /@media[^{]*prefers-color-scheme[^{]*:\s*dark[^{]*\{/g;
+  let m: RegExpExecArray | null;
+  while ((m = mediaRe.exec(html)) !== null) {
+    const start = m.index + m[0].length;
+    let depth = 1;
+    let i = start;
+    while (i < html.length && depth > 0) {
+      if (html[i] === '{') depth++;
+      else if (html[i] === '}') depth--;
+      i++;
+    }
+    if (depth === 0) darkRules.push(html.slice(start, i - 1).trim());
+  }
+
+  const injected = darkRules.length > 0
+    ? `<style>${darkRules.join('\n')}</style>`
+    : '<style>body{background:#1a1a1a;color:#e5e7eb}</style>';
+
+  return html.includes('</head>') ? html.replace('</head>', `${injected}</head>`) : injected + html;
 }
 
 function parseQuery(url: string): Record<string, string> {
