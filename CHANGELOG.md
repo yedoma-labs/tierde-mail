@@ -8,6 +8,24 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Added
+
+**Design tokens & accessibility**
+- 14 new semantic tokens on `Theme`: `surfaceSubtle`, `borderSubtle`, plus `success/danger/warning/info` (bg, border, text) — enables theme-driven component colors
+- `PALETTE` const export for fixed system colors (changelog, impact, severity groups)
+- WCAG AA enforcement: `pnpm wcag` CLI script audits all 52 template variants; `src/__tests__/wcag.test.tsx` runs 52 tests in CI
+- `@media (prefers-color-scheme: dark)` catch-all rules in `EmailTemplate` for unclassed text; elements on light-bg islands (badges, code blocks, status indicators) protected via `tierde-badge` / `tierde-code` / `tierde-positive` / `tierde-negative` class hooks
+
+### Changed
+
+- All 24 templates refactored to derive every color from theme tokens or `PALETTE` — zero hardcoded hex values remain in template source
+- `AlertBox` now uses `useTheme()` for status colors instead of hardcoded values
+- `UsageAlert` pct% text now uses WCAG-safe severity-specific text color, not the decorative bar color
+
+### Fixed
+
+- Dark mode text invisible in islands (code boxes, badges, refund amounts) — now use token-derived colors with `!important` overrides in media query
+
 ---
 
 ## [0.4.0] — 2026-06-17
