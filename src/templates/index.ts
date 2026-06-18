@@ -1,13 +1,3 @@
-export type { ApiKeyEvent, ApiKeyProps, ApiKeyStrings } from './ApiKeyCreated.js';
-export { API_KEY_STRINGS, ApiKeyCreated } from './ApiKeyCreated.js';
-export type {
-  AppointmentReminderProps,
-  AppointmentReminderStrings,
-} from './AppointmentReminder.js';
-export {
-  APPOINTMENT_REMINDER_STRINGS,
-  AppointmentReminder,
-} from './AppointmentReminder.js';
 export type { AbandonedCartProps, AbandonedCartStrings, CartItem } from './AbandonedCart.js';
 export { ABANDONED_CART_STRINGS, AbandonedCart } from './AbandonedCart.js';
 export type { AccountDeactivatedProps, AccountDeactivatedStrings } from './AccountDeactivated.js';
@@ -25,6 +15,16 @@ export type { AccountLockedProps, AccountLockedStrings, LockReason } from './Acc
 export { ACCOUNT_LOCKED_STRINGS, AccountLocked } from './AccountLocked.js';
 export type { AccountUnlockedProps, AccountUnlockedStrings } from './AccountUnlocked.js';
 export { ACCOUNT_UNLOCKED_STRINGS, AccountUnlocked } from './AccountUnlocked.js';
+export type { ApiKeyEvent, ApiKeyProps, ApiKeyStrings } from './ApiKeyCreated.js';
+export { API_KEY_STRINGS, ApiKeyCreated } from './ApiKeyCreated.js';
+export type {
+  AppointmentReminderProps,
+  AppointmentReminderStrings,
+} from './AppointmentReminder.js';
+export {
+  APPOINTMENT_REMINDER_STRINGS,
+  AppointmentReminder,
+} from './AppointmentReminder.js';
 export type { BackInStockProps, BackInStockStrings } from './BackInStock.js';
 export { BACK_IN_STOCK_STRINGS, BackInStock } from './BackInStock.js';
 export type {
@@ -47,10 +47,10 @@ export {
   EMAIL_CHANGE_VERIFICATION_STRINGS,
   EmailChangeVerification,
 } from './EmailChangeVerification.js';
-export type { EventInvitationProps, EventInvitationStrings } from './EventInvitation.js';
-export { EVENT_INVITATION_STRINGS, EventInvitation } from './EventInvitation.js';
 export type { EmailVerificationProps, EmailVerificationStrings } from './EmailVerification.js';
 export { EMAIL_VERIFICATION_STRINGS, EmailVerification } from './EmailVerification.js';
+export type { EventInvitationProps, EventInvitationStrings } from './EventInvitation.js';
+export { EVENT_INVITATION_STRINGS, EventInvitation } from './EventInvitation.js';
 export type { ExportReadyProps, ExportReadyStrings } from './ExportReady.js';
 export { EXPORT_READY_STRINGS, ExportReady } from './ExportReady.js';
 export type {

@@ -26,7 +26,7 @@ export interface ApiKeyStrings {
 }
 
 export const API_KEY_STRINGS: ApiKeyStrings = {
-  subject: (event, keyName, appName) => {
+  subject: (event, _keyName, appName) => {
     const labels: Record<ApiKeyEvent, string> = {
       created: `New API key created — ${appName}`,
       revoked: `API key revoked — ${appName}`,
@@ -85,8 +85,7 @@ export const ApiKeyCreated: EmailTemplateType<ApiKeyProps> = defineEmail<ApiKeyP
   }) => {
     const s = { ...API_KEY_STRINGS, ...strings };
     const year = currentYear(locale);
-    const alertVariant =
-      event === 'revoked' ? 'danger' : event === 'expiring' ? 'warning' : 'info';
+    const alertVariant = event === 'revoked' ? 'danger' : event === 'expiring' ? 'warning' : 'info';
     const buttonVariant = event === 'revoked' ? 'outline' : 'primary';
 
     return (
