@@ -96,6 +96,12 @@ export function createMailerFromEnv(): Mailer {
     case 'ses': {
       const region = env.SES_REGION ?? env.AWS_REGION;
       if (!region) throw new Error('SES_REGION or AWS_REGION is required for ses provider');
+      if (env.SES_ENDPOINT && !(env.AWS_ACCESS_KEY_ID && env.AWS_SECRET_ACCESS_KEY)) {
+        throw new Error(
+          'AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are required when SES_ENDPOINT is set. ' +
+          'For local dev: AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test',
+        );
+      }
       return createMailer({
         provider: ses({
           region,
