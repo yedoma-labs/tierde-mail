@@ -37,7 +37,11 @@ class SesProvider implements EmailProvider {
     const client = new SESClient({
       region: this.#config.region,
       ...(this.#config.endpoint ? { endpoint: this.#config.endpoint } : {}),
-      ...(this.#config.credentials ? { credentials: this.#config.credentials } : {}),
+      // Wrap in an async provider so the SDK cannot fall back to the
+      // credential chain (e.g. pick up AWS_SESSION_TOKEN from the environment).
+      ...(this.#config.credentials
+        ? { credentials: async () => this.#config.credentials! }
+        : {}),
     });
 
     try {
