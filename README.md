@@ -146,6 +146,7 @@ docker compose down
 |---|---|---|
 | Mailpit SMTP | `localhost:1025` | catch-all SMTP sink |
 | Mailpit UI | `http://localhost:8025` | browse captured emails |
+| WireMock | `http://localhost:8080` | HTTP mock — Resend, SendGrid, Postmark |
 | LocalStack | `http://localhost:4566` | AWS SES API mock |
 
 Every address you send to is accepted — no DNS, no deliverability concerns.
@@ -189,6 +190,55 @@ TIERDE_FROM_EMAIL=dev@example.com \
   --props '{"name":"Alice","loginUrl":"https://example.com"}'
 # open http://localhost:8025 to see the email
 ```
+
+### Resend / SendGrid / Postmark (via WireMock)
+
+[WireMock](https://wiremock.org) stubs the HTTP APIs for Resend, SendGrid, and Postmark — calls succeed and return a mock message ID without touching the real provider. Stub mappings live in `scripts/wiremock/mappings/`.
+
+Use `*_BASE_URL` to redirect each provider at WireMock:
+
+```ts
+import { resend }   from '@yedoma-labs/tierde-mail/providers/resend';
+import { sendgrid } from '@yedoma-labs/tierde-mail/providers/sendgrid';
+import { postmark } from '@yedoma-labs/tierde-mail/providers/postmark';
+
+resend({   apiKey: 'test',  baseUrl: 'http://localhost:8080' })
+sendgrid({ apiKey: 'test',  baseUrl: 'http://localhost:8080' })
+postmark({ serverToken: 'test', baseUrl: 'http://localhost:8080' })
+```
+
+Or via environment variables:
+
+```bash
+# resend
+RESEND_BASE_URL=http://localhost:8080
+
+# sendgrid
+SENDGRID_BASE_URL=http://localhost:8080
+
+# postmark
+POSTMARK_BASE_URL=http://localhost:8080
+```
+
+**Smoke-test via CLI:**
+
+```bash
+docker compose up -d
+
+# resend — users
+TIERDE_PROVIDER=resend RESEND_API_KEY=test RESEND_BASE_URL=http://localhost:8080 \
+TIERDE_FROM_EMAIL=dev@example.com \
+  npx tierde send welcome --to anyone@example.com \
+  --props '{"name":"Alice","loginUrl":"https://example.com"}'
+
+# resend — contributors (pnpm build first)
+TIERDE_PROVIDER=resend RESEND_API_KEY=test RESEND_BASE_URL=http://localhost:8080 \
+TIERDE_FROM_EMAIL=dev@example.com \
+  node dist/bin/tierde.js send welcome --to anyone@example.com \
+  --props '{"name":"Alice","loginUrl":"https://example.com"}'
+```
+
+Swap `TIERDE_PROVIDER` and the matching `*_API_KEY` / `*_BASE_URL` pair for SendGrid or Postmark.
 
 ### SES provider (via LocalStack)
 

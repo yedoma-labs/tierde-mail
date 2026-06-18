@@ -10,6 +10,15 @@ services:
       MP_SMTP_AUTH_ALLOW_INSECURE: "true"
       MP_MAX_MESSAGES: "500"
 
+  wiremock:
+    image: wiremock/wiremock:latest
+    container_name: tierde-wiremock
+    restart: unless-stopped
+    ports:
+      - "8080:8080"   # HTTP mock — Resend, SendGrid, Postmark
+    volumes:
+      - ./scripts/wiremock/mappings:/home/wiremock/mappings
+
   localstack:
     image: localstack/localstack:latest
     container_name: tierde-localstack

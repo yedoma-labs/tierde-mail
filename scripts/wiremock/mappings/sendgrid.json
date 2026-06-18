@@ -1,0 +1,10 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/v3/mail/send"
+  },
+  "response": {
+    "status": 202,
+    "headers": { "X-Message-Id": "wiremock-sendgrid-message-id" }
+  }
+}

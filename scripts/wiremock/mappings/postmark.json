@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/email"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "To": "test@example.com",
+      "SubmittedAt": "2024-01-01T00:00:00.0000000+00:00",
+      "MessageID": "wiremock-postmark-message-id",
+      "ErrorCode": 0,
+      "Message": "OK"
+    }
+  }
+}

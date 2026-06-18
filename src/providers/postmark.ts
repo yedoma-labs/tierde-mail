@@ -2,6 +2,7 @@ import type { EmailAddress, EmailMessage, EmailProvider, SendResult } from '../t
 
 interface PostmarkConfig {
   serverToken: string;
+  baseUrl?: string;
 }
 
 function formatAddress(addr: EmailAddress): string {
@@ -16,9 +17,11 @@ function formatAddresses(addrs: EmailAddress | EmailAddress[]): string {
 class PostmarkProvider implements EmailProvider {
   readonly name = 'postmark';
   readonly #serverToken: string;
+  readonly #baseUrl: string;
 
   constructor(config: PostmarkConfig) {
     this.#serverToken = config.serverToken;
+    this.#baseUrl = config.baseUrl ?? 'https://api.postmarkapp.com';
   }
 
   async send(message: EmailMessage): Promise<SendResult> {
@@ -50,7 +53,7 @@ class PostmarkProvider implements EmailProvider {
       }));
     }
 
-    const response = await fetch('https://api.postmarkapp.com/email', {
+    const response = await fetch(`${this.#baseUrl}/email`, {
       method: 'POST',
       headers: {
         'X-Postmark-Server-Token': this.#serverToken,

@@ -19,12 +19,12 @@ import type { Mailer } from './types.js';
  *   TIERDE_FROM_NAME  sender display name
  *
  * Per-provider:
- *   resend:   RESEND_API_KEY
+ *   resend:   RESEND_API_KEY, RESEND_BASE_URL (optional, e.g. http://localhost:8080 for WireMock)
  *   smtp:     SMTP_HOST, SMTP_PORT (default 587), SMTP_USER, SMTP_PASS, SMTP_SECURE
- *   ses:      AWS_REGION (or SES_REGION), SES_ENDPOINT (optional, e.g. http://localhost:4566 for moto),
+ *   ses:      AWS_REGION (or SES_REGION), SES_ENDPOINT (optional, e.g. http://localhost:4566 for LocalStack),
  *             AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY (optional, for mock/explicit creds)
- *   sendgrid: SENDGRID_API_KEY
- *   postmark: POSTMARK_SERVER_TOKEN
+ *   sendgrid: SENDGRID_API_KEY, SENDGRID_BASE_URL (optional, e.g. http://localhost:8080 for WireMock)
+ *   postmark: POSTMARK_SERVER_TOKEN, POSTMARK_BASE_URL (optional, e.g. http://localhost:8080 for WireMock)
  *   mailpit:  MAILPIT_HOST (default localhost), MAILPIT_PORT (default 1025)
  */
 export function createMailerFromEnv(): Mailer {
@@ -43,6 +43,7 @@ export function createMailerFromEnv(): Mailer {
 
       // resend
       RESEND_API_KEY: eg.string().sensitive().optional(),
+      RESEND_BASE_URL: eg.string().optional(),
 
       // smtp
       SMTP_HOST: eg.string().optional(),
@@ -60,9 +61,11 @@ export function createMailerFromEnv(): Mailer {
 
       // sendgrid
       SENDGRID_API_KEY: eg.string().sensitive().optional(),
+      SENDGRID_BASE_URL: eg.string().optional(),
 
       // postmark
       POSTMARK_SERVER_TOKEN: eg.string().sensitive().optional(),
+      POSTMARK_BASE_URL: eg.string().optional(),
 
       // mailpit / mailhog
       MAILPIT_HOST: eg.string().default('localhost'),
@@ -77,7 +80,13 @@ export function createMailerFromEnv(): Mailer {
   switch (env.TIERDE_PROVIDER) {
     case 'resend': {
       if (!env.RESEND_API_KEY) throw new Error('RESEND_API_KEY is required for resend provider');
-      return createMailer({ provider: resend({ apiKey: env.RESEND_API_KEY }), from });
+      return createMailer({
+        provider: resend({
+          apiKey: env.RESEND_API_KEY,
+          ...(env.RESEND_BASE_URL ? { baseUrl: env.RESEND_BASE_URL } : {}),
+        }),
+        from,
+      });
     }
     case 'smtp': {
       if (!env.SMTP_HOST) throw new Error('SMTP_HOST is required for smtp provider');
@@ -121,12 +130,24 @@ export function createMailerFromEnv(): Mailer {
     case 'sendgrid': {
       if (!env.SENDGRID_API_KEY)
         throw new Error('SENDGRID_API_KEY is required for sendgrid provider');
-      return createMailer({ provider: sendgrid({ apiKey: env.SENDGRID_API_KEY }), from });
+      return createMailer({
+        provider: sendgrid({
+          apiKey: env.SENDGRID_API_KEY,
+          ...(env.SENDGRID_BASE_URL ? { baseUrl: env.SENDGRID_BASE_URL } : {}),
+        }),
+        from,
+      });
     }
     case 'postmark': {
       if (!env.POSTMARK_SERVER_TOKEN)
         throw new Error('POSTMARK_SERVER_TOKEN is required for postmark provider');
-      return createMailer({ provider: postmark({ serverToken: env.POSTMARK_SERVER_TOKEN }), from });
+      return createMailer({
+        provider: postmark({
+          serverToken: env.POSTMARK_SERVER_TOKEN,
+          ...(env.POSTMARK_BASE_URL ? { baseUrl: env.POSTMARK_BASE_URL } : {}),
+        }),
+        from,
+      });
     }
     case 'mailpit': {
       return createMailer({

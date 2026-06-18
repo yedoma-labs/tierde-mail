@@ -2,6 +2,7 @@ import type { EmailAddress, EmailMessage, EmailProvider, SendResult } from '../t
 
 interface SendGridConfig {
   apiKey: string;
+  baseUrl?: string;
 }
 
 function toPersonalization(addr: EmailAddress | EmailAddress[]) {
@@ -12,9 +13,11 @@ function toPersonalization(addr: EmailAddress | EmailAddress[]) {
 class SendGridProvider implements EmailProvider {
   readonly name = 'sendgrid';
   readonly #apiKey: string;
+  readonly #baseUrl: string;
 
   constructor(config: SendGridConfig) {
     this.#apiKey = config.apiKey;
+    this.#baseUrl = config.baseUrl ?? 'https://api.sendgrid.com';
   }
 
   async send(message: EmailMessage): Promise<SendResult> {
@@ -51,7 +54,7 @@ class SendGridProvider implements EmailProvider {
       }));
     }
 
-    const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
+    const response = await fetch(`${this.#baseUrl}/v3/mail/send`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${this.#apiKey}`,
