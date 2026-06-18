@@ -91,7 +91,7 @@ Under the hood, the render phase is synchronous - no network I/O. Providers hand
 **Where to get it:**
 - npm: [`@yedoma-labs/tierde-mail`](https://www.npmjs.com/package/@yedoma-labs/tierde-mail)
 - GitHub: [`yedoma-labs/tierde-mail`](https://github.com/yedoma-labs/tierde-mail)
-- Latest version: check `package.json` or npm page
+- Latest version: 0.6.0
 
 **Install core + peer dependencies:**
 
@@ -178,20 +178,18 @@ await mailer.send(Welcome, {
 });
 ```
 
-**Local development** - use Mailpit (Docker, no config):
+**Local development** - the repo ships a `docker-compose.yml` that starts a full local mail stack in one command:
 
 ```bash
-docker run -d -p 1025:1025 -p 8025:8025 axllent/mailpit
+docker compose up -d
 ```
 
-```ts
-import { mailpit } from '@yedoma-labs/tierde-mail/providers/mailpit';
-const mailer = createMailer({
-  provider: mailpit(),
-  from: 'hello@example.com',
-});
-// Browse: http://localhost:8025
-```
+This starts three services:
+- **Mailpit** — SMTP sink + web inbox at `http://localhost:8025` (catches all outgoing mail)
+- **WireMock** — HTTP mock at `http://localhost:8080` (stubs Resend, SendGrid, Postmark APIs)
+- **LocalStack** — AWS-compatible SES endpoint at `http://localhost:4566`
+
+See the full section below for wiring each provider to its mock.
 
 ## Usage examples
 
@@ -252,6 +250,168 @@ expect(inbox[0].subject).toBe('Welcome, Alice!');
 expect(inbox[0].html).toContain('Get Started');
 ```
 
+## Local testing with Docker (0.6.0)
+
+No real provider credentials needed for local work. The repo ships a `docker-compose.yml` with a complete mock stack.
+
+### Prerequisites
+
+- Docker + Docker Compose
+- AWS CLI (only if you want to run LocalStack commands manually — the init script handles verification automatically)
+- Optional: a [LocalStack auth token](https://app.localstack.cloud/sign-in) if you want LocalStack Pro features (Community edition works for SES without one — set `LOCALSTACK_AUTH_TOKEN=` to an empty string or remove the env var from your `.env`)
+
+### One-command stack
+
+```bash
+# from repo root (or copy docker-compose.yml to your project)
+docker compose up -d
+```
+
+Services and ports:
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| Mailpit | `1025` (SMTP), `8025` (UI) | Catches all mail; browse at http://localhost:8025 |
+| WireMock | `8080` | HTTP stubs for Resend, SendGrid, Postmark |
+| LocalStack | `4566` | SES-compatible AWS endpoint |
+
+The LocalStack container auto-verifies your sender address on startup via the bundled `scripts/localstack/init-ses.sh` ready-hook — no manual `aws ses verify-email-identity` step.
+
+### Wiring providers to local mocks
+
+**Mailpit (SMTP provider)**
+
+```ts
+import { mailpit } from '@yedoma-labs/tierde-mail/providers/mailpit';
+
+const mailer = createMailer({
+  provider: mailpit(), // default: localhost:1025
+  from: 'hello@example.com',
+});
+// Send anything — open http://localhost:8025 to see it
+```
+
+**Resend → WireMock**
+
+```ts
+import { resend } from '@yedoma-labs/tierde-mail/providers/resend';
+
+const mailer = createMailer({
+  provider: resend({
+    apiKey: 'test-key',           // any non-empty string
+    baseUrl: 'http://localhost:8080',
+  }),
+  from: 'hello@example.com',
+});
+// WireMock stubs POST /emails → returns { id: "wiremock-resend-message-id" }
+```
+
+**SendGrid → WireMock**
+
+```ts
+import { sendgrid } from '@yedoma-labs/tierde-mail/providers/sendgrid';
+
+const mailer = createMailer({
+  provider: sendgrid({
+    apiKey: 'test-key',
+    baseUrl: 'http://localhost:8080',
+  }),
+  from: 'hello@example.com',
+});
+// WireMock stubs POST /v3/mail/send → 202
+```
+
+**Postmark → WireMock**
+
+```ts
+import { postmark } from '@yedoma-labs/tierde-mail/providers/postmark';
+
+const mailer = createMailer({
+  provider: postmark({
+    serverToken: 'test-token',
+    baseUrl: 'http://localhost:8080',
+  }),
+  from: 'hello@example.com',
+});
+// WireMock stubs POST /email → 200
+```
+
+**SES → LocalStack**
+
+```ts
+import { ses } from '@yedoma-labs/tierde-mail/providers/ses';
+
+const mailer = createMailer({
+  provider: ses({
+    region: 'us-east-1',
+    endpoint: 'http://localhost:4566',
+    credentials: { accessKeyId: 'test', secretAccessKey: 'test' },
+  }),
+  from: 'dev@example.com',   // must match TIERDE_FROM_EMAIL in docker-compose.yml
+});
+```
+
+### Using `createMailerFromEnv` with the local stack
+
+All mock URLs are configurable via env vars — no code changes needed between local and production:
+
+```bash
+# .env.local
+
+# shared
+TIERDE_FROM_EMAIL=dev@example.com
+TIERDE_FROM_NAME=Local Dev
+
+# pick one:
+
+# Mailpit
+TIERDE_PROVIDER=mailpit
+MAILPIT_HOST=localhost
+MAILPIT_PORT=1025
+
+# Resend → WireMock
+TIERDE_PROVIDER=resend
+RESEND_API_KEY=test-key
+RESEND_BASE_URL=http://localhost:8080
+
+# SendGrid → WireMock
+TIERDE_PROVIDER=sendgrid
+SENDGRID_API_KEY=test-key
+SENDGRID_BASE_URL=http://localhost:8080
+
+# Postmark → WireMock
+TIERDE_PROVIDER=postmark
+POSTMARK_SERVER_TOKEN=test-token
+POSTMARK_BASE_URL=http://localhost:8080
+
+# SES → LocalStack
+TIERDE_PROVIDER=ses
+SES_REGION=us-east-1
+SES_ENDPOINT=http://localhost:4566
+AWS_ACCESS_KEY_ID=test
+AWS_SECRET_ACCESS_KEY=test
+```
+
+```ts
+import { createMailerFromEnv } from '@yedoma-labs/tierde-mail';
+
+const mailer = createMailerFromEnv(); // reads above env vars
+```
+
+**Guard:** if `SES_ENDPOINT` is set but `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` are missing, `createMailerFromEnv` throws a descriptive error rather than silently falling through to ambient AWS credentials (SSO sessions, named profiles).
+
+### Smoke-testing via CLI
+
+```bash
+# fire a real send through whichever provider is configured in env
+TIERDE_PROVIDER=resend RESEND_API_KEY=test-key RESEND_BASE_URL=http://localhost:8080 \
+TIERDE_FROM_EMAIL=dev@example.com \
+  npx tierde send welcome \
+  --to me@example.com \
+  --props '{"name":"Alice","loginUrl":"https://example.com"}'
+# → sent: wiremock-resend-message-id
+```
+
 ## Advanced patterns
 
 ### Environment-aware provider selection
@@ -260,10 +420,15 @@ expect(inbox[0].html).toContain('Get Started');
 const mailer = createMailer({
   provider: process.env.NODE_ENV === 'production'
     ? resend({ apiKey: process.env.RESEND_API_KEY! })
-    : mailpit(),
+    : resend({
+        apiKey: 'test-key',
+        baseUrl: 'http://localhost:8080', // WireMock — same code path as prod
+      }),
   from: 'hello@example.com',
 });
 ```
+
+Or use `mailpit()` if you want to read the email in a browser rather than assert on a mock response.
 
 ### Multi-provider failover
 
@@ -411,6 +576,8 @@ console.log(html); // Full rendered email - paste into email client to preview
 
 - [ ] **Provider secrets in env vars.** Never commit API keys; use `.env.local` (git-ignored).
 - [ ] **Test email rendering.** Run `npx tierde dev` and preview every email variant in dark mode.
+- [ ] **Local mock smoke test.** Run `docker compose up -d` and fire `npx tierde send` against WireMock/LocalStack before touching real credentials.
+- [ ] **`SES_ENDPOINT` guard.** If using SES locally, always set `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY`; `createMailerFromEnv` will throw if you forget.
 - [ ] **Webhook handlers.** Set up bounce/complaint/delivery handlers for Resend/Postmark to clean your list.
 - [ ] **Rate limits.** If batch-sending, honor provider limits (Resend: 100/sec free tier, SES: 14 per second base).
 - [ ] **Monitoring.** Log `result.id` for every send; wire that to observability (Sentry, DataDog) for delivery tracking.
