@@ -22,5 +22,8 @@ services:
       SES_EMAIL_BODY_VALIDATION_ENABLED: "0"   # skip validation — local/CI only
       SES_REGION: ${SES_REGION:-us-east-1}
       TIERDE_FROM_EMAIL: ${TIERDE_FROM_EMAIL:-dev@example.com}
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_DEFAULT_REGION: ${SES_REGION:-us-east-1}
     volumes:
       - ./scripts/localstack/init-ses.sh:/etc/localstack/init/ready.d/init-ses.sh
