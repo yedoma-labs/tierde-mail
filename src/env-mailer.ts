@@ -96,19 +96,13 @@ export function createMailerFromEnv(): Mailer {
     case 'ses': {
       const region = env.SES_REGION ?? env.AWS_REGION;
       if (!region) throw new Error('SES_REGION or AWS_REGION is required for ses provider');
-      // When using a mock endpoint, block the real credential chain to prevent ambient
-      // AWS credentials (SSO session tokens etc.) from leaking into the request.
-      const credentials =
-        env.AWS_ACCESS_KEY_ID && env.AWS_SECRET_ACCESS_KEY
-          ? { accessKeyId: env.AWS_ACCESS_KEY_ID, secretAccessKey: env.AWS_SECRET_ACCESS_KEY }
-          : env.SES_ENDPOINT
-            ? { accessKeyId: 'AKIAIOSFODNN7EXAMPLE', secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY' }
-            : undefined;
       return createMailer({
         provider: ses({
           region,
           ...(env.SES_ENDPOINT ? { endpoint: env.SES_ENDPOINT } : {}),
-          ...(credentials ? { credentials } : {}),
+          ...(env.AWS_ACCESS_KEY_ID && env.AWS_SECRET_ACCESS_KEY
+            ? { credentials: { accessKeyId: env.AWS_ACCESS_KEY_ID, secretAccessKey: env.AWS_SECRET_ACCESS_KEY } }
+            : {}),
         }),
         from,
       });

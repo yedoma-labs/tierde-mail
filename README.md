@@ -137,9 +137,9 @@ docker compose down
 |---|---|---|
 | Mailpit SMTP | `localhost:1025` | catch-all SMTP sink |
 | Mailpit UI | `http://localhost:8025` | browse captured emails |
-| motoserver | `http://localhost:4566` | AWS SES API mock |
+| LocalStack | `http://localhost:4566` | AWS SES API mock |
 
-Every address you send to is accepted — no DNS, no credentials, no deliverability concerns.
+Every address you send to is accepted — no DNS, no deliverability concerns.
 
 ### Mailpit provider (direct SMTP)
 
@@ -160,11 +160,26 @@ TIERDE_PROVIDER=mailpit
 TIERDE_FROM_EMAIL=dev@example.com
 ```
 
-### SES provider (via motoserver)
+### SES provider (via LocalStack)
 
-[moto](https://docs.getmoto.org/) is an open-source AWS mock — no account or license required. It accepts SES API calls so you can verify credentials, region config, and call structure without touching AWS. **Emails are acknowledged but not forwarded to Mailpit** — use the Mailpit provider above to preview email content during development.
+[LocalStack](https://localstack.cloud) mocks the SES API locally. The free community tier requires a one-time signup — get your token at [app.localstack.cloud](https://app.localstack.cloud), then export it before starting the stack:
 
-Pass the motoserver endpoint explicitly:
+```bash
+export LOCALSTACK_AUTH_TOKEN=your-token-here
+docker compose up -d
+```
+
+LocalStack accepts the call but does not deliver emails — use the Mailpit provider above to preview email content during development.
+
+Set these in your shell (or `.env.local`) before running:
+
+```bash
+export AWS_ACCESS_KEY_ID=test
+export AWS_SECRET_ACCESS_KEY=test
+export AWS_SESSION_TOKEN=   # clear any real SSO session token
+```
+
+Explicit credentials block the SDK from picking up ambient AWS credentials from your environment (SSO sessions, profiles). LocalStack accepts any value here.
 
 ```ts
 import { ses } from '@yedoma-labs/tierde-mail/providers/ses';
@@ -173,31 +188,18 @@ const mailer = createMailer({
   provider: ses({
     region: 'us-east-1',
     endpoint: 'http://localhost:4566',
-    credentials: { accessKeyId: 'AKIAIOSFODNN7EXAMPLE', secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY' },
+    credentials: { accessKeyId: 'test', secretAccessKey: 'test' },
   }),
   from: 'dev@example.com',
 });
 ```
 
-Moto enforces SES sandbox rules — verify your sender identity before the first send (same as real AWS):
-
-```ts
-import { SESClient, VerifyEmailIdentityCommand } from '@aws-sdk/client-ses';
-
-const client = new SESClient({
-  region: 'us-east-1',
-  endpoint: 'http://localhost:4566',
-  credentials: { accessKeyId: 'AKIAIOSFODNN7EXAMPLE', secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY' },
-});
-await client.send(new VerifyEmailIdentityCommand({ EmailAddress: 'dev@example.com' }));
-client.destroy();
-```
-
-This is a one-time step per motoserver session (resets on container restart).
-
 **Smoke-test via CLI:**
 
 ```bash
+AWS_ACCESS_KEY_ID=test \
+AWS_SECRET_ACCESS_KEY=test \
+AWS_SESSION_TOKEN= \
 TIERDE_PROVIDER=ses \
 SES_REGION=us-east-1 \
 SES_ENDPOINT=http://localhost:4566 \
@@ -205,12 +207,8 @@ TIERDE_FROM_EMAIL=dev@example.com \
   npx tierde send welcome \
   --to anyone@example.com \
   --props '{"name":"Alice","loginUrl":"https://example.com"}'
-# exits 0 = motoserver accepted the call
+# exits 0 = LocalStack accepted the call
 ```
-
-`SES_ENDPOINT` alone is sufficient — dummy credentials are used automatically so ambient AWS credentials (SSO session tokens, profiles) never reach the mock server.
-
-> LocalStack is an alternative to moto but its `latest` image now requires a `LOCALSTACK_AUTH_TOKEN` even for the free tier. If you prefer LocalStack, swap the image and use the same `endpoint: 'http://localhost:4566'`.
 
 ---
 
