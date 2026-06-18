@@ -8,20 +8,35 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+---
+
+## [0.6.0] — 2026-06-18
+
 ### Added
 
-- `docker-compose.yml` — one-command local mail stack: Mailpit (catch-all SMTP + web UI on `:8025`) and LocalStack (SES API mock on `:4566`)
+**Local development stack**
+- `docker-compose.yml` — one-command local mail stack: Mailpit (SMTP sink + web UI on `:8025`), WireMock (HTTP mock on `:8080`), and LocalStack (SES API mock on `:4566`)
 - `scripts/localstack/init-ses.sh` — LocalStack ready-hook that auto-verifies `$TIERDE_FROM_EMAIL` on startup; no manual `aws ses verify-email-identity` step required
-- `SesConfig.endpoint` — optional endpoint URL override for pointing the SES provider at a local mock (`http://localhost:4566`)
-- `createMailerFromEnv`: new `SES_ENDPOINT`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` env vars for local/CI SES configuration; `SES_ENDPOINT` without credentials now throws a clear error instead of silently falling through to the real credential chain
+- `scripts/wiremock/mappings/` — pre-configured WireMock stubs for Resend (`POST /emails`), SendGrid (`POST /v3/mail/send`), and Postmark (`POST /email`)
+
+**Provider `baseUrl` overrides**
+- `SesConfig.endpoint` — redirect the SES provider at any AWS-compatible endpoint (e.g. LocalStack)
+- `SendGridConfig.baseUrl` — redirect SendGrid at a local mock
+- `PostmarkConfig.baseUrl` — redirect Postmark at a local mock
+- `ResendConfig.baseUrl` already existed; now surfaced via `RESEND_BASE_URL` env var
+
+**New `createMailerFromEnv` env vars**
+- `RESEND_BASE_URL`, `SENDGRID_BASE_URL`, `POSTMARK_BASE_URL` — point HTTP providers at WireMock or any stub server
+- `SES_ENDPOINT`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` — local/CI SES configuration
 
 ### Fixed
 
-- SES provider: explicit credentials are now wrapped in an async provider function so the AWS SDK cannot fall back to the credential chain and pick up ambient `AWS_SESSION_TOKEN` values (e.g. SSO sessions)
+- SES provider: credentials are now wrapped in an async provider so the AWS SDK cannot fall through to the credential chain and pick up ambient `AWS_SESSION_TOKEN` values (SSO sessions, named profiles)
+- `createMailerFromEnv`: setting `SES_ENDPOINT` without `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY` now throws a descriptive error instead of silently sending with real credentials
 
 ### Changed
 
-- `docker-compose.yml` LocalStack: `SES_EMAIL_BODY_VALIDATION_ENABLED=0` disables body validation for local/CI use; `AWS_ACCESS_KEY_ID=test` / `AWS_SECRET_ACCESS_KEY=test` pre-configured inside the container for the init script
+- LocalStack container: `SES_EMAIL_BODY_VALIDATION_ENABLED=0` and pre-set `AWS_ACCESS_KEY_ID=test` / `AWS_SECRET_ACCESS_KEY=test` for the init script
 
 ---
 
