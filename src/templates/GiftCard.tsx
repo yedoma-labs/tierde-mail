@@ -7,7 +7,7 @@ import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
 import { Text } from '../components/Text.js';
 import { defineEmail } from '../define-email.js';
-import { PALETTE, defaultTheme } from '../theme.js';
+import { PALETTE } from '../theme.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
 import type { BaseTemplateProps } from './shared.js';
 import { currentYear } from './utils.js';
@@ -110,15 +110,9 @@ export const GiftCard: EmailTemplateType<GiftCardProps> = defineEmail<GiftCardPr
     theme,
   }) => {
     const s = { ...GIFT_CARD_STRINGS, ...strings };
-    const t = { ...defaultTheme, ...theme };
     const year = currentYear(locale);
     return (
-      <EmailTemplate
-        preview={s.subject(senderName, appName)}
-        lang={locale}
-        dir={dir}
-        theme={theme}
-      >
+      <EmailTemplate preview={s.subject(senderName, appName)} lang={locale} dir={dir} theme={theme}>
         <Heading>{s.heading(senderName)}</Heading>
         <Text>{s.greeting(recipientName)}</Text>
         {message && <Text>{message}</Text>}
