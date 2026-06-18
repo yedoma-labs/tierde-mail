@@ -40,6 +40,12 @@
         "rules": {
           "security": {
             "noScriptUrl": "off"
+          },
+          "style": {
+            "noNonNullAssertion": "off"
+          },
+          "suspicious": {
+            "noAssignInExpressions": "off"
           }
         }
       }

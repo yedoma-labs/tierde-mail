@@ -111,8 +111,8 @@ export const AbandonedCart: EmailTemplateType<AbandonedCartProps> = defineEmail<
               cellSpacing="0"
             >
               <tbody>
-                {items.map((item, i) => (
-                  <tr key={i}>
+                {items.map((item) => (
+                  <tr key={item.name}>
                     <td style={itemRowStyle}>
                       <p style={itemNameStyle}>
                         {item.name}

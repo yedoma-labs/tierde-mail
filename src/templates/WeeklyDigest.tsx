@@ -149,8 +149,8 @@ export const WeeklyDigest: EmailTemplateType<WeeklyDigestProps> = defineEmail<We
               >
                 <tbody>
                   <tr>
-                    {stats.slice(0, 3).map((stat, i) => (
-                      <td key={i} style={statCellStyle}>
+                    {stats.slice(0, 3).map((stat) => (
+                      <td key={stat.label} style={statCellStyle}>
                         <span style={statValueStyle}>{stat.value}</span>
                         <span style={statLabelStyle}>{stat.label}</span>
                         {stat.change && (
@@ -165,10 +165,9 @@ export const WeeklyDigest: EmailTemplateType<WeeklyDigestProps> = defineEmail<We
                         )}
                       </td>
                     ))}
-                    {stats.length < 3 &&
-                      Array.from({ length: 3 - stats.length }).map((_, i) => (
-                        <td key={`pad-${i}`} />
-                      ))}
+                    {stats.length === 2 && <td key="pad-0" />}
+                    {stats.length <= 1 && <td key="pad-1" />}
+                    {stats.length === 0 && <td key="pad-2" />}
                   </tr>
                 </tbody>
               </table>
@@ -184,7 +183,7 @@ export const WeeklyDigest: EmailTemplateType<WeeklyDigestProps> = defineEmail<We
             </Text>
             {items.map((item, i) => (
               <div
-                key={i}
+                key={item.url}
                 style={{
                   padding: '12px 0',
                   borderBottom: i < items.length - 1 ? `1px solid ${t.borderSubtle}` : 'none',

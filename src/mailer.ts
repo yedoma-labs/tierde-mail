@@ -81,7 +81,8 @@ class MailerImpl implements Mailer {
       const idx = this.#roundRobinIndex % this.#providers.length;
       this.#roundRobinIndex++;
       const provider = this.#providers[idx];
-      return provider!.send(message);
+      if (!provider) throw new Error('No provider available for round-robin slot');
+      return provider.send(message);
     }
 
     // failover: try each provider in order
@@ -131,7 +132,7 @@ export async function executeBatch<Props>(
       recipients.map(async (recipient, idx): Promise<void> => {
         const slot = idx % concurrency;
         const now = Date.now();
-        const waitMs = Math.max(0, slotFreeAt[slot]! - now);
+        const waitMs = Math.max(0, (slotFreeAt[slot] ?? 0) - now);
         if (waitMs > 0) await delay(waitMs);
         slotFreeAt[slot] = Date.now() + minGapMs;
 

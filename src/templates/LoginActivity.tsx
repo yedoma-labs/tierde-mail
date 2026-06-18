@@ -118,8 +118,8 @@ export const LoginActivity: EmailTemplateType<LoginActivityProps> = defineEmail<
                 </tr>
               </thead>
               <tbody>
-                {events.map((ev, i) => (
-                  <tr key={`${ev.timestamp}-${i}`}>
+                {events.map((ev) => (
+                  <tr key={`${ev.timestamp}-${ev.status}`}>
                     <td style={tdStyle}>{ev.timestamp}</td>
                     <td style={tdStyle}>{ev.location ?? '—'}</td>
                     <td style={tdStyle}>{ev.device ?? '—'}</td>

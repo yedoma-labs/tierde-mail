@@ -72,7 +72,7 @@ const typeBadge = (
     backgroundColor: bg,
     color,
     label,
-  } as any;
+  } as CSSProperties & { label: string };
 };
 
 const heroStyle: CSSProperties = {
@@ -134,11 +134,11 @@ export const FeatureAnnouncement: EmailTemplateType<FeatureAnnouncementProps> =
           </Text>
           {changes && changes.length > 0 && (
             <Section>
-              {changes.map((item, i) => {
+              {changes.map((item) => {
                 const badgeProps = typeBadge(item.type, s);
-                const { label, ...badgeStyle } = badgeProps as any;
+                const { label, ...badgeStyle } = badgeProps;
                 return (
-                  <div key={i} style={changeRowStyle}>
+                  <div key={item.title} style={changeRowStyle}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
                       <span className="tierde-badge" style={badgeStyle as CSSProperties}>
                         {label}

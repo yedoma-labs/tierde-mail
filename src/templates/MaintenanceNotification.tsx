@@ -209,8 +209,8 @@ export const MaintenanceNotification: EmailTemplateType<MaintenanceNotificationP
                 cellSpacing="0"
               >
                 <tbody>
-                  {affectedServices.map((svc, i) => (
-                    <tr key={i}>
+                  {affectedServices.map((svc) => (
+                    <tr key={svc.name}>
                       <td
                         style={{
                           padding: '10px 0',

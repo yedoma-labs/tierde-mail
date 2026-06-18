@@ -129,8 +129,8 @@ export const OnboardingProgress: EmailTemplateType<OnboardingProgressProps> =
               cellSpacing="0"
             >
               <tbody>
-                {steps.map((step, i) => (
-                  <tr key={i}>
+                {steps.map((step) => (
+                  <tr key={step.title}>
                     <td style={stepRowStyle}>
                       <p style={stepTitleStyle(step.completed)}>
                         {step.url && !step.completed ? (

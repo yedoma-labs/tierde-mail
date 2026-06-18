@@ -133,8 +133,8 @@ export const OrderConfirmation: EmailTemplateType<OrderConfirmationProps> =
                 </tr>
               </thead>
               <tbody>
-                {items.map((item, i) => (
-                  <tr key={i}>
+                {items.map((item) => (
+                  <tr key={item.name}>
                     <td style={tdStyle}>
                       <strong>{item.name}</strong>
                       {item.description && (

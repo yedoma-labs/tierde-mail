@@ -42,8 +42,7 @@ function injectDarkMode(html: string): string {
   // to match — prefers-color-scheme reflects the OS preference, not a CSS property.
   const darkRules: string[] = [];
   const mediaRe = /@media[^{]*prefers-color-scheme[^{]*:\s*dark[^{]*\{/g;
-  let m: RegExpExecArray | null;
-  while ((m = mediaRe.exec(html)) !== null) {
+  for (let m = mediaRe.exec(html); m !== null; m = mediaRe.exec(html)) {
     const start = m.index + m[0].length;
     let depth = 1;
     let i = start;
