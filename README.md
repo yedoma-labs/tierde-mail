@@ -169,6 +169,27 @@ TIERDE_PROVIDER=mailpit
 TIERDE_FROM_EMAIL=dev@example.com
 ```
 
+**Smoke-test via CLI:**
+
+```bash
+docker compose up -d
+
+# users (uses published package from npmjs)
+TIERDE_PROVIDER=mailpit \
+TIERDE_FROM_EMAIL=dev@example.com \
+  npx tierde send welcome \
+  --to anyone@example.com \
+  --props '{"name":"Alice","loginUrl":"https://example.com"}'
+
+# contributors (uses local package, build first: pnpm build)
+TIERDE_PROVIDER=mailpit \
+TIERDE_FROM_EMAIL=dev@example.com \
+  node dist/bin/tierde.js send welcome \
+  --to anyone@example.com \
+  --props '{"name":"Alice","loginUrl":"https://example.com"}'
+# open http://localhost:8025 to see the email
+```
+
 ### SES provider (via LocalStack)
 
 [LocalStack](https://localstack.cloud) mocks the SES API locally. The free community tier requires a one-time signup:
@@ -212,7 +233,7 @@ const mailer = createMailer({
 export LOCALSTACK_AUTH_TOKEN=your-token-here
 docker compose up -d
 
-# users
+# users (uses published package from npmjs)
 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_SESSION_TOKEN= \
 TIERDE_PROVIDER=ses SES_REGION=us-east-1 SES_ENDPOINT=http://localhost:4566 \
 TIERDE_FROM_EMAIL=dev@example.com \
@@ -220,7 +241,7 @@ TIERDE_FROM_EMAIL=dev@example.com \
   --to anyone@example.com \
   --props '{"name":"Alice","loginUrl":"https://example.com"}'
 
-# contributors (build first: pnpm build)
+# contributors (uses local package, build first: pnpm build)
 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_SESSION_TOKEN= \
 TIERDE_PROVIDER=ses SES_REGION=us-east-1 SES_ENDPOINT=http://localhost:4566 \
 TIERDE_FROM_EMAIL=dev@example.com \
