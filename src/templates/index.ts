@@ -1,3 +1,13 @@
+export type { ApiKeyEvent, ApiKeyProps, ApiKeyStrings } from './ApiKeyCreated.js';
+export { API_KEY_STRINGS, ApiKeyCreated } from './ApiKeyCreated.js';
+export type {
+  AppointmentReminderProps,
+  AppointmentReminderStrings,
+} from './AppointmentReminder.js';
+export {
+  APPOINTMENT_REMINDER_STRINGS,
+  AppointmentReminder,
+} from './AppointmentReminder.js';
 export type { AbandonedCartProps, AbandonedCartStrings, CartItem } from './AbandonedCart.js';
 export { ABANDONED_CART_STRINGS, AbandonedCart } from './AbandonedCart.js';
 export type { AccountDeactivatedProps, AccountDeactivatedStrings } from './AccountDeactivated.js';
@@ -37,6 +47,8 @@ export {
   EMAIL_CHANGE_VERIFICATION_STRINGS,
   EmailChangeVerification,
 } from './EmailChangeVerification.js';
+export type { EventInvitationProps, EventInvitationStrings } from './EventInvitation.js';
+export { EVENT_INVITATION_STRINGS, EventInvitation } from './EventInvitation.js';
 export type { EmailVerificationProps, EmailVerificationStrings } from './EmailVerification.js';
 export { EMAIL_VERIFICATION_STRINGS, EmailVerification } from './EmailVerification.js';
 export type { ExportReadyProps, ExportReadyStrings } from './ExportReady.js';
@@ -47,6 +59,8 @@ export type {
   FeatureAnnouncementStrings,
 } from './FeatureAnnouncement.js';
 export { FEATURE_ANNOUNCEMENT_STRINGS, FeatureAnnouncement } from './FeatureAnnouncement.js';
+export type { GiftCardProps, GiftCardStrings } from './GiftCard.js';
+export { GIFT_CARD_STRINGS, GiftCard } from './GiftCard.js';
 export type { InvoiceLineItem, InvoiceProps, InvoiceStrings } from './Invoice.js';
 export { INVOICE_STRINGS, Invoice } from './Invoice.js';
 export type { LoginActivityProps, LoginActivityStrings } from './LoginActivity.js';
