@@ -211,6 +211,7 @@ AWS_SESSION_TOKEN= \
 TIERDE_PROVIDER=ses \
 SES_REGION=us-east-1 \
 SES_ENDPOINT=http://localhost:4566 \
+TIERDE_FROM_EMAIL=dev@example.com \
   npx tierde send welcome \
   --to anyone@example.com \
   --props '{"name":"Alice","loginUrl":"https://example.com"}'
