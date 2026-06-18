@@ -11,10 +11,10 @@ interface KeyValueTableProps {
   rows: KeyValueRow[];
 }
 
-export function KeyValueTable({ rows }: KeyValueTableProps): ReactElement {
+export function KeyValueTable({ rows }: KeyValueTableProps): ReactElement | null {
   const theme = useTheme();
   const filtered = rows.filter((r) => r.value != null && r.value !== '' && r.value !== false);
-  if (filtered.length === 0) return null as unknown as ReactElement;
+  if (filtered.length === 0) return null;
 
   const cellBase: CSSProperties = {
     padding: '8px 0',
