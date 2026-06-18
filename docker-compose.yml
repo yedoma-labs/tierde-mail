@@ -18,6 +18,9 @@ services:
       - "4566:4566"   # AWS API gateway
     environment:
       SERVICES: ses
-      DEFAULT_REGION: us-east-1
       LOCALSTACK_AUTH_TOKEN: ${LOCALSTACK_AUTH_TOKEN}
       SES_EMAIL_BODY_VALIDATION_ENABLED: "0"   # skip validation — local/CI only
+      SES_REGION: ${SES_REGION:-us-east-1}
+      TIERDE_FROM_EMAIL: ${TIERDE_FROM_EMAIL:-dev@example.com}
+    volumes:
+      - ./scripts/localstack/init-ses.sh:/etc/localstack/init/ready.d/init-ses.sh
