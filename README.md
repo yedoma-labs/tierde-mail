@@ -172,7 +172,7 @@ TIERDE_FROM_EMAIL=dev@example.com
 export LOCALSTACK_AUTH_TOKEN=your-token-here
 ```
 
-LocalStack accepts SES API calls but does not deliver emails — use the Mailpit provider to preview email content.
+LocalStack accepts SES API calls but does not deliver emails. SMTP relay to Mailpit requires LocalStack Pro — with the community tier, use the Mailpit provider directly to preview email content.
 
 **Sender identity is verified automatically on startup** via `scripts/localstack/init-ses.sh`. The verified address defaults to `$TIERDE_FROM_EMAIL` (or `dev@example.com`). To verify a different address, export `TIERDE_FROM_EMAIL` before `docker compose up -d`.
 
