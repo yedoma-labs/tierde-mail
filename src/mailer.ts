@@ -81,7 +81,7 @@ class MailerImpl implements Mailer {
       const idx = this.#roundRobinIndex % this.#providers.length;
       this.#roundRobinIndex++;
       const provider = this.#providers[idx];
-      return provider?.send(message);
+      return provider!.send(message);
     }
 
     // failover: try each provider in order
