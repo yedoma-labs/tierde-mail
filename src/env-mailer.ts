@@ -99,7 +99,7 @@ export function createMailerFromEnv(): Mailer {
       if (env.SES_ENDPOINT && !(env.AWS_ACCESS_KEY_ID && env.AWS_SECRET_ACCESS_KEY)) {
         throw new Error(
           'AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are required when SES_ENDPOINT is set. ' +
-          'For local dev: AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test',
+            'For local dev: AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test',
         );
       }
       return createMailer({
@@ -107,7 +107,12 @@ export function createMailerFromEnv(): Mailer {
           region,
           ...(env.SES_ENDPOINT ? { endpoint: env.SES_ENDPOINT } : {}),
           ...(env.AWS_ACCESS_KEY_ID && env.AWS_SECRET_ACCESS_KEY
-            ? { credentials: { accessKeyId: env.AWS_ACCESS_KEY_ID, secretAccessKey: env.AWS_SECRET_ACCESS_KEY } }
+            ? {
+                credentials: {
+                  accessKeyId: env.AWS_ACCESS_KEY_ID,
+                  secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
+                },
+              }
             : {}),
         }),
         from,

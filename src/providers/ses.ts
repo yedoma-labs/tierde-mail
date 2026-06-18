@@ -40,7 +40,10 @@ class SesProvider implements EmailProvider {
       // Wrap in an async provider so the SDK cannot fall back to the
       // credential chain (e.g. pick up AWS_SESSION_TOKEN from the environment).
       ...(this.#config.credentials
-        ? { credentials: async () => this.#config.credentials as NonNullable<SesConfig['credentials']> }
+        ? {
+            credentials: async () =>
+              this.#config.credentials as NonNullable<SesConfig['credentials']>,
+          }
         : {}),
     });
 
