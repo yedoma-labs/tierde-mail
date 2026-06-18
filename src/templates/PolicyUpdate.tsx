@@ -87,7 +87,7 @@ export const PolicyUpdate: EmailTemplateType<PolicyUpdateProps> = defineEmail<Po
         <Text>{s.effectiveDate(effectiveDate)}</Text>
         {changes && changes.length > 0 && (
           <Section>
-            {changes.map((change) => (
+            {changes.map((change, i) => (
               <table
                 key={change.section}
                 width="100%"
