@@ -162,7 +162,11 @@ TIERDE_FROM_EMAIL=dev@example.com
 
 ### SES provider (via LocalStack)
 
-[LocalStack](https://localstack.cloud) mocks the SES API locally. The free community tier requires a one-time signup — get your token at [app.localstack.cloud](https://app.localstack.cloud), then export it before starting the stack:
+[LocalStack](https://localstack.cloud) mocks the SES API locally. The free community tier requires a one-time signup:
+
+1. Create a free account at [app.localstack.cloud](https://app.localstack.cloud)
+2. Go to **Workspace → Auth Token** in the dashboard
+3. Copy the token and export it before starting the stack:
 
 ```bash
 export LOCALSTACK_AUTH_TOKEN=your-token-here
