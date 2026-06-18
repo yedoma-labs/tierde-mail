@@ -8,6 +8,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+---
+
+## [0.5.0] — 2026-06-18
+
 ### Added
 
 **New templates**
