@@ -10,6 +10,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ### Added
 
+**New templates**
+- `AppointmentReminder` — appointment/booking reminders with date, time, provider, location, and optional reschedule/cancel links
+- `EventInvitation` — webinar and event invites with date, time, location, register CTA, and add-to-calendar link
+- `ApiKeyCreated` — developer API key lifecycle emails for `created`, `revoked`, and `expiring` events; uses `AlertBox` variant to reflect severity
+- `GiftCard` — e-commerce gift card delivery with amount, redemption code, personal message, and expiry
+
 **Design tokens & accessibility**
 - 14 new semantic tokens on `Theme`: `surfaceSubtle`, `borderSubtle`, plus `success/danger/warning/info` (bg, border, text) — enables theme-driven component colors
 - `PALETTE` const export for fixed system colors (changelog, impact, severity groups)
