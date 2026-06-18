@@ -1,0 +1,20 @@
+services:
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: tierde-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"   # SMTP — catch-all, no auth required
+      - "8025:8025"   # Web UI
+    environment:
+      MP_SMTP_AUTH_ALLOW_INSECURE: "true"
+      MP_MAX_MESSAGES: "500"
+
+  motoserver:
+    image: motoserver/moto:latest
+    container_name: tierde-motoserver
+    restart: unless-stopped
+    ports:
+      - "4566:5000"   # AWS mock endpoint (all services)
+    environment:
+      MOTO_PORT: "5000"

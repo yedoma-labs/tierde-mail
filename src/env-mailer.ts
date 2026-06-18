@@ -21,7 +21,8 @@ import type { Mailer } from './types.js';
  * Per-provider:
  *   resend:   RESEND_API_KEY
  *   smtp:     SMTP_HOST, SMTP_PORT (default 587), SMTP_USER, SMTP_PASS, SMTP_SECURE
- *   ses:      AWS_REGION (or SES_REGION)
+ *   ses:      AWS_REGION (or SES_REGION), SES_ENDPOINT (optional, e.g. http://localhost:4566 for moto),
+ *             AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY (optional, for mock/explicit creds)
  *   sendgrid: SENDGRID_API_KEY
  *   postmark: POSTMARK_SERVER_TOKEN
  *   mailpit:  MAILPIT_HOST (default localhost), MAILPIT_PORT (default 1025)
@@ -53,6 +54,9 @@ export function createMailerFromEnv(): Mailer {
       // ses
       SES_REGION: eg.string().optional(),
       AWS_REGION: eg.string().optional(),
+      SES_ENDPOINT: eg.string().optional(),
+      AWS_ACCESS_KEY_ID: eg.string().sensitive().optional(),
+      AWS_SECRET_ACCESS_KEY: eg.string().sensitive().optional(),
 
       // sendgrid
       SENDGRID_API_KEY: eg.string().sensitive().optional(),
@@ -92,7 +96,22 @@ export function createMailerFromEnv(): Mailer {
     case 'ses': {
       const region = env.SES_REGION ?? env.AWS_REGION;
       if (!region) throw new Error('SES_REGION or AWS_REGION is required for ses provider');
-      return createMailer({ provider: ses({ region }), from });
+      // When using a mock endpoint, block the real credential chain to prevent ambient
+      // AWS credentials (SSO session tokens etc.) from leaking into the request.
+      const credentials =
+        env.AWS_ACCESS_KEY_ID && env.AWS_SECRET_ACCESS_KEY
+          ? { accessKeyId: env.AWS_ACCESS_KEY_ID, secretAccessKey: env.AWS_SECRET_ACCESS_KEY }
+          : env.SES_ENDPOINT
+            ? { accessKeyId: 'AKIAIOSFODNN7EXAMPLE', secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY' }
+            : undefined;
+      return createMailer({
+        provider: ses({
+          region,
+          ...(env.SES_ENDPOINT ? { endpoint: env.SES_ENDPOINT } : {}),
+          ...(credentials ? { credentials } : {}),
+        }),
+        from,
+      });
     }
     case 'sendgrid': {
       if (!env.SENDGRID_API_KEY)

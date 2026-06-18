@@ -2,6 +2,8 @@ import type { EmailAddress, EmailMessage, EmailProvider, SendResult } from '../t
 
 interface SesConfig {
   region: string;
+  /** Override the SES endpoint URL. Use `http://localhost:4566` for LocalStack. */
+  endpoint?: string;
   credentials?: {
     accessKeyId: string;
     secretAccessKey: string;
@@ -34,6 +36,7 @@ class SesProvider implements EmailProvider {
 
     const client = new SESClient({
       region: this.#config.region,
+      ...(this.#config.endpoint ? { endpoint: this.#config.endpoint } : {}),
       ...(this.#config.credentials ? { credentials: this.#config.credentials } : {}),
     });
 
