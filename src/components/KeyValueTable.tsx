@@ -14,7 +14,7 @@ interface KeyValueTableProps {
 export function KeyValueTable({ rows }: KeyValueTableProps): ReactElement {
   const theme = useTheme();
   const filtered = rows.filter((r) => r.value != null && r.value !== '' && r.value !== false);
-  if (filtered.length === 0) return <></>;
+  if (filtered.length === 0) return null as unknown as ReactElement;
 
   const cellBase: CSSProperties = {
     padding: '8px 0',

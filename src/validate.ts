@@ -18,6 +18,7 @@ export function validateEmail(email: string): void {
     throw new TypeError(`Invalid email address: ${email}`);
   }
   // Reject CRLF, control chars to prevent email header injection
+  // biome-ignore lint/suspicious/noControlCharactersInRegex: intentional — rejects header injection chars
   if (/[\r\n\x00-\x1f]/.test(email)) {
     throw new TypeError(`Invalid email address: contains control characters`);
   }
@@ -52,6 +53,7 @@ export function normalizeAddresses(input: EmailAddressInput | EmailAddressInput[
 
 export function validateAttachment(attachment: Attachment): void {
   const filename = attachment.filename;
+  // biome-ignore lint/suspicious/noControlCharactersInRegex: intentional — rejects unsafe filename chars
   if (/[\x00-\x1f]/.test(filename)) {
     throw new TypeError(`Unsafe attachment filename: contains control characters`);
   }
