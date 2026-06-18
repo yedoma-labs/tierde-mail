@@ -119,6 +119,15 @@ postmark({ serverToken: '...' })
 
 ## Local development
 
+> **Contributors** (working on this repo): build first, then run `node dist/bin/tierde.js` instead of `npx tierde`. `npx tierde` always fetches the published package and will not reflect local changes.
+>
+> ```bash
+> pnpm build
+> node dist/bin/tierde.js send welcome --to test@example.com --props '{"name":"Alice","loginUrl":"https://example.com"}'
+> ```
+>
+> **Users** (consuming the package): use `npx tierde` as shown throughout this guide.
+
 A `docker-compose.yml` is included at the repo root. It runs [Mailpit](https://mailpit.axllent.org/) — a catch-all SMTP sink that accepts every outbound email without delivering anything.
 
 **Start:**
@@ -201,18 +210,21 @@ const mailer = createMailer({
 
 ```bash
 export LOCALSTACK_AUTH_TOKEN=your-token-here
-export TIERDE_FROM_EMAIL=dev@example.com
-
 docker compose up -d
 
-AWS_ACCESS_KEY_ID=test \
-AWS_SECRET_ACCESS_KEY=test \
-AWS_SESSION_TOKEN= \
-TIERDE_PROVIDER=ses \
-SES_REGION=us-east-1 \
-SES_ENDPOINT=http://localhost:4566 \
+# users
+AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_SESSION_TOKEN= \
+TIERDE_PROVIDER=ses SES_REGION=us-east-1 SES_ENDPOINT=http://localhost:4566 \
 TIERDE_FROM_EMAIL=dev@example.com \
   npx tierde send welcome \
+  --to anyone@example.com \
+  --props '{"name":"Alice","loginUrl":"https://example.com"}'
+
+# contributors (build first: pnpm build)
+AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_SESSION_TOKEN= \
+TIERDE_PROVIDER=ses SES_REGION=us-east-1 SES_ENDPOINT=http://localhost:4566 \
+TIERDE_FROM_EMAIL=dev@example.com \
+  node dist/bin/tierde.js send welcome \
   --to anyone@example.com \
   --props '{"name":"Alice","loginUrl":"https://example.com"}'
 # exits 0 = LocalStack accepted the call
