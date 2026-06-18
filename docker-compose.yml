@@ -20,3 +20,4 @@ services:
       SERVICES: ses
       DEFAULT_REGION: us-east-1
       LOCALSTACK_AUTH_TOKEN: ${LOCALSTACK_AUTH_TOKEN}
+      SES_EMAIL_BODY_VALIDATION_ENABLED: "0"   # skip validation — local/CI only
