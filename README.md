@@ -166,24 +166,23 @@ TIERDE_FROM_EMAIL=dev@example.com
 
 1. Create a free account at [app.localstack.cloud](https://app.localstack.cloud)
 2. Go to **Workspace → Auth Token** in the dashboard
-3. Copy the token and export it before starting the stack:
+3. Copy the token and export it:
 
 ```bash
 export LOCALSTACK_AUTH_TOKEN=your-token-here
-docker compose up -d
 ```
 
-LocalStack accepts the call but does not deliver emails — use the Mailpit provider above to preview email content during development.
+LocalStack accepts SES API calls but does not deliver emails — use the Mailpit provider to preview email content.
 
-Set these in your shell (or `.env.local`) before running:
+**Sender identity is verified automatically on startup** via `scripts/localstack/init-ses.sh`. The verified address defaults to `$TIERDE_FROM_EMAIL` (or `dev@example.com`). To verify a different address, export `TIERDE_FROM_EMAIL` before `docker compose up -d`.
+
+**Credentials:** pass explicit mock credentials to prevent the AWS SDK from picking up ambient SSO session tokens from your environment:
 
 ```bash
 export AWS_ACCESS_KEY_ID=test
 export AWS_SECRET_ACCESS_KEY=test
 export AWS_SESSION_TOKEN=   # clear any real SSO session token
 ```
-
-Explicit credentials block the SDK from picking up ambient AWS credentials from your environment (SSO sessions, profiles). LocalStack accepts any value here.
 
 ```ts
 import { ses } from '@yedoma-labs/tierde-mail/providers/ses';
@@ -201,13 +200,17 @@ const mailer = createMailer({
 **Smoke-test via CLI:**
 
 ```bash
+export LOCALSTACK_AUTH_TOKEN=your-token-here
+export TIERDE_FROM_EMAIL=dev@example.com
+
+docker compose up -d
+
 AWS_ACCESS_KEY_ID=test \
 AWS_SECRET_ACCESS_KEY=test \
 AWS_SESSION_TOKEN= \
 TIERDE_PROVIDER=ses \
 SES_REGION=us-east-1 \
 SES_ENDPOINT=http://localhost:4566 \
-TIERDE_FROM_EMAIL=dev@example.com \
   npx tierde send welcome \
   --to anyone@example.com \
   --props '{"name":"Alice","loginUrl":"https://example.com"}'
