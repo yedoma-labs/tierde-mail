@@ -8,6 +8,21 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Added
+
+- `docker-compose.yml` — one-command local mail stack: Mailpit (catch-all SMTP + web UI on `:8025`) and LocalStack (SES API mock on `:4566`)
+- `scripts/localstack/init-ses.sh` — LocalStack ready-hook that auto-verifies `$TIERDE_FROM_EMAIL` on startup; no manual `aws ses verify-email-identity` step required
+- `SesConfig.endpoint` — optional endpoint URL override for pointing the SES provider at a local mock (`http://localhost:4566`)
+- `createMailerFromEnv`: new `SES_ENDPOINT`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` env vars for local/CI SES configuration; `SES_ENDPOINT` without credentials now throws a clear error instead of silently falling through to the real credential chain
+
+### Fixed
+
+- SES provider: explicit credentials are now wrapped in an async provider function so the AWS SDK cannot fall back to the credential chain and pick up ambient `AWS_SESSION_TOKEN` values (e.g. SSO sessions)
+
+### Changed
+
+- `docker-compose.yml` LocalStack: `SES_EMAIL_BODY_VALIDATION_ENABLED=0` disables body validation for local/CI use; `AWS_ACCESS_KEY_ID=test` / `AWS_SECRET_ACCESS_KEY=test` pre-configured inside the container for the init script
+
 ---
 
 ## [0.5.0] — 2026-06-18
