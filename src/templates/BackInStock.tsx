@@ -1,16 +1,16 @@
-import { currentYear } from './utils.js';
-import { defineEmail } from '../define-email.js';
-import { defaultTheme } from '../theme.js';
-import { EmailTemplate } from '../components/EmailTemplate.js';
-import { Heading } from '../components/Heading.js';
-import { Text } from '../components/Text.js';
+import type { CSSProperties } from 'react';
 import { Button } from '../components/Button.js';
+import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Footer } from '../components/Footer.js';
+import { Heading } from '../components/Heading.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
-import type { CSSProperties } from 'react';
-import type { BaseTemplateProps } from './shared.js';
+import { Text } from '../components/Text.js';
+import { defineEmail } from '../define-email.js';
+import { defaultTheme } from '../theme.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
+import type { BaseTemplateProps } from './shared.js';
+import { currentYear } from './utils.js';
 
 export interface BackInStockStrings {
   subject: (productName: string) => string;
@@ -26,7 +26,8 @@ export const BACK_IN_STOCK_STRINGS: BackInStockStrings = {
   subject: (productName) => `${productName} is back in stock!`,
   heading: "It's back!",
   greeting: (name) => `Hi ${name},`,
-  body: (productName) => `Great news — ${productName} is available again. Get it before it sells out.`,
+  body: (productName) =>
+    `Great news — ${productName} is available again. Get it before it sells out.`,
   urgencyNote: 'Stock is limited. Order now to avoid missing out again.',
   ctaLabel: 'Shop Now',
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
@@ -101,7 +102,14 @@ export const BackInStock: EmailTemplateType<BackInStockProps> = defineEmail<Back
               <img
                 src={productImageUrl}
                 alt={productName}
-                style={{ maxWidth: '200px', maxHeight: '200px', objectFit: 'contain', marginBottom: '16px', display: 'block', margin: '0 auto 16px' }}
+                style={{
+                  maxWidth: '200px',
+                  maxHeight: '200px',
+                  objectFit: 'contain',
+                  marginBottom: '16px',
+                  display: 'block',
+                  margin: '0 auto 16px',
+                }}
               />
             )}
             <p style={productNameStyle}>{productName}</p>
@@ -111,7 +119,9 @@ export const BackInStock: EmailTemplateType<BackInStockProps> = defineEmail<Back
         </Section>
         <Button href={productUrl}>{s.ctaLabel}</Button>
         <Hr />
-        <Text muted size="sm">{s.urgencyNote}</Text>
+        <Text muted size="sm">
+          {s.urgencyNote}
+        </Text>
         <Footer>{s.footer(year, appName)}</Footer>
       </EmailTemplate>
     );

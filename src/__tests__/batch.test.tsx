@@ -1,9 +1,9 @@
-import { describe, it, expect, vi } from 'vitest';
-import { defineEmail } from '../define-email.js';
-import { createMailer } from '../mailer.js';
-import type { EmailProvider, EmailMessage, SendResult } from '../types.js';
+import { describe, expect, it } from 'vitest';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Text } from '../components/Text.js';
+import { defineEmail } from '../define-email.js';
+import { createMailer } from '../mailer.js';
+import type { EmailMessage, EmailProvider, SendResult } from '../types.js';
 
 const TestEmail = defineEmail<{ name: string }>({
   subject: ({ name }) => `Hello ${name}`,
@@ -49,7 +49,7 @@ describe('mailer.sendBatch', () => {
     let callCount = 0;
     const flakyProvider: EmailProvider = {
       name: 'flaky',
-      async send(msg): Promise<SendResult> {
+      async send(_msg): Promise<SendResult> {
         callCount++;
         if (callCount === 2) throw new Error('send failed');
         return { id: `id-${callCount}`, provider: 'flaky' };
@@ -203,7 +203,10 @@ describe('mailer.sendBatch', () => {
     const mailer = createMailer({ provider, from: 'sender@example.com' });
 
     const result = await mailer.sendBatch(TestEmail, {
-      recipients: Array.from({ length: 5 }, (_, i) => ({ to: `r${i}@example.com`, props: { name: `R${i}` } })),
+      recipients: Array.from({ length: 5 }, (_, i) => ({
+        to: `r${i}@example.com`,
+        props: { name: `R${i}` },
+      })),
       maxPerSecond: 100,
       concurrency: 5,
     });

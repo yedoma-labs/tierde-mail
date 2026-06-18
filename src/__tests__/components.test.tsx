@@ -1,15 +1,15 @@
-import { describe, it, expect } from 'vitest';
-import React from 'react';
-import { renderEmail } from '../render.js';
-import { EmailTemplate } from '../components/EmailTemplate.js';
+import type React from 'react';
+import { describe, expect, it } from 'vitest';
 import { AlertBox } from '../components/AlertBox.js';
+import { Button } from '../components/Button.js';
+import { EmailTemplate } from '../components/EmailTemplate.js';
+import { Image } from '../components/Image.js';
 import { KeyValueTable } from '../components/KeyValueTable.js';
 import { Link } from '../components/Link.js';
-import { Button } from '../components/Button.js';
-import { Image } from '../components/Image.js';
 import { LogoHeader } from '../components/LogoHeader.js';
-import { Row, Column } from '../components/Row.js';
 import { Preview } from '../components/Preview.js';
+import { Column, Row } from '../components/Row.js';
+import { renderEmail } from '../render.js';
 
 // Wrap in EmailTemplate to satisfy theme context for Button/Link
 function wrap(element: React.ReactElement) {
@@ -52,7 +52,11 @@ describe('AlertBox', () => {
   });
 
   it('renders icon when provided', () => {
-    const html = wrap(<AlertBox variant="danger" icon="🔒">Locked</AlertBox>);
+    const html = wrap(
+      <AlertBox variant="danger" icon="🔒">
+        Locked
+      </AlertBox>,
+    );
     expect(html).toContain('🔒');
     expect(html).toContain('Locked');
   });
@@ -61,10 +65,12 @@ describe('AlertBox', () => {
 describe('KeyValueTable', () => {
   it('renders label/value pairs', () => {
     const html = wrap(
-      <KeyValueTable rows={[
-        { label: 'Name', value: 'Alice' },
-        { label: 'Location', value: 'Berlin' },
-      ]} />,
+      <KeyValueTable
+        rows={[
+          { label: 'Name', value: 'Alice' },
+          { label: 'Location', value: 'Berlin' },
+        ]}
+      />,
     );
     expect(html).toContain('Name');
     expect(html).toContain('Alice');
@@ -74,10 +80,12 @@ describe('KeyValueTable', () => {
 
   it('filters out null values', () => {
     const html = wrap(
-      <KeyValueTable rows={[
-        { label: 'Shown', value: 'yes' },
-        { label: 'Hidden', value: null },
-      ]} />,
+      <KeyValueTable
+        rows={[
+          { label: 'Shown', value: 'yes' },
+          { label: 'Hidden', value: null },
+        ]}
+      />,
     );
     expect(html).toContain('Shown');
     expect(html).not.toContain('Hidden');
@@ -85,49 +93,55 @@ describe('KeyValueTable', () => {
 
   it('filters out undefined values', () => {
     const html = wrap(
-      <KeyValueTable rows={[
-        { label: 'Shown', value: 'yes' },
-        { label: 'Hidden', value: undefined },
-      ]} />,
+      <KeyValueTable
+        rows={[
+          { label: 'Shown', value: 'yes' },
+          { label: 'Hidden', value: undefined },
+        ]}
+      />,
     );
     expect(html).not.toContain('Hidden');
   });
 
   it('filters out empty string values', () => {
     const html = wrap(
-      <KeyValueTable rows={[
-        { label: 'Shown', value: 'yes' },
-        { label: 'Hidden', value: '' },
-      ]} />,
+      <KeyValueTable
+        rows={[
+          { label: 'Shown', value: 'yes' },
+          { label: 'Hidden', value: '' },
+        ]}
+      />,
     );
     expect(html).not.toContain('Hidden');
   });
 
   it('filters out false values', () => {
     const html = wrap(
-      <KeyValueTable rows={[
-        { label: 'Shown', value: 'yes' },
-        { label: 'Hidden', value: false },
-      ]} />,
+      <KeyValueTable
+        rows={[
+          { label: 'Shown', value: 'yes' },
+          { label: 'Hidden', value: false },
+        ]}
+      />,
     );
     expect(html).not.toContain('Hidden');
   });
 
   it('renders nothing when all rows filtered', () => {
     const html = renderEmail(
-      <KeyValueTable rows={[
-        { label: 'A', value: null },
-        { label: 'B', value: '' },
-      ]} />,
+      <KeyValueTable
+        rows={[
+          { label: 'A', value: null },
+          { label: 'B', value: '' },
+        ]}
+      />,
     );
     expect(html).not.toContain('<table');
     expect(html).not.toContain('A');
   });
 
   it('applies monospace font for mono rows', () => {
-    const html = wrap(
-      <KeyValueTable rows={[{ label: 'IP', value: '192.168.1.1', mono: true }]} />,
-    );
+    const html = wrap(<KeyValueTable rows={[{ label: 'IP', value: '192.168.1.1', mono: true }]} />);
     expect(html).toContain('monospace');
     expect(html).toContain('192.168.1.1');
   });
@@ -155,7 +169,9 @@ describe('Link security', () => {
   });
 
   it('blocks data: protocol', () => {
-    expect(() => wrap(<Link href="data:text/html,<h1>xss</h1>">XSS</Link>)).toThrow('Invalid link href');
+    expect(() => wrap(<Link href="data:text/html,<h1>xss</h1>">XSS</Link>)).toThrow(
+      'Invalid link href',
+    );
   });
 
   it('blocks vbscript: protocol', () => {
@@ -165,11 +181,15 @@ describe('Link security', () => {
 
 describe('Button security', () => {
   it('blocks javascript: protocol', () => {
-    expect(() => wrap(<Button href="javascript:alert(1)">XSS</Button>)).toThrow('Invalid button href');
+    expect(() => wrap(<Button href="javascript:alert(1)">XSS</Button>)).toThrow(
+      'Invalid button href',
+    );
   });
 
   it('blocks data: protocol', () => {
-    expect(() => wrap(<Button href="data:text/html,xss">XSS</Button>)).toThrow('Invalid button href');
+    expect(() => wrap(<Button href="data:text/html,xss">XSS</Button>)).toThrow(
+      'Invalid button href',
+    );
   });
 
   it('allows https URLs', () => {
@@ -195,7 +215,9 @@ describe('Image', () => {
   });
 
   it('applies width and height', () => {
-    const html = renderEmail(<Image src="https://example.com/x.png" alt="" width={200} height={100} />);
+    const html = renderEmail(
+      <Image src="https://example.com/x.png" alt="" width={200} height={100} />,
+    );
     expect(html).toContain('width:200px');
     expect(html).toContain('height:100px');
   });
@@ -209,7 +231,9 @@ describe('LogoHeader', () => {
 
   it('renders logo img when src provided', () => {
     const html = renderEmail(
-      <EmailTemplate><LogoHeader src="https://example.com/logo.png" alt="Brand" width={160} /></EmailTemplate>,
+      <EmailTemplate>
+        <LogoHeader src="https://example.com/logo.png" alt="Brand" width={160} />
+      </EmailTemplate>,
     );
     expect(html).toContain('https://example.com/logo.png');
     expect(html).toContain('alt="Brand"');
@@ -217,7 +241,9 @@ describe('LogoHeader', () => {
 
   it('applies custom backgroundColor', () => {
     const html = renderEmail(
-      <EmailTemplate><LogoHeader src="https://example.com/logo.png" backgroundColor="#ff0000" /></EmailTemplate>,
+      <EmailTemplate>
+        <LogoHeader src="https://example.com/logo.png" backgroundColor="#ff0000" />
+      </EmailTemplate>,
     );
     expect(html).toContain('#ff0000');
   });
@@ -239,7 +265,9 @@ describe('Row / Column', () => {
   it('Column applies width and align', () => {
     const html = renderEmail(
       <Row>
-        <Column width="50%" align="center" valign="middle">Content</Column>
+        <Column width="50%" align="center" valign="middle">
+          Content
+        </Column>
       </Row>,
     );
     expect(html).toContain('width:50%');
@@ -249,7 +277,9 @@ describe('Row / Column', () => {
 
   it('Column defaults to left/top alignment', () => {
     const html = renderEmail(
-      <Row><Column>Test</Column></Row>,
+      <Row>
+        <Column>Test</Column>
+      </Row>,
     );
     expect(html).toContain('text-align:left');
     expect(html).toContain('vertical-align:top');

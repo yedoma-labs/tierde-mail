@@ -1,16 +1,16 @@
-import { currentYear } from './utils.js';
-import type { BaseTemplateProps, LoginEvent } from './shared.js';
-import { defineEmail } from '../define-email.js';
-import { defaultTheme } from '../theme.js';
-import { EmailTemplate } from '../components/EmailTemplate.js';
-import { Heading } from '../components/Heading.js';
-import { Text } from '../components/Text.js';
+import type { CSSProperties } from 'react';
 import { Button } from '../components/Button.js';
+import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Footer } from '../components/Footer.js';
+import { Heading } from '../components/Heading.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
-import type { CSSProperties } from 'react';
+import { Text } from '../components/Text.js';
+import { defineEmail } from '../define-email.js';
+import { defaultTheme } from '../theme.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
+import type { BaseTemplateProps, LoginEvent } from './shared.js';
+import { currentYear } from './utils.js';
 
 export interface LoginActivityStrings {
   subject: (appName: string) => string;
@@ -58,76 +58,98 @@ const badgeBase: CSSProperties = {
   fontWeight: '600',
 };
 
-export const LoginActivity: EmailTemplateType<LoginActivityProps> = defineEmail<LoginActivityProps>({
-  subject: ({ appName = 'Our App', strings }) => {
-    const s = { ...LOGIN_ACTIVITY_STRINGS, ...strings };
-    return s.subject(appName);
-  },
-  component: ({ name, events, securityUrl, appName = 'Our App', locale, dir, strings, theme }) => {
-    const s = { ...LOGIN_ACTIVITY_STRINGS, ...strings };
-    const t = { ...defaultTheme, ...theme };
-    const year = currentYear(locale);
+export const LoginActivity: EmailTemplateType<LoginActivityProps> = defineEmail<LoginActivityProps>(
+  {
+    subject: ({ appName = 'Our App', strings }) => {
+      const s = { ...LOGIN_ACTIVITY_STRINGS, ...strings };
+      return s.subject(appName);
+    },
+    component: ({
+      name,
+      events,
+      securityUrl,
+      appName = 'Our App',
+      locale,
+      dir,
+      strings,
+      theme,
+    }) => {
+      const s = { ...LOGIN_ACTIVITY_STRINGS, ...strings };
+      const t = { ...defaultTheme, ...theme };
+      const year = currentYear(locale);
 
-    const thStyle: CSSProperties = {
-      textAlign: 'left',
-      fontSize: '11px',
-      fontWeight: '600',
-      textTransform: 'uppercase',
-      letterSpacing: '0.05em',
-      color: t.textMuted,
-      padding: '0 8px 8px 0',
-      borderBottom: `2px solid ${t.border}`,
-      whiteSpace: 'nowrap',
-    };
+      const thStyle: CSSProperties = {
+        textAlign: 'left',
+        fontSize: '11px',
+        fontWeight: '600',
+        textTransform: 'uppercase',
+        letterSpacing: '0.05em',
+        color: t.textMuted,
+        padding: '0 8px 8px 0',
+        borderBottom: `2px solid ${t.border}`,
+        whiteSpace: 'nowrap',
+      };
 
-    const tdStyle: CSSProperties = {
-      fontSize: '13px',
-      color: t.textSecondary,
-      padding: '8px 8px 8px 0',
-      borderBottom: `1px solid ${t.borderSubtle}`,
-      verticalAlign: 'top',
-    };
+      const tdStyle: CSSProperties = {
+        fontSize: '13px',
+        color: t.textSecondary,
+        padding: '8px 8px 8px 0',
+        borderBottom: `1px solid ${t.borderSubtle}`,
+        verticalAlign: 'top',
+      };
 
-    return (
-      <EmailTemplate preview={s.subject(appName)} lang={locale} dir={dir} theme={theme}>
-        <Heading>{s.heading}</Heading>
-        <Text>{s.greeting(name)}</Text>
-        <Text>{s.body}</Text>
-        <Section>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }} cellPadding="0" cellSpacing="0">
-            <thead>
-              <tr>
-                <th style={thStyle}>{s.timestampLabel}</th>
-                <th style={thStyle}>{s.locationLabel}</th>
-                <th style={thStyle}>{s.deviceLabel}</th>
-                <th style={thStyle}>{s.statusLabel}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {events.map((ev, i) => (
-                <tr key={`${ev.timestamp}-${i}`}>
-                  <td style={tdStyle}>{ev.timestamp}</td>
-                  <td style={tdStyle}>{ev.location ?? '—'}</td>
-                  <td style={tdStyle}>{ev.device ?? '—'}</td>
-                  <td style={tdStyle}>
-                    <span className="tierde-badge" style={{
-                      ...badgeBase,
-                      backgroundColor: ev.status === 'success' ? t.successBg : t.dangerBg,
-                      color: ev.status === 'success' ? t.successText : t.dangerText,
-                    }}>
-                      {ev.status === 'success' ? s.statusSuccess : s.statusFailed}
-                    </span>
-                  </td>
+      return (
+        <EmailTemplate preview={s.subject(appName)} lang={locale} dir={dir} theme={theme}>
+          <Heading>{s.heading}</Heading>
+          <Text>{s.greeting(name)}</Text>
+          <Text>{s.body}</Text>
+          <Section>
+            <table
+              style={{ width: '100%', borderCollapse: 'collapse' }}
+              cellPadding="0"
+              cellSpacing="0"
+            >
+              <thead>
+                <tr>
+                  <th style={thStyle}>{s.timestampLabel}</th>
+                  <th style={thStyle}>{s.locationLabel}</th>
+                  <th style={thStyle}>{s.deviceLabel}</th>
+                  <th style={thStyle}>{s.statusLabel}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </Section>
-        <Button href={securityUrl} variant="outline">{s.reviewCtaLabel}</Button>
-        <Hr />
-        <Text muted size="sm">{s.suspiciousNote}</Text>
-        <Footer>{s.footer(year, appName)}</Footer>
-      </EmailTemplate>
-    );
+              </thead>
+              <tbody>
+                {events.map((ev, i) => (
+                  <tr key={`${ev.timestamp}-${i}`}>
+                    <td style={tdStyle}>{ev.timestamp}</td>
+                    <td style={tdStyle}>{ev.location ?? '—'}</td>
+                    <td style={tdStyle}>{ev.device ?? '—'}</td>
+                    <td style={tdStyle}>
+                      <span
+                        className="tierde-badge"
+                        style={{
+                          ...badgeBase,
+                          backgroundColor: ev.status === 'success' ? t.successBg : t.dangerBg,
+                          color: ev.status === 'success' ? t.successText : t.dangerText,
+                        }}
+                      >
+                        {ev.status === 'success' ? s.statusSuccess : s.statusFailed}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Section>
+          <Button href={securityUrl} variant="outline">
+            {s.reviewCtaLabel}
+          </Button>
+          <Hr />
+          <Text muted size="sm">
+            {s.suspiciousNote}
+          </Text>
+          <Footer>{s.footer(year, appName)}</Footer>
+        </EmailTemplate>
+      );
+    },
   },
-});
+);

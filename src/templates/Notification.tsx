@@ -1,12 +1,12 @@
-import { currentYear } from './utils.js';
-import { defineEmail } from '../define-email.js';
+import { Button } from '../components/Button.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
+import { Footer } from '../components/Footer.js';
 import { Heading } from '../components/Heading.js';
 import { Text } from '../components/Text.js';
-import { Button } from '../components/Button.js';
-import { Footer } from '../components/Footer.js';
-import type { BaseTemplateProps } from './shared.js';
+import { defineEmail } from '../define-email.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
+import type { BaseTemplateProps } from './shared.js';
+import { currentYear } from './utils.js';
 
 export interface NotificationStrings {
   footer: (year: string, appName: string) => string;
@@ -25,7 +25,17 @@ export interface NotificationProps extends BaseTemplateProps<NotificationStrings
 
 export const Notification: EmailTemplateType<NotificationProps> = defineEmail<NotificationProps>({
   subject: ({ title }) => title,
-  component: ({ title, body, ctaLabel, ctaUrl, appName = 'Our App', locale, dir, strings, theme }) => {
+  component: ({
+    title,
+    body,
+    ctaLabel,
+    ctaUrl,
+    appName = 'Our App',
+    locale,
+    dir,
+    strings,
+    theme,
+  }) => {
     const s = { ...NOTIFICATION_STRINGS, ...strings };
     const year = currentYear(locale);
     return (

@@ -1,10 +1,9 @@
-import { describe, it, expect } from 'vitest';
-import React from 'react';
-import { renderEmail } from '../render.js';
+import { describe, expect, it } from 'vitest';
+import { Button } from '../components/Button.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
 import { Text } from '../components/Text.js';
-import { Button } from '../components/Button.js';
+import { renderEmail } from '../render.js';
 
 describe('renderEmail', () => {
   it('produces valid HTML string', () => {

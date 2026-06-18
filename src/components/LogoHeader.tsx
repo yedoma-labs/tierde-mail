@@ -8,7 +8,12 @@ interface LogoHeaderProps {
   backgroundColor?: string;
 }
 
-export function LogoHeader({ src, alt, width, backgroundColor }: LogoHeaderProps): ReactElement | null {
+export function LogoHeader({
+  src,
+  alt,
+  width,
+  backgroundColor,
+}: LogoHeaderProps): ReactElement | null {
   const theme = useTheme();
   const logoSrc = src ?? theme.logo;
   if (!logoSrc) return null;

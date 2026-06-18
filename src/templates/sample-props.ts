@@ -238,8 +238,16 @@ export const SAMPLE_PROPS: Record<string, unknown> = {
     description: 'All emails now adapt to system dark mode — no extra configuration needed.',
     ctaUrl: 'https://example.com/changelog',
     changes: [
-      { type: 'new', title: 'Dark mode for all templates', description: 'Automatic @media (prefers-color-scheme: dark) support.' },
-      { type: 'improvement', title: 'Faster rendering', description: 'CSS inlining is now 3x faster.' },
+      {
+        type: 'new',
+        title: 'Dark mode for all templates',
+        description: 'Automatic @media (prefers-color-scheme: dark) support.',
+      },
+      {
+        type: 'improvement',
+        title: 'Faster rendering',
+        description: 'CSS inlining is now 3x faster.',
+      },
     ],
     appName: 'Acme',
   },
@@ -307,9 +315,24 @@ export const SAMPLE_PROPS: Record<string, unknown> = {
   LoginActivity: {
     name: 'Alice Smith',
     events: [
-      { timestamp: 'June 16, 2026 14:32 UTC', location: 'Berlin, Germany', device: 'Chrome on macOS', status: 'success' },
-      { timestamp: 'June 15, 2026 09:11 UTC', location: 'Hamburg, Germany', device: 'Safari on iPhone', status: 'success' },
-      { timestamp: 'June 14, 2026 22:45 UTC', location: 'Unknown', device: 'Firefox on Windows', status: 'failed' },
+      {
+        timestamp: 'June 16, 2026 14:32 UTC',
+        location: 'Berlin, Germany',
+        device: 'Chrome on macOS',
+        status: 'success',
+      },
+      {
+        timestamp: 'June 15, 2026 09:11 UTC',
+        location: 'Hamburg, Germany',
+        device: 'Safari on iPhone',
+        status: 'success',
+      },
+      {
+        timestamp: 'June 14, 2026 22:45 UTC',
+        location: 'Unknown',
+        device: 'Firefox on Windows',
+        status: 'failed',
+      },
     ],
     securityUrl: 'https://example.com/account/security',
     appName: 'Acme',

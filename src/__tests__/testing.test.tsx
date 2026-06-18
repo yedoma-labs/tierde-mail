@@ -1,16 +1,23 @@
-import { describe, it, expect } from 'vitest';
-import { captureEmails, expectAttachment, expectAttachmentCount, expectNoAttachments } from '../testing/index.js';
-import { defineEmail } from '../define-email.js';
+import { describe, expect, it } from 'vitest';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
 import { Text } from '../components/Text.js';
+import { defineEmail } from '../define-email.js';
+import {
+  captureEmails,
+  expectAttachment,
+  expectAttachmentCount,
+  expectNoAttachments,
+} from '../testing/index.js';
 
 const WelcomeEmail = defineEmail<{ name: string; loginUrl: string }>({
   subject: ({ name }) => `Welcome, ${name}!`,
   component: ({ name, loginUrl }) => (
     <EmailTemplate>
       <Heading>Welcome!</Heading>
-      <Text>Hi {name}, <a href={loginUrl}>log in here</a></Text>
+      <Text>
+        Hi {name}, <a href={loginUrl}>log in here</a>
+      </Text>
     </EmailTemplate>
   ),
 });
@@ -129,7 +136,9 @@ describe('expectAttachment', () => {
       attachments: [{ filename: 'tiny.txt', content: 'hi', contentType: 'text/plain' }],
       headers: {},
     });
-    expect(() => expectAttachment(inbox[0]!, { minBytes: 1000 })).toThrow(/Expected attachment matching/);
+    expect(() => expectAttachment(inbox[0]!, { minBytes: 1000 })).toThrow(
+      /Expected attachment matching/,
+    );
   });
 
   it('error message includes what was found', () => {
@@ -187,7 +196,9 @@ describe('expectAttachmentCount', () => {
       attachments: [pdfAttachment],
       headers: {},
     });
-    expect(() => expectAttachmentCount(inbox[0]!, 2)).toThrow('Expected 2 attachment(s) but found 1');
+    expect(() => expectAttachmentCount(inbox[0]!, 2)).toThrow(
+      'Expected 2 attachment(s) but found 1',
+    );
   });
 });
 

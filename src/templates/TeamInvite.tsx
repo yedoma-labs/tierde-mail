@@ -1,13 +1,13 @@
-import { currentYear } from './utils.js';
-import { defineEmail } from '../define-email.js';
-import { EmailTemplate } from '../components/EmailTemplate.js';
-import { Heading } from '../components/Heading.js';
-import { Text } from '../components/Text.js';
 import { Button } from '../components/Button.js';
+import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Footer } from '../components/Footer.js';
+import { Heading } from '../components/Heading.js';
 import { Hr } from '../components/Hr.js';
-import type { BaseTemplateProps } from './shared.js';
+import { Text } from '../components/Text.js';
+import { defineEmail } from '../define-email.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
+import type { BaseTemplateProps } from './shared.js';
+import { currentYear } from './utils.js';
 
 export interface TeamInviteStrings {
   subject: (inviterName: string, teamName: string) => string;
@@ -72,9 +72,7 @@ export const TeamInvite: EmailTemplateType<TeamInviteProps> = defineEmail<TeamIn
         <Button href={inviteUrl}>{s.ctaLabel}</Button>
         <Hr />
         <Text muted size="sm">
-          {s.expiryNote(expiresInHours)}
-          {' '}
-          {s.declineNote}
+          {s.expiryNote(expiresInHours)} {s.declineNote}
         </Text>
         <Footer>{s.footer(year, appName)}</Footer>
       </EmailTemplate>

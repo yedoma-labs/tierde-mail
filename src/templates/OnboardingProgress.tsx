@@ -1,16 +1,16 @@
-import { currentYear } from './utils.js';
-import { defineEmail } from '../define-email.js';
-import { defaultTheme } from '../theme.js';
-import { EmailTemplate } from '../components/EmailTemplate.js';
-import { Heading } from '../components/Heading.js';
-import { Text } from '../components/Text.js';
+import type { CSSProperties } from 'react';
 import { Button } from '../components/Button.js';
+import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Footer } from '../components/Footer.js';
+import { Heading } from '../components/Heading.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
-import type { CSSProperties } from 'react';
-import type { BaseTemplateProps } from './shared.js';
+import { Text } from '../components/Text.js';
+import { defineEmail } from '../define-email.js';
+import { defaultTheme } from '../theme.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
+import type { BaseTemplateProps } from './shared.js';
+import { currentYear } from './utils.js';
 
 export interface OnboardingStep {
   title: string;
@@ -58,96 +58,115 @@ export interface OnboardingProgressProps extends BaseTemplateProps<OnboardingPro
   dashboardUrl: string;
 }
 
-export const OnboardingProgress: EmailTemplateType<OnboardingProgressProps> = defineEmail<OnboardingProgressProps>({
-  subject: ({ steps, appName = 'Our App', strings }) => {
-    const s = { ...ONBOARDING_PROGRESS_STRINGS, ...strings };
-    const completed = steps.filter((st) => st.completed).length;
-    return s.subject(completed, steps.length, appName);
-  },
-  component: ({
-    name,
-    steps,
-    dashboardUrl,
-    appName = 'Our App',
-    locale,
-    dir,
-    strings,
-    theme,
-  }) => {
-    const s = { ...ONBOARDING_PROGRESS_STRINGS, ...strings };
-    const t = { ...defaultTheme, ...theme };
-    const year = currentYear(locale);
+export const OnboardingProgress: EmailTemplateType<OnboardingProgressProps> =
+  defineEmail<OnboardingProgressProps>({
+    subject: ({ steps, appName = 'Our App', strings }) => {
+      const s = { ...ONBOARDING_PROGRESS_STRINGS, ...strings };
+      const completed = steps.filter((st) => st.completed).length;
+      return s.subject(completed, steps.length, appName);
+    },
+    component: ({
+      name,
+      steps,
+      dashboardUrl,
+      appName = 'Our App',
+      locale,
+      dir,
+      strings,
+      theme,
+    }) => {
+      const s = { ...ONBOARDING_PROGRESS_STRINGS, ...strings };
+      const t = { ...defaultTheme, ...theme };
+      const year = currentYear(locale);
 
-    const stepRowStyle: CSSProperties = {
-      padding: '12px 0',
-      borderBottom: `1px solid ${t.borderSubtle}`,
-    };
+      const stepRowStyle: CSSProperties = {
+        padding: '12px 0',
+        borderBottom: `1px solid ${t.borderSubtle}`,
+      };
 
-    const stepTitleStyle = (completed: boolean): CSSProperties => ({
-      fontWeight: '600',
-      fontSize: '14px',
-      color: completed ? t.successText : t.textPrimary,
-      margin: '0 0 2px',
-    });
+      const stepTitleStyle = (completed: boolean): CSSProperties => ({
+        fontWeight: '600',
+        fontSize: '14px',
+        color: completed ? t.successText : t.textPrimary,
+        margin: '0 0 2px',
+      });
 
-    const stepDescStyle: CSSProperties = {
-      fontSize: '13px',
-      color: t.textMuted,
-      margin: 0,
-    };
+      const stepDescStyle: CSSProperties = {
+        fontSize: '13px',
+        color: t.textMuted,
+        margin: 0,
+      };
 
-    const badgeStyle = (completed: boolean): CSSProperties => ({
-      display: 'inline-block',
-      padding: '2px 8px',
-      borderRadius: '12px',
-      fontSize: '11px',
-      fontWeight: '700',
-      backgroundColor: completed ? t.successBg : t.secondary,
-      color: completed ? t.successText : t.textSecondary,
-      whiteSpace: 'nowrap',
-    });
+      const badgeStyle = (completed: boolean): CSSProperties => ({
+        display: 'inline-block',
+        padding: '2px 8px',
+        borderRadius: '12px',
+        fontSize: '11px',
+        fontWeight: '700',
+        backgroundColor: completed ? t.successBg : t.secondary,
+        color: completed ? t.successText : t.textSecondary,
+        whiteSpace: 'nowrap',
+      });
 
-    const completedCount = steps.filter((st) => st.completed).length;
-    const totalCount = steps.length;
-    const allDone = completedCount === totalCount;
+      const completedCount = steps.filter((st) => st.completed).length;
+      const totalCount = steps.length;
+      const allDone = completedCount === totalCount;
 
-    return (
-      <EmailTemplate
-        preview={s.subject(completedCount, totalCount, appName)}
-        lang={locale}
-        dir={dir}
-        theme={theme}
-      >
-        <Heading>{s.heading(completedCount, totalCount)}</Heading>
-        <Text>{s.greeting(name)}</Text>
-        <Text>{s.body(completedCount, totalCount)}</Text>
-        <Section>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }} cellPadding="0" cellSpacing="0">
-            <tbody>
-              {steps.map((step, i) => (
-                <tr key={i}>
-                  <td style={stepRowStyle}>
-                    <p style={stepTitleStyle(step.completed)}>
-                      {step.url && !step.completed ? (
-                        <a href={step.url} style={{ color: t.textPrimary, textDecoration: 'none' }}>{step.title}</a>
-                      ) : step.title}
-                    </p>
-                    {step.description && <p style={stepDescStyle}>{step.description}</p>}
-                  </td>
-                  <td style={{ ...stepRowStyle, textAlign: 'right', verticalAlign: 'top', paddingLeft: '12px' }}>
-                    <span className="tierde-badge" style={badgeStyle(step.completed)}>
-                      {step.completed ? s.completedLabel : s.pendingLabel}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Section>
-        {!allDone && <Button href={dashboardUrl}>{s.ctaLabel}</Button>}
-        <Hr />
-        <Footer>{s.footer(year, appName)}</Footer>
-      </EmailTemplate>
-    );
-  },
-});
+      return (
+        <EmailTemplate
+          preview={s.subject(completedCount, totalCount, appName)}
+          lang={locale}
+          dir={dir}
+          theme={theme}
+        >
+          <Heading>{s.heading(completedCount, totalCount)}</Heading>
+          <Text>{s.greeting(name)}</Text>
+          <Text>{s.body(completedCount, totalCount)}</Text>
+          <Section>
+            <table
+              style={{ width: '100%', borderCollapse: 'collapse' }}
+              cellPadding="0"
+              cellSpacing="0"
+            >
+              <tbody>
+                {steps.map((step, i) => (
+                  <tr key={i}>
+                    <td style={stepRowStyle}>
+                      <p style={stepTitleStyle(step.completed)}>
+                        {step.url && !step.completed ? (
+                          <a
+                            href={step.url}
+                            style={{ color: t.textPrimary, textDecoration: 'none' }}
+                          >
+                            {step.title}
+                          </a>
+                        ) : (
+                          step.title
+                        )}
+                      </p>
+                      {step.description && <p style={stepDescStyle}>{step.description}</p>}
+                    </td>
+                    <td
+                      style={{
+                        ...stepRowStyle,
+                        textAlign: 'right',
+                        verticalAlign: 'top',
+                        paddingLeft: '12px',
+                      }}
+                    >
+                      <span className="tierde-badge" style={badgeStyle(step.completed)}>
+                        {step.completed ? s.completedLabel : s.pendingLabel}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Section>
+          {!allDone && <Button href={dashboardUrl}>{s.ctaLabel}</Button>}
+          <Hr />
+          <Footer>{s.footer(year, appName)}</Footer>
+        </EmailTemplate>
+      );
+    },
+  });

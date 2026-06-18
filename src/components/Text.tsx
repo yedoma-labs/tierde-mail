@@ -1,4 +1,4 @@
-import type { ReactNode, CSSProperties, ReactElement } from 'react';
+import type { CSSProperties, ReactElement, ReactNode } from 'react';
 import { useTheme } from '../ThemeContext.js';
 
 interface TextProps {
@@ -15,7 +15,13 @@ const sizeMap = {
   lg: '17px',
 };
 
-export function Text({ children, color, size = 'md', muted = false, align = 'left' }: TextProps): ReactElement {
+export function Text({
+  children,
+  color,
+  size = 'md',
+  muted = false,
+  align = 'left',
+}: TextProps): ReactElement {
   const theme = useTheme();
   const defaultColor = muted ? theme.textMuted : theme.textSecondary;
   const className = muted ? 'tierde-text-muted' : 'tierde-text-secondary';

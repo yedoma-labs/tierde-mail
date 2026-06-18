@@ -1,16 +1,16 @@
-import { currentYear } from './utils.js';
-import { defineEmail } from '../define-email.js';
-import { defaultTheme, PALETTE } from '../theme.js';
-import { EmailTemplate } from '../components/EmailTemplate.js';
-import { Heading } from '../components/Heading.js';
-import { Text } from '../components/Text.js';
+import type { CSSProperties } from 'react';
 import { Button } from '../components/Button.js';
+import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Footer } from '../components/Footer.js';
+import { Heading } from '../components/Heading.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
-import type { CSSProperties } from 'react';
-import type { BaseTemplateProps } from './shared.js';
+import { Text } from '../components/Text.js';
+import { defineEmail } from '../define-email.js';
+import { defaultTheme, PALETTE } from '../theme.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
+import type { BaseTemplateProps } from './shared.js';
+import { currentYear } from './utils.js';
 
 export type UsageSeverity = 'warning' | 'critical' | 'exceeded';
 
@@ -108,21 +108,42 @@ export const UsageAlert: EmailTemplateType<UsageAlertProps> = defineEmail<UsageA
     };
 
     return (
-      <EmailTemplate preview={s.subject(resource, percentUsed, appName)} lang={locale} dir={dir} theme={theme}>
+      <EmailTemplate
+        preview={s.subject(resource, percentUsed, appName)}
+        lang={locale}
+        dir={dir}
+        theme={theme}
+      >
         <Heading>{s.heading(severity, resource)}</Heading>
         <Text>{s.greeting(name)}</Text>
         <Text>{s.body(severity, resource, percentUsed)}</Text>
         <Section>
           <div style={{ padding: '16px', backgroundColor: t.surfaceSubtle, borderRadius: '8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '4px' }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                fontSize: '13px',
+                marginBottom: '4px',
+              }}
+            >
               <span style={{ fontWeight: '600', color: t.textPrimary }}>{resource}</span>
               <span style={{ color: textColor, fontWeight: '700' }}>{pct}%</span>
             </div>
             <div style={progressBarWrapStyle}>
-              <div style={{ backgroundColor: color, height: '10px', width: `${pct}%`, borderRadius: '999px' }} />
+              <div
+                style={{
+                  backgroundColor: color,
+                  height: '10px',
+                  width: `${pct}%`,
+                  borderRadius: '999px',
+                }}
+              />
             </div>
             <div style={{ fontSize: '12px', color: t.textMuted, marginTop: '4px' }}>
-              {used}{unit} used of {limit}{unit}
+              {used}
+              {unit} used of {limit}
+              {unit}
               {resetDate && <span> · Resets {resetDate}</span>}
             </div>
           </div>

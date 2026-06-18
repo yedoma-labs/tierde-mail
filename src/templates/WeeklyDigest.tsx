@@ -1,16 +1,16 @@
-import { currentYear } from './utils.js';
-import { defineEmail } from '../define-email.js';
-import { defaultTheme } from '../theme.js';
-import { EmailTemplate } from '../components/EmailTemplate.js';
-import { Heading } from '../components/Heading.js';
-import { Text } from '../components/Text.js';
+import type { CSSProperties } from 'react';
 import { Button } from '../components/Button.js';
+import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Footer } from '../components/Footer.js';
+import { Heading } from '../components/Heading.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
-import type { CSSProperties } from 'react';
-import type { BaseTemplateProps } from './shared.js';
+import { Text } from '../components/Text.js';
+import { defineEmail } from '../define-email.js';
+import { defaultTheme } from '../theme.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
+import type { BaseTemplateProps } from './shared.js';
+import { currentYear } from './utils.js';
 
 export interface DigestItem {
   title: string;
@@ -132,20 +132,21 @@ export const WeeklyDigest: EmailTemplateType<WeeklyDigestProps> = defineEmail<We
     };
 
     return (
-      <EmailTemplate
-        preview={s.subject(weekOf, appName)}
-        lang={locale}
-        dir={dir}
-        theme={theme}
-      >
+      <EmailTemplate preview={s.subject(weekOf, appName)} lang={locale} dir={dir} theme={theme}>
         <Heading>{s.heading(weekOf)}</Heading>
         <Text>{s.greeting(name)}</Text>
 
         {stats && stats.length > 0 && (
           <>
-            <Text size="sm" muted>{s.statsHeading}</Text>
+            <Text size="sm" muted>
+              {s.statsHeading}
+            </Text>
             <Section>
-              <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '8px' }} cellPadding="0" cellSpacing="0">
+              <table
+                style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '8px' }}
+                cellPadding="0"
+                cellSpacing="0"
+              >
                 <tbody>
                   <tr>
                     {stats.slice(0, 3).map((stat, i) => (
@@ -153,13 +154,21 @@ export const WeeklyDigest: EmailTemplateType<WeeklyDigestProps> = defineEmail<We
                         <span style={statValueStyle}>{stat.value}</span>
                         <span style={statLabelStyle}>{stat.label}</span>
                         {stat.change && (
-                          <span className={stat.positive === false ? 'tierde-negative' : 'tierde-positive'} style={statChangeStyle(stat.positive)}>{stat.change}</span>
+                          <span
+                            className={
+                              stat.positive === false ? 'tierde-negative' : 'tierde-positive'
+                            }
+                            style={statChangeStyle(stat.positive)}
+                          >
+                            {stat.change}
+                          </span>
                         )}
                       </td>
                     ))}
-                    {stats.length < 3 && Array.from({ length: 3 - stats.length }).map((_, i) => (
-                      <td key={`pad-${i}`} />
-                    ))}
+                    {stats.length < 3 &&
+                      Array.from({ length: 3 - stats.length }).map((_, i) => (
+                        <td key={`pad-${i}`} />
+                      ))}
                   </tr>
                 </tbody>
               </table>
@@ -170,13 +179,36 @@ export const WeeklyDigest: EmailTemplateType<WeeklyDigestProps> = defineEmail<We
         {items && items.length > 0 && (
           <>
             <Hr />
-            <Text size="sm" muted>{s.highlightsHeading}</Text>
+            <Text size="sm" muted>
+              {s.highlightsHeading}
+            </Text>
             {items.map((item, i) => (
-              <div key={i} style={{ padding: '12px 0', borderBottom: i < items.length - 1 ? `1px solid ${t.borderSubtle}` : 'none' }}>
-                {item.meta && <p style={itemMetaStyle}>{item.category ? `${item.category} · ` : ''}{item.meta}</p>}
-                <a href={item.url} style={itemTitleStyle}>{item.title}</a>
+              <div
+                key={i}
+                style={{
+                  padding: '12px 0',
+                  borderBottom: i < items.length - 1 ? `1px solid ${t.borderSubtle}` : 'none',
+                }}
+              >
+                {item.meta && (
+                  <p style={itemMetaStyle}>
+                    {item.category ? `${item.category} · ` : ''}
+                    {item.meta}
+                  </p>
+                )}
+                <a href={item.url} style={itemTitleStyle}>
+                  {item.title}
+                </a>
                 {item.summary && <p style={itemSummaryStyle}>{item.summary}</p>}
-                <a href={item.url} style={{ fontSize: '13px', color: t.primary, textDecoration: 'none', fontWeight: '500' }}>
+                <a
+                  href={item.url}
+                  style={{
+                    fontSize: '13px',
+                    color: t.primary,
+                    textDecoration: 'none',
+                    fontWeight: '500',
+                  }}
+                >
                   {s.readMore}
                 </a>
               </div>
@@ -186,7 +218,9 @@ export const WeeklyDigest: EmailTemplateType<WeeklyDigestProps> = defineEmail<We
 
         <Button href={dashboardUrl}>{s.ctaLabel}</Button>
         <Hr />
-        <Text muted size="sm">{s.unsubscribeNote}</Text>
+        <Text muted size="sm">
+          {s.unsubscribeNote}
+        </Text>
         <Footer>{s.footer(year, appName)}</Footer>
       </EmailTemplate>
     );

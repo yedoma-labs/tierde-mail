@@ -1,4 +1,4 @@
-import type { EmailProvider, EmailMessage, SendResult, EmailAddress } from '../types.js';
+import type { EmailAddress, EmailMessage, EmailProvider, SendResult } from '../types.js';
 
 interface SmtpAuth {
   user: string;
@@ -35,9 +35,7 @@ class SmtpProvider implements EmailProvider {
   async send(message: EmailMessage): Promise<SendResult> {
     // Dynamic import so nodemailer is truly optional
     const nodemailer = await import('nodemailer').catch(() => {
-      throw new Error(
-        'nodemailer is required for SMTP provider. Install it: pnpm add nodemailer',
-      );
+      throw new Error('nodemailer is required for SMTP provider. Install it: pnpm add nodemailer');
     });
 
     const port = this.#config.port ?? 587;

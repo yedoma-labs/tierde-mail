@@ -1,18 +1,25 @@
-import { currentYear } from './utils.js';
-import { defineEmail } from '../define-email.js';
-import { PALETTE } from '../theme.js';
-import { EmailTemplate } from '../components/EmailTemplate.js';
-import { Heading } from '../components/Heading.js';
-import { Text } from '../components/Text.js';
+import type { CSSProperties } from 'react';
 import { Button } from '../components/Button.js';
+import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Footer } from '../components/Footer.js';
+import { Heading } from '../components/Heading.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
-import type { CSSProperties } from 'react';
-import type { BaseTemplateProps } from './shared.js';
+import { Text } from '../components/Text.js';
+import { defineEmail } from '../define-email.js';
+import { PALETTE } from '../theme.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
+import type { BaseTemplateProps } from './shared.js';
+import { currentYear } from './utils.js';
 
-export type SubscriptionEvent = 'started' | 'upgraded' | 'downgraded' | 'cancelled' | 'renewed' | 'trial_started' | 'trial_ending';
+export type SubscriptionEvent =
+  | 'started'
+  | 'upgraded'
+  | 'downgraded'
+  | 'cancelled'
+  | 'renewed'
+  | 'trial_started'
+  | 'trial_ending';
 
 export interface SubscriptionStrings {
   subject: (event: SubscriptionEvent, planName: string, appName: string) => string;
@@ -55,7 +62,8 @@ export const SUBSCRIPTION_STRINGS: SubscriptionStrings = {
       started: `Thank you for subscribing to ${planName}! Your subscription is now active.`,
       upgraded: `You've successfully upgraded to ${planName}. Enjoy your new features!`,
       downgraded: `Your plan has been changed to ${planName}. The change will take effect at the end of your current billing period.`,
-      cancelled: 'Your subscription has been cancelled. You can continue using the service until the end of your current billing period.',
+      cancelled:
+        'Your subscription has been cancelled. You can continue using the service until the end of your current billing period.',
       renewed: `Your ${planName} subscription has been renewed${nextBillingDate ? ` and your next billing date is ${nextBillingDate}` : ''}.`,
       trial_started: `Your ${planName} trial has started. Enjoy full access to all features during your trial period.`,
       trial_ending: `Your trial ends soon. Upgrade now to keep access to ${planName} features.`,
@@ -130,7 +138,13 @@ export const Subscription: EmailTemplateType<SubscriptionProps> = defineEmail<Su
         <Text>{s.body(event, planName, nextBillingDate)}</Text>
         {trialDaysRemaining !== undefined && event === 'trial_ending' && (
           <Section>
-            <div style={{ ...planBadgeStyle, backgroundColor: PALETTE.trial.bg, color: PALETTE.trial.text }}>
+            <div
+              style={{
+                ...planBadgeStyle,
+                backgroundColor: PALETTE.trial.bg,
+                color: PALETTE.trial.text,
+              }}
+            >
               {s.trialDaysNote(trialDaysRemaining)}
             </div>
           </Section>

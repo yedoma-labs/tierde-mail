@@ -1,6 +1,10 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createHmac } from 'node:crypto';
-import { createResendWebhookHandler, createPostmarkWebhookHandler, WebhookVerificationError } from '../webhooks/index.js';
+import { describe, expect, it } from 'vitest';
+import {
+  createPostmarkWebhookHandler,
+  createResendWebhookHandler,
+  WebhookVerificationError,
+} from '../webhooks/index.js';
 
 // ---------------------------------------------------------------------------
 // Resend helpers
@@ -82,7 +86,7 @@ describe('createResendWebhookHandler', () => {
   it('exposes raw payload', () => {
     const handler = createResendWebhookHandler({ secret: RESEND_SECRET });
     const event = handler.verify(resendDeliveryPayload, resendHeaders(resendDeliveryPayload));
-    expect((event.raw as Record<string, unknown>)['type']).toBe('email.delivered');
+    expect((event.raw as Record<string, unknown>).type).toBe('email.delivered');
   });
 
   it('throws WebhookVerificationError on invalid signature', () => {
@@ -151,7 +155,9 @@ describe('createPostmarkWebhookHandler', () => {
   it('throws WebhookVerificationError on invalid signature', () => {
     const handler = createPostmarkWebhookHandler({ token: POSTMARK_TOKEN });
     const headers = { 'X-Postmark-Signature-256': 'invalidsig==' };
-    expect(() => handler.verify(postmarkDeliveryPayload, headers)).toThrow(WebhookVerificationError);
+    expect(() => handler.verify(postmarkDeliveryPayload, headers)).toThrow(
+      WebhookVerificationError,
+    );
   });
 
   it('throws on missing header', () => {
@@ -162,7 +168,7 @@ describe('createPostmarkWebhookHandler', () => {
   it('exposes raw payload', () => {
     const handler = createPostmarkWebhookHandler({ token: POSTMARK_TOKEN });
     const event = handler.verify(postmarkDeliveryPayload, postmarkHeaders(postmarkDeliveryPayload));
-    expect((event.raw as Record<string, unknown>)['RecordType']).toBe('Delivery');
+    expect((event.raw as Record<string, unknown>).RecordType).toBe('Delivery');
   });
 
   it('WebhookVerificationError has correct name', () => {

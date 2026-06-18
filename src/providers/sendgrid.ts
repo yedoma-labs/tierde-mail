@@ -1,4 +1,4 @@
-import type { EmailProvider, EmailMessage, SendResult, EmailAddress } from '../types.js';
+import type { EmailAddress, EmailMessage, EmailProvider, SendResult } from '../types.js';
 
 interface SendGridConfig {
   apiKey: string;
@@ -37,18 +37,15 @@ class SendGridProvider implements EmailProvider {
     };
 
     if (message.replyTo) {
-      body['reply_to'] = message.replyTo.name
+      body.reply_to = message.replyTo.name
         ? { email: message.replyTo.email, name: message.replyTo.name }
         : { email: message.replyTo.email };
     }
 
     if (message.attachments && message.attachments.length > 0) {
-      body['attachments'] = message.attachments.map((a) => ({
+      body.attachments = message.attachments.map((a) => ({
         filename: a.filename,
-        content:
-          typeof a.content === 'string'
-            ? a.content
-            : a.content.toString('base64'),
+        content: typeof a.content === 'string' ? a.content : a.content.toString('base64'),
         type: a.contentType,
         disposition: 'attachment',
       }));

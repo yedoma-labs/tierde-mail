@@ -1,4 +1,4 @@
-import type { EmailProvider, EmailMessage, SendResult, EmailAddress } from '../types.js';
+import type { EmailAddress, EmailMessage, EmailProvider, SendResult } from '../types.js';
 
 interface ResendConfig {
   apiKey: string;
@@ -33,20 +33,17 @@ class ResendProvider implements EmailProvider {
       text: message.text,
     };
 
-    if (message.cc) body['cc'] = formatAddresses(message.cc);
-    if (message.bcc) body['bcc'] = formatAddresses(message.bcc);
-    if (message.replyTo) body['reply_to'] = formatAddress(message.replyTo);
+    if (message.cc) body.cc = formatAddresses(message.cc);
+    if (message.bcc) body.bcc = formatAddresses(message.bcc);
+    if (message.replyTo) body.reply_to = formatAddress(message.replyTo);
     if (message.headers && Object.keys(message.headers).length > 0) {
-      body['headers'] = message.headers;
+      body.headers = message.headers;
     }
 
     if (message.attachments && message.attachments.length > 0) {
-      body['attachments'] = message.attachments.map((a) => ({
+      body.attachments = message.attachments.map((a) => ({
         filename: a.filename,
-        content:
-          typeof a.content === 'string'
-            ? a.content
-            : a.content.toString('base64'),
+        content: typeof a.content === 'string' ? a.content : a.content.toString('base64'),
         content_type: a.contentType,
       }));
     }

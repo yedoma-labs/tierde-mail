@@ -1,16 +1,16 @@
-import { currentYear } from './utils.js';
-import { defineEmail } from '../define-email.js';
-import { defaultTheme } from '../theme.js';
-import { EmailTemplate } from '../components/EmailTemplate.js';
-import { Heading } from '../components/Heading.js';
-import { Text } from '../components/Text.js';
+import type { CSSProperties } from 'react';
 import { Button } from '../components/Button.js';
+import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Footer } from '../components/Footer.js';
+import { Heading } from '../components/Heading.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
-import type { CSSProperties } from 'react';
-import type { BaseTemplateProps } from './shared.js';
+import { Text } from '../components/Text.js';
+import { defineEmail } from '../define-email.js';
+import { defaultTheme } from '../theme.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
+import type { BaseTemplateProps } from './shared.js';
+import { currentYear } from './utils.js';
 
 export type ReferralEvent = 'invite' | 'reminder' | 'reward_earned' | 'reward_credited';
 
@@ -124,15 +124,24 @@ export const Referral: EmailTemplateType<ReferralProps> = defineEmail<ReferralPr
     };
 
     return (
-      <EmailTemplate preview={s.subject(event, referrerName, appName)} lang={locale} dir={dir} theme={theme}>
+      <EmailTemplate
+        preview={s.subject(event, referrerName, appName)}
+        lang={locale}
+        dir={dir}
+        theme={theme}
+      >
         <Heading>{s.heading(event)}</Heading>
         <Text>{s.greeting(name)}</Text>
         <Text>{s.body(event, referrerName, appName, reward)}</Text>
         {referralCode && (
           <Section>
             <div style={codeBoxStyle}>
-              <span className="tierde-code" style={codeStyle}>{referralCode}</span>
-              <span className="tierde-code" style={codeLabelStyle}>{s.codeLine(referralCode).split(':')[0]}</span>
+              <span className="tierde-code" style={codeStyle}>
+                {referralCode}
+              </span>
+              <span className="tierde-code" style={codeLabelStyle}>
+                {s.codeLine(referralCode).split(':')[0]}
+              </span>
             </div>
           </Section>
         )}

@@ -1,16 +1,16 @@
-import { currentYear } from './utils.js';
-import { defineEmail } from '../define-email.js';
-import { defaultTheme } from '../theme.js';
-import { EmailTemplate } from '../components/EmailTemplate.js';
-import { Heading } from '../components/Heading.js';
-import { Text } from '../components/Text.js';
+import type { CSSProperties } from 'react';
 import { Button } from '../components/Button.js';
+import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Footer } from '../components/Footer.js';
+import { Heading } from '../components/Heading.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
-import type { CSSProperties } from 'react';
-import type { BaseTemplateProps } from './shared.js';
+import { Text } from '../components/Text.js';
+import { defineEmail } from '../define-email.js';
+import { defaultTheme } from '../theme.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
+import type { BaseTemplateProps } from './shared.js';
+import { currentYear } from './utils.js';
 
 export type SupportTicketEvent = 'created' | 'updated' | 'resolved' | 'closed' | 'reopened';
 
@@ -55,7 +55,7 @@ export const SUPPORT_TICKET_STRINGS: SupportTicketStrings = {
     };
     return messages[event];
   },
-  ctaLabel: (event) => event === 'resolved' ? 'Rate Your Experience' : 'View Ticket',
+  ctaLabel: (event) => (event === 'resolved' ? 'Rate Your Experience' : 'View Ticket'),
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
@@ -70,94 +70,145 @@ export interface SupportTicketProps extends BaseTemplateProps<SupportTicketStrin
   priority?: 'low' | 'normal' | 'high' | 'urgent';
 }
 
-export const SupportTicket: EmailTemplateType<SupportTicketProps> = defineEmail<SupportTicketProps>({
-  subject: ({ event, ticketId, appName = 'Our App', strings }) => {
-    const s = { ...SUPPORT_TICKET_STRINGS, ...strings };
-    return s.subject(event, ticketId, appName);
-  },
-  component: ({
-    name,
-    event,
-    ticketId,
-    ticketTitle,
-    ticketUrl,
-    agentMessage,
-    agentName,
-    priority,
-    appName = 'Our App',
-    locale,
-    dir,
-    strings,
-    theme,
-  }) => {
-    const s = { ...SUPPORT_TICKET_STRINGS, ...strings };
-    const t = { ...defaultTheme, ...theme };
-    const year = currentYear(locale);
+export const SupportTicket: EmailTemplateType<SupportTicketProps> = defineEmail<SupportTicketProps>(
+  {
+    subject: ({ event, ticketId, appName = 'Our App', strings }) => {
+      const s = { ...SUPPORT_TICKET_STRINGS, ...strings };
+      return s.subject(event, ticketId, appName);
+    },
+    component: ({
+      name,
+      event,
+      ticketId,
+      ticketTitle,
+      ticketUrl,
+      agentMessage,
+      agentName,
+      priority,
+      appName = 'Our App',
+      locale,
+      dir,
+      strings,
+      theme,
+    }) => {
+      const s = { ...SUPPORT_TICKET_STRINGS, ...strings };
+      const t = { ...defaultTheme, ...theme };
+      const year = currentYear(locale);
 
-    const detailRowStyle: CSSProperties = {
-      padding: '8px 0',
-      borderBottom: `1px solid ${t.borderSubtle}`,
-      fontSize: '14px',
-    };
-
-    const priorityBadge = (priority: SupportTicketProps['priority']): CSSProperties => {
-      const map: Record<NonNullable<SupportTicketProps['priority']>, [string, string]> = {
-        low: [t.secondary, t.textSecondary],
-        normal: [t.infoBg, t.infoText],
-        high: [t.warningBg, t.warningText],
-        urgent: [t.dangerBg, t.dangerText],
+      const detailRowStyle: CSSProperties = {
+        padding: '8px 0',
+        borderBottom: `1px solid ${t.borderSubtle}`,
+        fontSize: '14px',
       };
-      const [bg, color] = map[priority ?? 'normal'];
-      return { display: 'inline-block', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: '700', backgroundColor: bg, color };
-    };
 
-    const agentMessageStyle: CSSProperties = {
-      backgroundColor: t.surfaceSubtle,
-      borderLeft: `3px solid ${t.primary}`,
-      borderRadius: '0 6px 6px 0',
-      padding: '12px 16px',
-      fontSize: '14px',
-      color: t.textSecondary,
-      lineHeight: '1.6',
-    };
+      const priorityBadge = (priority: SupportTicketProps['priority']): CSSProperties => {
+        const map: Record<NonNullable<SupportTicketProps['priority']>, [string, string]> = {
+          low: [t.secondary, t.textSecondary],
+          normal: [t.infoBg, t.infoText],
+          high: [t.warningBg, t.warningText],
+          urgent: [t.dangerBg, t.dangerText],
+        };
+        const [bg, color] = map[priority ?? 'normal'];
+        return {
+          display: 'inline-block',
+          padding: '2px 8px',
+          borderRadius: '12px',
+          fontSize: '11px',
+          fontWeight: '700',
+          backgroundColor: bg,
+          color,
+        };
+      };
 
-    return (
-      <EmailTemplate preview={s.subject(event, ticketId, appName)} lang={locale} dir={dir} theme={theme}>
-        <Heading>{s.heading(event)}</Heading>
-        <Text>{s.greeting(name)}</Text>
-        <Text>{s.body(event, ticketTitle)}</Text>
-        <Section>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }} cellPadding="0" cellSpacing="0">
-            <tbody>
-              <tr>
-                <td style={detailRowStyle}><span style={{ color: t.textMuted }}>Ticket</span></td>
-                <td style={{ ...detailRowStyle, textAlign: 'right', fontWeight: '600', color: t.textPrimary, fontFamily: 'monospace', fontSize: '13px' }}>#{ticketId}</td>
-              </tr>
-              <tr>
-                <td style={detailRowStyle}><span style={{ color: t.textMuted }}>Subject</span></td>
-                <td style={{ ...detailRowStyle, textAlign: 'right', fontWeight: '600', color: t.textPrimary }}>{ticketTitle}</td>
-              </tr>
-              {priority && (
+      const agentMessageStyle: CSSProperties = {
+        backgroundColor: t.surfaceSubtle,
+        borderLeft: `3px solid ${t.primary}`,
+        borderRadius: '0 6px 6px 0',
+        padding: '12px 16px',
+        fontSize: '14px',
+        color: t.textSecondary,
+        lineHeight: '1.6',
+      };
+
+      return (
+        <EmailTemplate
+          preview={s.subject(event, ticketId, appName)}
+          lang={locale}
+          dir={dir}
+          theme={theme}
+        >
+          <Heading>{s.heading(event)}</Heading>
+          <Text>{s.greeting(name)}</Text>
+          <Text>{s.body(event, ticketTitle)}</Text>
+          <Section>
+            <table
+              style={{ width: '100%', borderCollapse: 'collapse' }}
+              cellPadding="0"
+              cellSpacing="0"
+            >
+              <tbody>
                 <tr>
-                  <td style={{ padding: '8px 0', fontSize: '14px' }}><span style={{ color: t.textMuted }}>Priority</span></td>
-                  <td style={{ padding: '8px 0', textAlign: 'right' }}>
-                    <span className="tierde-badge" style={priorityBadge(priority)}>{priority.charAt(0).toUpperCase() + priority.slice(1)}</span>
+                  <td style={detailRowStyle}>
+                    <span style={{ color: t.textMuted }}>Ticket</span>
+                  </td>
+                  <td
+                    style={{
+                      ...detailRowStyle,
+                      textAlign: 'right',
+                      fontWeight: '600',
+                      color: t.textPrimary,
+                      fontFamily: 'monospace',
+                      fontSize: '13px',
+                    }}
+                  >
+                    #{ticketId}
                   </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </Section>
-        {agentMessage && (
-          <Section>
-            {agentName && <Text muted size="sm">{agentName} replied:</Text>}
-            <div style={agentMessageStyle}>{agentMessage}</div>
+                <tr>
+                  <td style={detailRowStyle}>
+                    <span style={{ color: t.textMuted }}>Subject</span>
+                  </td>
+                  <td
+                    style={{
+                      ...detailRowStyle,
+                      textAlign: 'right',
+                      fontWeight: '600',
+                      color: t.textPrimary,
+                    }}
+                  >
+                    {ticketTitle}
+                  </td>
+                </tr>
+                {priority && (
+                  <tr>
+                    <td style={{ padding: '8px 0', fontSize: '14px' }}>
+                      <span style={{ color: t.textMuted }}>Priority</span>
+                    </td>
+                    <td style={{ padding: '8px 0', textAlign: 'right' }}>
+                      <span className="tierde-badge" style={priorityBadge(priority)}>
+                        {priority.charAt(0).toUpperCase() + priority.slice(1)}
+                      </span>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </Section>
-        )}
-        <Button href={ticketUrl}>{s.ctaLabel(event)}</Button>
-        <Hr />
-        <Footer>{s.footer(year, appName)}</Footer>
-      </EmailTemplate>
-    );
+          {agentMessage && (
+            <Section>
+              {agentName && (
+                <Text muted size="sm">
+                  {agentName} replied:
+                </Text>
+              )}
+              <div style={agentMessageStyle}>{agentMessage}</div>
+            </Section>
+          )}
+          <Button href={ticketUrl}>{s.ctaLabel(event)}</Button>
+          <Hr />
+          <Footer>{s.footer(year, appName)}</Footer>
+        </EmailTemplate>
+      );
+    },
   },
-});
+);

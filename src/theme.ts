@@ -61,8 +61,7 @@ export const defaultTheme: Theme = {
   infoBg: '#eff6ff',
   infoBorder: '#bfdbfe',
   infoText: '#1e40af',
-  fontFamily:
-    "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
+  fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
   borderRadius: '12px',
   buttonBorderRadius: '8px',
   maxWidth: '600px',
@@ -70,17 +69,17 @@ export const defaultTheme: Theme = {
 
 export const PALETTE = {
   changelog: {
-    new:         { bg: '#eff6ff', text: '#1d4ed8' },
+    new: { bg: '#eff6ff', text: '#1d4ed8' },
     improvement: { bg: '#f0fdf4', text: '#15803d' },
-    fix:         { bg: '#faf5ff', text: '#7e22ce' },
+    fix: { bg: '#faf5ff', text: '#7e22ce' },
   },
   impact: {
-    full_outage:    { bg: '#fee2e2', text: '#991b1b' },
+    full_outage: { bg: '#fee2e2', text: '#991b1b' },
     partial_outage: { bg: '#ffedd5', text: '#9a3412' },
-    degraded:       { bg: '#fef9c3', text: '#854d0e' },
+    degraded: { bg: '#fef9c3', text: '#854d0e' },
   },
   severity: {
-    warning:  { bar: '#eab308', text: '#854d0e' },
+    warning: { bar: '#eab308', text: '#854d0e' },
     critical: { bar: '#f97316', text: '#9a3412' },
     exceeded: { bar: '#dc2626', text: '#dc2626' },
   },

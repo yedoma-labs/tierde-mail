@@ -1,15 +1,15 @@
-import { currentYear } from './utils.js';
-import type { BaseTemplateProps } from './shared.js';
-import { defineEmail } from '../define-email.js';
-import { defaultTheme } from '../theme.js';
+import type { CSSProperties } from 'react';
 import { EmailTemplate } from '../components/EmailTemplate.js';
-import { Heading } from '../components/Heading.js';
-import { Text } from '../components/Text.js';
 import { Footer } from '../components/Footer.js';
+import { Heading } from '../components/Heading.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
-import type { CSSProperties } from 'react';
+import { Text } from '../components/Text.js';
+import { defineEmail } from '../define-email.js';
+import { defaultTheme } from '../theme.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
+import type { BaseTemplateProps } from './shared.js';
+import { currentYear } from './utils.js';
 
 export interface PhoneVerificationStrings {
   subject: (appName: string) => string;
@@ -40,48 +40,63 @@ export interface PhoneVerificationProps extends BaseTemplateProps<PhoneVerificat
   expiresInMinutes?: number;
 }
 
-export const PhoneVerification: EmailTemplateType<PhoneVerificationProps> = defineEmail<PhoneVerificationProps>({
-  subject: ({ appName = 'Our App', strings }) => {
-    const s = { ...PHONE_VERIFICATION_STRINGS, ...strings };
-    return s.subject(appName);
-  },
-  component: ({ name, phone, code, expiresInMinutes = 10, appName = 'Our App', locale, dir, strings, theme }) => {
-    const s = { ...PHONE_VERIFICATION_STRINGS, ...strings };
-    const t = { ...defaultTheme, ...theme };
-    const year = currentYear(locale);
+export const PhoneVerification: EmailTemplateType<PhoneVerificationProps> =
+  defineEmail<PhoneVerificationProps>({
+    subject: ({ appName = 'Our App', strings }) => {
+      const s = { ...PHONE_VERIFICATION_STRINGS, ...strings };
+      return s.subject(appName);
+    },
+    component: ({
+      name,
+      phone,
+      code,
+      expiresInMinutes = 10,
+      appName = 'Our App',
+      locale,
+      dir,
+      strings,
+      theme,
+    }) => {
+      const s = { ...PHONE_VERIFICATION_STRINGS, ...strings };
+      const t = { ...defaultTheme, ...theme };
+      const year = currentYear(locale);
 
-    const codeLabelStyle: CSSProperties = {
-      fontSize: '12px',
-      fontWeight: '600',
-      textTransform: 'uppercase',
-      letterSpacing: '0.05em',
-      color: t.textMuted,
-      marginBottom: '8px',
-      display: 'block',
-    };
+      const codeLabelStyle: CSSProperties = {
+        fontSize: '12px',
+        fontWeight: '600',
+        textTransform: 'uppercase',
+        letterSpacing: '0.05em',
+        color: t.textMuted,
+        marginBottom: '8px',
+        display: 'block',
+      };
 
-    const codeStyle: CSSProperties = {
-      fontSize: '36px',
-      fontWeight: '700',
-      letterSpacing: '0.15em',
-      color: t.textPrimary,
-      fontFamily: 'monospace',
-    };
+      const codeStyle: CSSProperties = {
+        fontSize: '36px',
+        fontWeight: '700',
+        letterSpacing: '0.15em',
+        color: t.textPrimary,
+        fontFamily: 'monospace',
+      };
 
-    return (
-      <EmailTemplate preview={s.subject(appName)} lang={locale} dir={dir} theme={theme}>
-        <Heading>{s.heading}</Heading>
-        <Text>{s.greeting(name)}</Text>
-        <Text>{s.body(phone)}</Text>
-        <Section>
-          <span style={codeLabelStyle}>{s.codeLabel}</span>
-          <div style={codeStyle}>{code}</div>
-        </Section>
-        <Text muted size="sm">{s.expiry(expiresInMinutes)}</Text>
-        <Hr />
-        <Text muted size="sm">{s.noActionNote}</Text>
-        <Footer>{s.footer(year, appName)}</Footer>
-      </EmailTemplate>
-    );
-  },
-});
+      return (
+        <EmailTemplate preview={s.subject(appName)} lang={locale} dir={dir} theme={theme}>
+          <Heading>{s.heading}</Heading>
+          <Text>{s.greeting(name)}</Text>
+          <Text>{s.body(phone)}</Text>
+          <Section>
+            <span style={codeLabelStyle}>{s.codeLabel}</span>
+            <div style={codeStyle}>{code}</div>
+          </Section>
+          <Text muted size="sm">
+            {s.expiry(expiresInMinutes)}
+          </Text>
+          <Hr />
+          <Text muted size="sm">
+            {s.noActionNote}
+          </Text>
+          <Footer>{s.footer(year, appName)}</Footer>
+        </EmailTemplate>
+      );
+    },
+  });

@@ -1,11 +1,11 @@
 import { createEnv, eg } from '@yedoma-labs/bylyt-env-guard';
 import { createMailer } from './mailer.js';
-import { resend } from './providers/resend.js';
-import { smtp } from './providers/smtp.js';
-import { ses } from './providers/ses.js';
-import { sendgrid } from './providers/sendgrid.js';
-import { postmark } from './providers/postmark.js';
 import { mailpit } from './providers/mailpit.js';
+import { postmark } from './providers/postmark.js';
+import { resend } from './providers/resend.js';
+import { sendgrid } from './providers/sendgrid.js';
+import { ses } from './providers/ses.js';
+import { smtp } from './providers/smtp.js';
 import type { Mailer } from './types.js';
 
 /**
@@ -29,7 +29,14 @@ import type { Mailer } from './types.js';
 export function createMailerFromEnv(): Mailer {
   const env = createEnv({
     schema: {
-      TIERDE_PROVIDER: eg.enum(['resend', 'smtp', 'ses', 'sendgrid', 'postmark', 'mailpit'] as const),
+      TIERDE_PROVIDER: eg.enum([
+        'resend',
+        'smtp',
+        'ses',
+        'sendgrid',
+        'postmark',
+        'mailpit',
+      ] as const),
       TIERDE_FROM_EMAIL: eg.string().required(),
       TIERDE_FROM_NAME: eg.string().optional(),
 
@@ -88,15 +95,20 @@ export function createMailerFromEnv(): Mailer {
       return createMailer({ provider: ses({ region }), from });
     }
     case 'sendgrid': {
-      if (!env.SENDGRID_API_KEY) throw new Error('SENDGRID_API_KEY is required for sendgrid provider');
+      if (!env.SENDGRID_API_KEY)
+        throw new Error('SENDGRID_API_KEY is required for sendgrid provider');
       return createMailer({ provider: sendgrid({ apiKey: env.SENDGRID_API_KEY }), from });
     }
     case 'postmark': {
-      if (!env.POSTMARK_SERVER_TOKEN) throw new Error('POSTMARK_SERVER_TOKEN is required for postmark provider');
+      if (!env.POSTMARK_SERVER_TOKEN)
+        throw new Error('POSTMARK_SERVER_TOKEN is required for postmark provider');
       return createMailer({ provider: postmark({ serverToken: env.POSTMARK_SERVER_TOKEN }), from });
     }
     case 'mailpit': {
-      return createMailer({ provider: mailpit({ host: env.MAILPIT_HOST, port: env.MAILPIT_PORT }), from });
+      return createMailer({
+        provider: mailpit({ host: env.MAILPIT_HOST, port: env.MAILPIT_PORT }),
+        from,
+      });
     }
   }
 }

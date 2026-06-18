@@ -1,16 +1,16 @@
-import { currentYear } from './utils.js';
-import { defineEmail } from '../define-email.js';
-import { defaultTheme, PALETTE } from '../theme.js';
-import { EmailTemplate } from '../components/EmailTemplate.js';
-import { Heading } from '../components/Heading.js';
-import { Text } from '../components/Text.js';
+import type { CSSProperties } from 'react';
 import { Button } from '../components/Button.js';
+import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Footer } from '../components/Footer.js';
+import { Heading } from '../components/Heading.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
-import type { CSSProperties } from 'react';
-import type { BaseTemplateProps } from './shared.js';
+import { Text } from '../components/Text.js';
+import { defineEmail } from '../define-email.js';
+import { defaultTheme, PALETTE } from '../theme.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
+import type { BaseTemplateProps } from './shared.js';
+import { currentYear } from './utils.js';
 
 export type MaintenanceType = 'scheduled' | 'emergency' | 'completed' | 'extended';
 
@@ -36,7 +36,7 @@ export const MAINTENANCE_NOTIFICATION_STRINGS: MaintenanceNotificationStrings = 
     const labels: Record<MaintenanceType, string> = {
       scheduled: 'Scheduled maintenance',
       emergency: 'Emergency maintenance',
-      completed: 'We\'re back online',
+      completed: "We're back online",
       extended: 'Maintenance extended',
     };
     return labels[type];
@@ -59,7 +59,8 @@ export interface AffectedService {
   impact: 'full_outage' | 'partial_outage' | 'degraded';
 }
 
-export interface MaintenanceNotificationProps extends BaseTemplateProps<MaintenanceNotificationStrings> {
+export interface MaintenanceNotificationProps
+  extends BaseTemplateProps<MaintenanceNotificationStrings> {
   type: MaintenanceType;
   startTime?: string;
   endTime?: string;
@@ -74,103 +75,173 @@ const IMPACT_LABELS: Record<AffectedService['impact'], string> = {
   degraded: 'Degraded',
 };
 
-export const MaintenanceNotification: EmailTemplateType<MaintenanceNotificationProps> = defineEmail<MaintenanceNotificationProps>({
-  subject: ({ type, appName = 'Our App', strings }) => {
-    const s = { ...MAINTENANCE_NOTIFICATION_STRINGS, ...strings };
-    return s.subject(type, appName);
-  },
-  component: ({
-    type,
-    startTime,
-    endTime,
-    duration,
-    affectedServices,
-    statusPageUrl,
-    appName = 'Our App',
-    locale,
-    dir,
-    strings,
-    theme,
-  }) => {
-    const s = { ...MAINTENANCE_NOTIFICATION_STRINGS, ...strings };
-    const t = { ...defaultTheme, ...theme };
-    const year = currentYear(locale);
-    const hasWindow = startTime || endTime || duration;
+export const MaintenanceNotification: EmailTemplateType<MaintenanceNotificationProps> =
+  defineEmail<MaintenanceNotificationProps>({
+    subject: ({ type, appName = 'Our App', strings }) => {
+      const s = { ...MAINTENANCE_NOTIFICATION_STRINGS, ...strings };
+      return s.subject(type, appName);
+    },
+    component: ({
+      type,
+      startTime,
+      endTime,
+      duration,
+      affectedServices,
+      statusPageUrl,
+      appName = 'Our App',
+      locale,
+      dir,
+      strings,
+      theme,
+    }) => {
+      const s = { ...MAINTENANCE_NOTIFICATION_STRINGS, ...strings };
+      const t = { ...defaultTheme, ...theme };
+      const year = currentYear(locale);
+      const hasWindow = startTime || endTime || duration;
 
-    const windowBoxStyle: CSSProperties = {
-      backgroundColor: t.surfaceSubtle,
-      borderRadius: '8px',
-      padding: '16px',
-    };
+      const windowBoxStyle: CSSProperties = {
+        backgroundColor: t.surfaceSubtle,
+        borderRadius: '8px',
+        padding: '16px',
+      };
 
-    const timeRowStyle: CSSProperties = {
-      padding: '8px 0',
-      borderBottom: `1px solid ${t.border}`,
-      fontSize: '14px',
-    };
+      const timeRowStyle: CSSProperties = {
+        padding: '8px 0',
+        borderBottom: `1px solid ${t.border}`,
+        fontSize: '14px',
+      };
 
-    const impactBadge = (impact: AffectedService['impact']): CSSProperties => ({
-      display: 'inline-block',
-      padding: '2px 8px',
-      borderRadius: '12px',
-      fontSize: '11px',
-      fontWeight: '700',
-      backgroundColor: impact === 'full_outage' ? PALETTE.impact.full_outage.bg : impact === 'partial_outage' ? PALETTE.impact.partial_outage.bg : PALETTE.impact.degraded.bg,
-      color: impact === 'full_outage' ? PALETTE.impact.full_outage.text : impact === 'partial_outage' ? PALETTE.impact.partial_outage.text : PALETTE.impact.degraded.text,
-    });
+      const impactBadge = (impact: AffectedService['impact']): CSSProperties => ({
+        display: 'inline-block',
+        padding: '2px 8px',
+        borderRadius: '12px',
+        fontSize: '11px',
+        fontWeight: '700',
+        backgroundColor:
+          impact === 'full_outage'
+            ? PALETTE.impact.full_outage.bg
+            : impact === 'partial_outage'
+              ? PALETTE.impact.partial_outage.bg
+              : PALETTE.impact.degraded.bg,
+        color:
+          impact === 'full_outage'
+            ? PALETTE.impact.full_outage.text
+            : impact === 'partial_outage'
+              ? PALETTE.impact.partial_outage.text
+              : PALETTE.impact.degraded.text,
+      });
 
-    return (
-      <EmailTemplate preview={s.subject(type, appName)} lang={locale} dir={dir} theme={theme}>
-        <Heading>{s.heading(type)}</Heading>
-        <Text>{s.body(type, appName)}</Text>
-        {hasWindow && (
-          <Section>
-            <div style={windowBoxStyle}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }} cellPadding="0" cellSpacing="0">
+      return (
+        <EmailTemplate preview={s.subject(type, appName)} lang={locale} dir={dir} theme={theme}>
+          <Heading>{s.heading(type)}</Heading>
+          <Text>{s.body(type, appName)}</Text>
+          {hasWindow && (
+            <Section>
+              <div style={windowBoxStyle}>
+                <table
+                  style={{ width: '100%', borderCollapse: 'collapse' }}
+                  cellPadding="0"
+                  cellSpacing="0"
+                >
+                  <tbody>
+                    {startTime && (
+                      <tr>
+                        <td style={timeRowStyle}>
+                          <span style={{ color: t.textMuted }}>Start</span>
+                        </td>
+                        <td
+                          style={{
+                            ...timeRowStyle,
+                            textAlign: 'right',
+                            fontWeight: '600',
+                            color: t.textPrimary,
+                          }}
+                        >
+                          {startTime}
+                        </td>
+                      </tr>
+                    )}
+                    {endTime && (
+                      <tr>
+                        <td style={timeRowStyle}>
+                          <span style={{ color: t.textMuted }}>End</span>
+                        </td>
+                        <td
+                          style={{
+                            ...timeRowStyle,
+                            textAlign: 'right',
+                            fontWeight: '600',
+                            color: t.textPrimary,
+                          }}
+                        >
+                          {endTime}
+                        </td>
+                      </tr>
+                    )}
+                    {duration && (
+                      <tr>
+                        <td style={{ padding: '8px 0', fontSize: '14px' }}>
+                          <span style={{ color: t.textMuted }}>Duration</span>
+                        </td>
+                        <td
+                          style={{
+                            padding: '8px 0',
+                            textAlign: 'right',
+                            fontWeight: '600',
+                            color: t.textPrimary,
+                            fontSize: '14px',
+                          }}
+                        >
+                          {duration}
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </Section>
+          )}
+          {affectedServices && affectedServices.length > 0 && (
+            <Section>
+              <table
+                style={{ width: '100%', borderCollapse: 'collapse' }}
+                cellPadding="0"
+                cellSpacing="0"
+              >
                 <tbody>
-                  {startTime && (
-                    <tr>
-                      <td style={timeRowStyle}><span style={{ color: t.textMuted }}>Start</span></td>
-                      <td style={{ ...timeRowStyle, textAlign: 'right', fontWeight: '600', color: t.textPrimary }}>{startTime}</td>
+                  {affectedServices.map((svc, i) => (
+                    <tr key={i}>
+                      <td
+                        style={{
+                          padding: '10px 0',
+                          borderBottom: `1px solid ${t.borderSubtle}`,
+                          fontSize: '14px',
+                          color: t.textPrimary,
+                        }}
+                      >
+                        {svc.name}
+                      </td>
+                      <td
+                        style={{
+                          padding: '10px 0',
+                          borderBottom: `1px solid ${t.borderSubtle}`,
+                          textAlign: 'right',
+                        }}
+                      >
+                        <span className="tierde-badge" style={impactBadge(svc.impact)}>
+                          {IMPACT_LABELS[svc.impact]}
+                        </span>
+                      </td>
                     </tr>
-                  )}
-                  {endTime && (
-                    <tr>
-                      <td style={timeRowStyle}><span style={{ color: t.textMuted }}>End</span></td>
-                      <td style={{ ...timeRowStyle, textAlign: 'right', fontWeight: '600', color: t.textPrimary }}>{endTime}</td>
-                    </tr>
-                  )}
-                  {duration && (
-                    <tr>
-                      <td style={{ padding: '8px 0', fontSize: '14px' }}><span style={{ color: t.textMuted }}>Duration</span></td>
-                      <td style={{ padding: '8px 0', textAlign: 'right', fontWeight: '600', color: t.textPrimary, fontSize: '14px' }}>{duration}</td>
-                    </tr>
-                  )}
+                  ))}
                 </tbody>
               </table>
-            </div>
-          </Section>
-        )}
-        {affectedServices && affectedServices.length > 0 && (
-          <Section>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }} cellPadding="0" cellSpacing="0">
-              <tbody>
-                {affectedServices.map((svc, i) => (
-                  <tr key={i}>
-                    <td style={{ padding: '10px 0', borderBottom: `1px solid ${t.borderSubtle}`, fontSize: '14px', color: t.textPrimary }}>{svc.name}</td>
-                    <td style={{ padding: '10px 0', borderBottom: `1px solid ${t.borderSubtle}`, textAlign: 'right' }}>
-                      <span className="tierde-badge" style={impactBadge(svc.impact)}>{IMPACT_LABELS[svc.impact]}</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </Section>
-        )}
-        {statusPageUrl && <Button href={statusPageUrl}>{s.statusPageLabel}</Button>}
-        <Hr />
-        <Footer>{s.footer(year, appName)}</Footer>
-      </EmailTemplate>
-    );
-  },
-});
+            </Section>
+          )}
+          {statusPageUrl && <Button href={statusPageUrl}>{s.statusPageLabel}</Button>}
+          <Hr />
+          <Footer>{s.footer(year, appName)}</Footer>
+        </EmailTemplate>
+      );
+    },
+  });

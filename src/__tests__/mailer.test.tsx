@@ -1,10 +1,10 @@
-import { describe, it, expect, vi } from 'vitest';
-import { defineEmail } from '../define-email.js';
-import { createMailer } from '../mailer.js';
-import type { EmailProvider, EmailMessage, SendResult } from '../types.js';
+import { describe, expect, it } from 'vitest';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Heading } from '../components/Heading.js';
 import { Text } from '../components/Text.js';
+import { defineEmail } from '../define-email.js';
+import { createMailer } from '../mailer.js';
+import type { EmailMessage, EmailProvider } from '../types.js';
 
 const TestEmail = defineEmail<{ name: string }>({
   subject: ({ name }) => `Hello ${name}`,
@@ -57,7 +57,7 @@ describe('createMailer', () => {
 
     const msg = provider.calls[0];
     expect(Array.isArray(msg?.to)).toBe(true);
-    expect((msg?.to as Array<unknown>)).toHaveLength(2);
+    expect(msg?.to as Array<unknown>).toHaveLength(2);
     expect(Array.isArray(msg?.cc)).toBe(true);
   });
 
@@ -88,16 +88,26 @@ describe('createMailer', () => {
   it('throws when all providers fail', async () => {
     const mailer = createMailer({
       providers: [
-        { name: 'p1', async send() { throw new Error('p1 down'); } },
-        { name: 'p2', async send() { throw new Error('p2 down'); } },
+        {
+          name: 'p1',
+          async send() {
+            throw new Error('p1 down');
+          },
+        },
+        {
+          name: 'p2',
+          async send() {
+            throw new Error('p2 down');
+          },
+        },
       ],
       strategy: 'failover',
       from: 'sender@example.com',
     });
 
-    await expect(
-      mailer.send(TestEmail, { to: 'u@u.com', props: { name: 'D' } }),
-    ).rejects.toThrow('p2 down');
+    await expect(mailer.send(TestEmail, { to: 'u@u.com', props: { name: 'D' } })).rejects.toThrow(
+      'p2 down',
+    );
   });
 
   it('rejects invalid to address', async () => {

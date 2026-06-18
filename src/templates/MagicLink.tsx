@@ -1,13 +1,13 @@
-import { currentYear } from './utils.js';
-import { defineEmail } from '../define-email.js';
-import { EmailTemplate } from '../components/EmailTemplate.js';
-import { Heading } from '../components/Heading.js';
-import { Text } from '../components/Text.js';
 import { Button } from '../components/Button.js';
+import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Footer } from '../components/Footer.js';
+import { Heading } from '../components/Heading.js';
 import { Hr } from '../components/Hr.js';
-import type { BaseTemplateProps } from './shared.js';
+import { Text } from '../components/Text.js';
+import { defineEmail } from '../define-email.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
+import type { BaseTemplateProps } from './shared.js';
+import { currentYear } from './utils.js';
 
 export interface MagicLinkStrings {
   subject: (appName: string) => string;
@@ -41,7 +41,16 @@ export const MagicLink: EmailTemplateType<MagicLinkProps> = defineEmail<MagicLin
     const s = { ...MAGIC_LINK_STRINGS, ...strings };
     return s.subject(appName);
   },
-  component: ({ email, loginUrl, expiresIn = '15 minutes', appName = 'Our App', locale, dir, strings, theme }) => {
+  component: ({
+    email,
+    loginUrl,
+    expiresIn = '15 minutes',
+    appName = 'Our App',
+    locale,
+    dir,
+    strings,
+    theme,
+  }) => {
     const s = { ...MAGIC_LINK_STRINGS, ...strings };
     const year = currentYear(locale);
     return (

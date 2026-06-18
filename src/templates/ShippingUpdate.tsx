@@ -1,15 +1,15 @@
-import { currentYear } from './utils.js';
+import type { CSSProperties } from 'react';
+import { Button } from '../components/Button.js';
+import { EmailTemplate } from '../components/EmailTemplate.js';
+import { Footer } from '../components/Footer.js';
+import { Heading } from '../components/Heading.js';
+import { Section } from '../components/Section.js';
+import { Text } from '../components/Text.js';
 import { defineEmail } from '../define-email.js';
 import { defaultTheme } from '../theme.js';
-import { EmailTemplate } from '../components/EmailTemplate.js';
-import { Heading } from '../components/Heading.js';
-import { Text } from '../components/Text.js';
-import { Button } from '../components/Button.js';
-import { Footer } from '../components/Footer.js';
-import { Section } from '../components/Section.js';
-import type { CSSProperties } from 'react';
-import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
+import type { BaseTemplateProps } from './shared.js';
+import { currentYear } from './utils.js';
 
 export type ShippingStatus = 'shipped' | 'out_for_delivery' | 'delivered' | 'delayed';
 
@@ -67,98 +67,126 @@ export interface ShippingUpdateProps extends BaseTemplateProps<ShippingUpdateStr
   estimatedDelivery?: string;
 }
 
-export const ShippingUpdate: EmailTemplateType<ShippingUpdateProps> = defineEmail<ShippingUpdateProps>({
-  subject: ({ status, orderNumber, strings }) => {
-    const s = { ...SHIPPING_UPDATE_STRINGS, ...strings };
-    return s.subject(status, orderNumber);
-  },
-  component: ({
-    name,
-    orderNumber,
-    status,
-    trackingUrl,
-    trackingNumber,
-    carrier,
-    estimatedDelivery,
-    appName = 'Our Store',
-    locale,
-    dir,
-    strings,
-    theme,
-  }) => {
-    const s = { ...SHIPPING_UPDATE_STRINGS, ...strings };
-    const t = { ...defaultTheme, ...theme };
-    const year = currentYear(locale);
+export const ShippingUpdate: EmailTemplateType<ShippingUpdateProps> =
+  defineEmail<ShippingUpdateProps>({
+    subject: ({ status, orderNumber, strings }) => {
+      const s = { ...SHIPPING_UPDATE_STRINGS, ...strings };
+      return s.subject(status, orderNumber);
+    },
+    component: ({
+      name,
+      orderNumber,
+      status,
+      trackingUrl,
+      trackingNumber,
+      carrier,
+      estimatedDelivery,
+      appName = 'Our Store',
+      locale,
+      dir,
+      strings,
+      theme,
+    }) => {
+      const s = { ...SHIPPING_UPDATE_STRINGS, ...strings };
+      const t = { ...defaultTheme, ...theme };
+      const year = currentYear(locale);
 
-    const infoRowStyle: CSSProperties = {
-      display: 'flex',
-      justifyContent: 'space-between',
-      padding: '8px 0',
-      borderBottom: `1px solid ${t.borderSubtle}`,
-      fontSize: '14px',
-    };
+      const infoRowStyle: CSSProperties = {
+        display: 'flex',
+        justifyContent: 'space-between',
+        padding: '8px 0',
+        borderBottom: `1px solid ${t.borderSubtle}`,
+        fontSize: '14px',
+      };
 
-    const labelStyle: CSSProperties = {
-      color: t.textMuted,
-      fontWeight: '500',
-    };
+      const labelStyle: CSSProperties = {
+        color: t.textMuted,
+        fontWeight: '500',
+      };
 
-    const valueStyle: CSSProperties = {
-      color: t.textSecondary,
-      fontWeight: '600',
-    };
+      const valueStyle: CSSProperties = {
+        color: t.textSecondary,
+        fontWeight: '600',
+      };
 
-    return (
-      <EmailTemplate
-        preview={s.subject(status, orderNumber)}
-        lang={locale}
-        dir={dir}
-        theme={theme}
-      >
-        <Heading>{s.heading(status)}</Heading>
-        <Text>{s.greeting(name)}</Text>
-        <Text>{s.body(status, orderNumber)}</Text>
-        {(trackingNumber || carrier || estimatedDelivery) && (
-          <Section>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }} cellPadding="0" cellSpacing="0">
-              <tbody>
-                {carrier && (
-                  <tr>
-                    <td style={{ ...infoRowStyle, display: 'table-cell', padding: '10px 0', borderBottom: `1px solid ${t.borderSubtle}` }}>
-                      <span style={labelStyle}>Carrier</span>
-                    </td>
-                    <td style={{ ...infoRowStyle, display: 'table-cell', padding: '10px 0', textAlign: 'right', borderBottom: `1px solid ${t.borderSubtle}` }}>
-                      <span style={valueStyle}>{carrier}</span>
-                    </td>
-                  </tr>
-                )}
-                {trackingNumber && (
-                  <tr>
-                    <td style={{ padding: '10px 0', borderBottom: `1px solid ${t.borderSubtle}` }}>
-                      <span style={labelStyle}>Tracking #</span>
-                    </td>
-                    <td style={{ padding: '10px 0', textAlign: 'right', borderBottom: `1px solid ${t.borderSubtle}` }}>
-                      <span style={valueStyle}>{trackingNumber}</span>
-                    </td>
-                  </tr>
-                )}
-                {estimatedDelivery && (
-                  <tr>
-                    <td style={{ padding: '10px 0' }}>
-                      <span style={labelStyle}>Est. Delivery</span>
-                    </td>
-                    <td style={{ padding: '10px 0', textAlign: 'right' }}>
-                      <span style={valueStyle}>{estimatedDelivery}</span>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </Section>
-        )}
-        <Button href={trackingUrl}>{s.ctaLabel}</Button>
-        <Footer>{s.footer(year, appName)}</Footer>
-      </EmailTemplate>
-    );
-  },
-});
+      return (
+        <EmailTemplate
+          preview={s.subject(status, orderNumber)}
+          lang={locale}
+          dir={dir}
+          theme={theme}
+        >
+          <Heading>{s.heading(status)}</Heading>
+          <Text>{s.greeting(name)}</Text>
+          <Text>{s.body(status, orderNumber)}</Text>
+          {(trackingNumber || carrier || estimatedDelivery) && (
+            <Section>
+              <table
+                style={{ width: '100%', borderCollapse: 'collapse' }}
+                cellPadding="0"
+                cellSpacing="0"
+              >
+                <tbody>
+                  {carrier && (
+                    <tr>
+                      <td
+                        style={{
+                          ...infoRowStyle,
+                          display: 'table-cell',
+                          padding: '10px 0',
+                          borderBottom: `1px solid ${t.borderSubtle}`,
+                        }}
+                      >
+                        <span style={labelStyle}>Carrier</span>
+                      </td>
+                      <td
+                        style={{
+                          ...infoRowStyle,
+                          display: 'table-cell',
+                          padding: '10px 0',
+                          textAlign: 'right',
+                          borderBottom: `1px solid ${t.borderSubtle}`,
+                        }}
+                      >
+                        <span style={valueStyle}>{carrier}</span>
+                      </td>
+                    </tr>
+                  )}
+                  {trackingNumber && (
+                    <tr>
+                      <td
+                        style={{ padding: '10px 0', borderBottom: `1px solid ${t.borderSubtle}` }}
+                      >
+                        <span style={labelStyle}>Tracking #</span>
+                      </td>
+                      <td
+                        style={{
+                          padding: '10px 0',
+                          textAlign: 'right',
+                          borderBottom: `1px solid ${t.borderSubtle}`,
+                        }}
+                      >
+                        <span style={valueStyle}>{trackingNumber}</span>
+                      </td>
+                    </tr>
+                  )}
+                  {estimatedDelivery && (
+                    <tr>
+                      <td style={{ padding: '10px 0' }}>
+                        <span style={labelStyle}>Est. Delivery</span>
+                      </td>
+                      <td style={{ padding: '10px 0', textAlign: 'right' }}>
+                        <span style={valueStyle}>{estimatedDelivery}</span>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </Section>
+          )}
+          <Button href={trackingUrl}>{s.ctaLabel}</Button>
+          <Footer>{s.footer(year, appName)}</Footer>
+        </EmailTemplate>
+      );
+    },
+  });

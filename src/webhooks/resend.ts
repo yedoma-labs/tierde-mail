@@ -1,5 +1,5 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
-import type { WebhookHandler, WebhookEvent } from './types.js';
+import type { WebhookEvent, WebhookHandler } from './types.js';
 import { WebhookVerificationError } from './types.js';
 
 interface ResendWebhookConfig {
@@ -9,12 +9,9 @@ interface ResendWebhookConfig {
   toleranceSeconds?: number;
 }
 
-function getHeader(
-  headers: Record<string, string | string[] | undefined>,
-  name: string,
-): string {
+function getHeader(headers: Record<string, string | string[] | undefined>, name: string): string {
   const val = headers[name] ?? headers[name.toLowerCase()];
-  return Array.isArray(val) ? val[0] ?? '' : val ?? '';
+  return Array.isArray(val) ? (val[0] ?? '') : (val ?? '');
 }
 
 class ResendWebhookHandler implements WebhookHandler {
@@ -77,22 +74,20 @@ class ResendWebhookHandler implements WebhookHandler {
 }
 
 function normalizeResendEvent(payload: Record<string, unknown>): WebhookEvent {
-  const type = String(payload['type'] ?? '');
-  const data = (payload['data'] ?? {}) as Record<string, unknown>;
+  const type = String(payload.type ?? '');
+  const data = (payload.data ?? {}) as Record<string, unknown>;
 
-  const to = Array.isArray(data['to'])
-    ? (data['to'] as unknown[]).map(String)
-    : [String(data['to'] ?? '')];
+  const to = Array.isArray(data.to) ? (data.to as unknown[]).map(String) : [String(data.to ?? '')];
 
   return {
     type,
     provider: 'resend',
     email: {
-      id: String(data['email_id'] ?? ''),
+      id: String(data.email_id ?? ''),
       to,
-      from: String(data['from'] ?? ''),
-      subject: data['subject'] ? String(data['subject']) : undefined,
-      timestamp: String(data['created_at'] ?? new Date().toISOString()),
+      from: String(data.from ?? ''),
+      subject: data.subject ? String(data.subject) : undefined,
+      timestamp: String(data.created_at ?? new Date().toISOString()),
     },
     raw: payload,
   };

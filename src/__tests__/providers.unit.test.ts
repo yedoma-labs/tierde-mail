@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { EmailMessage } from '../types.js';
 
 const baseMessage: EmailMessage = {
@@ -29,7 +29,7 @@ describe('resend provider', () => {
     expect(mockFetch).toHaveBeenCalledOnce();
     const [url, init] = mockFetch.mock.calls[0] as [string, RequestInit];
     expect(url).toBe('https://api.resend.com/emails');
-    expect((init.headers as Record<string, string>)['Authorization']).toBe('Bearer test-key');
+    expect((init.headers as Record<string, string>).Authorization).toBe('Bearer test-key');
     expect(result).toEqual({ id: 'msg_123', provider: 'resend' });
   });
 
@@ -107,7 +107,7 @@ describe('sendgrid provider', () => {
 
     const [url, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
     expect(url).toBe('https://api.sendgrid.com/v3/mail/send');
-    expect((init.headers as Record<string, string>)['Authorization']).toBe('Bearer sg-key');
+    expect((init.headers as Record<string, string>).Authorization).toBe('Bearer sg-key');
 
     const body = JSON.parse(init.body as string);
     expect(body.personalizations[0].to[0].email).toBe('recipient@example.com');
@@ -134,7 +134,9 @@ describe('sendgrid provider', () => {
     } as unknown as Response);
 
     const { sendgrid } = await import('../providers/sendgrid.js');
-    await expect(sendgrid({ apiKey: 'k' }).send(baseMessage)).rejects.toThrow('SendGrid API error 403');
+    await expect(sendgrid({ apiKey: 'k' }).send(baseMessage)).rejects.toThrow(
+      'SendGrid API error 403',
+    );
   });
 
   it('includes cc/bcc in personalization', async () => {
@@ -204,7 +206,9 @@ describe('postmark provider', () => {
     } as unknown as Response);
 
     const { postmark } = await import('../providers/postmark.js');
-    await expect(postmark({ serverToken: 'k' }).send(baseMessage)).rejects.toThrow('Postmark API error 401');
+    await expect(postmark({ serverToken: 'k' }).send(baseMessage)).rejects.toThrow(
+      'Postmark API error 401',
+    );
   });
 });
 
@@ -244,9 +248,7 @@ describe('smtp provider', () => {
     const { smtp } = await import('../providers/smtp.js');
     await smtp({ host: 'smtp.example.com', port: 465 }).send(baseMessage);
 
-    expect(mockCreateTransport).toHaveBeenCalledWith(
-      expect.objectContaining({ secure: true }),
-    );
+    expect(mockCreateTransport).toHaveBeenCalledWith(expect.objectContaining({ secure: true }));
   });
 
   it('falls back to uuid id when messageId missing', async () => {
@@ -272,7 +274,9 @@ vi.mock('@aws-sdk/client-ses', () => ({
   },
   SendEmailCommand: class MockSendEmailCommand {
     params: unknown;
-    constructor(params: unknown) { this.params = params; }
+    constructor(params: unknown) {
+      this.params = params;
+    }
   },
 }));
 

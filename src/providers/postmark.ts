@@ -1,4 +1,4 @@
-import type { EmailProvider, EmailMessage, SendResult, EmailAddress } from '../types.js';
+import type { EmailAddress, EmailMessage, EmailProvider, SendResult } from '../types.js';
 
 interface PostmarkConfig {
   serverToken: string;
@@ -31,24 +31,21 @@ class PostmarkProvider implements EmailProvider {
       MessageStream: 'outbound',
     };
 
-    if (message.cc) body['Cc'] = formatAddresses(message.cc);
-    if (message.bcc) body['Bcc'] = formatAddresses(message.bcc);
-    if (message.replyTo) body['ReplyTo'] = formatAddress(message.replyTo);
+    if (message.cc) body.Cc = formatAddresses(message.cc);
+    if (message.bcc) body.Bcc = formatAddresses(message.bcc);
+    if (message.replyTo) body.ReplyTo = formatAddress(message.replyTo);
 
     if (message.headers && Object.keys(message.headers).length > 0) {
-      body['Headers'] = Object.entries(message.headers).map(([Name, Value]) => ({
+      body.Headers = Object.entries(message.headers).map(([Name, Value]) => ({
         Name,
         Value,
       }));
     }
 
     if (message.attachments && message.attachments.length > 0) {
-      body['Attachments'] = message.attachments.map((a) => ({
+      body.Attachments = message.attachments.map((a) => ({
         Name: a.filename,
-        Content:
-          typeof a.content === 'string'
-            ? a.content
-            : a.content.toString('base64'),
+        Content: typeof a.content === 'string' ? a.content : a.content.toString('base64'),
         ContentType: a.contentType,
       }));
     }

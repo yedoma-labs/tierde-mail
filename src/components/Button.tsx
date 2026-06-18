@@ -19,7 +19,12 @@ function isValidUrl(url: string): boolean {
   }
 }
 
-export function Button({ href, children, variant = 'primary', align = 'center' }: ButtonProps): ReactElement {
+export function Button({
+  href,
+  children,
+  variant = 'primary',
+  align = 'center',
+}: ButtonProps): ReactElement {
   if (!isValidUrl(href)) {
     throw new Error(`Invalid button href: ${href}`);
   }
@@ -85,7 +90,11 @@ export function Button({ href, children, variant = 'primary', align = 'center' }
         <tbody>
           <tr>
             <td style={tdStyle}>
-              <a href={href} className={isOutline ? 'tierde-btn-outline-text' : undefined} style={linkStyle}>
+              <a
+                href={href}
+                className={isOutline ? 'tierde-btn-outline-text' : undefined}
+                style={linkStyle}
+              >
                 {children}
               </a>
             </td>

@@ -1,8 +1,8 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { renderEmail } from '../render.js';
-import { createTheme, defaultTheme, darkTheme } from '../theme.js';
-import { Welcome } from '../templates/Welcome.js';
 import { PasswordChangedConfirmation } from '../templates/PasswordChangedConfirmation.js';
+import { Welcome } from '../templates/Welcome.js';
+import { createTheme, darkTheme, defaultTheme } from '../theme.js';
 
 describe('theme system', () => {
   it('createTheme merges overrides with defaultTheme', () => {
@@ -81,7 +81,8 @@ function extractDarkMediaCSS(html: string): string {
   const blocks: string[] = [];
   while ((m = re.exec(html)) !== null) {
     const start = m.index + m[0].length;
-    let depth = 1, i = start;
+    let depth = 1,
+      i = start;
     while (i < html.length && depth > 0) {
       if (html[i] === '{') depth++;
       else if (html[i] === '}') depth--;
@@ -99,14 +100,14 @@ describe('light mode color tokens', () => {
     expect(defaultTheme.accentBar).toBe('#4f46e5');
     expect(defaultTheme.primaryText).toBe('#ffffff');
     // Surfaces
-    expect(defaultTheme.background).toBe('#f8fafc');     // slate-50
+    expect(defaultTheme.background).toBe('#f8fafc'); // slate-50
     expect(defaultTheme.cardBackground).toBe('#ffffff');
     // Text hierarchy (slate scale)
-    expect(defaultTheme.textPrimary).toBe('#0f172a');    // slate-900
-    expect(defaultTheme.textSecondary).toBe('#334155');  // slate-700
-    expect(defaultTheme.textMuted).toBe('#64748b');      // slate-500
+    expect(defaultTheme.textPrimary).toBe('#0f172a'); // slate-900
+    expect(defaultTheme.textSecondary).toBe('#334155'); // slate-700
+    expect(defaultTheme.textMuted).toBe('#64748b'); // slate-500
     // Border
-    expect(defaultTheme.border).toBe('#e2e8f0');         // slate-200
+    expect(defaultTheme.border).toBe('#e2e8f0'); // slate-200
   });
 
   it('KeyValueTable renders with theme.textMuted label and theme.textPrimary value', () => {
@@ -131,18 +132,18 @@ describe('light mode color tokens', () => {
 describe('dark mode color tokens', () => {
   it('darkTheme palette is correct', () => {
     // Surfaces
-    expect(darkTheme.background).toBe('#0f172a');      // slate-900
-    expect(darkTheme.cardBackground).toBe('#1e293b');  // slate-800
+    expect(darkTheme.background).toBe('#0f172a'); // slate-900
+    expect(darkTheme.cardBackground).toBe('#1e293b'); // slate-800
     // Primary brand — indigo-500 (brighter than light-mode indigo-600)
     expect(darkTheme.primary).toBe('#6366f1');
     expect(darkTheme.accentBar).toBe('#6366f1');
     expect(darkTheme.primaryText).toBe('#ffffff');
     // Text hierarchy (slate scale, all pass WCAG AA on cardBackground)
-    expect(darkTheme.textPrimary).toBe('#f1f5f9');     // slate-100  ≥12:1 on card
-    expect(darkTheme.textSecondary).toBe('#cbd5e1');   // slate-300  ≥7:1  on card
-    expect(darkTheme.textMuted).toBe('#94a3b8');       // slate-400  ~4.5:1 on card
+    expect(darkTheme.textPrimary).toBe('#f1f5f9'); // slate-100  ≥12:1 on card
+    expect(darkTheme.textSecondary).toBe('#cbd5e1'); // slate-300  ≥7:1  on card
+    expect(darkTheme.textMuted).toBe('#94a3b8'); // slate-400  ~4.5:1 on card
     // Border
-    expect(darkTheme.border).toBe('#334155');          // slate-700
+    expect(darkTheme.border).toBe('#334155'); // slate-700
   });
 
   it('rendered @media dark block contains all darkTheme surface tokens', () => {
@@ -160,11 +161,18 @@ describe('dark mode color tokens', () => {
     const html = renderEmail(Welcome.component({ name: 'Alice', loginUrl: 'https://example.com' }));
     const dark = extractDarkMediaCSS(html);
     const required = [
-      'tierde-bg', 'tierde-card',
-      'tierde-text-primary', 'tierde-text-secondary', 'tierde-text-muted',
-      'tierde-footer', 'tierde-border', 'tierde-logo-bg',
-      'tierde-kv-label', 'tierde-kv-value',
-      'tierde-btn-outline', 'tierde-btn-outline-text',
+      'tierde-bg',
+      'tierde-card',
+      'tierde-text-primary',
+      'tierde-text-secondary',
+      'tierde-text-muted',
+      'tierde-footer',
+      'tierde-border',
+      'tierde-logo-bg',
+      'tierde-kv-label',
+      'tierde-kv-value',
+      'tierde-btn-outline',
+      'tierde-btn-outline-text',
     ];
     for (const cls of required) {
       expect(dark, `dark @media missing selector: .${cls}`).toContain(cls);
@@ -184,8 +192,11 @@ describe('dark mode color tokens', () => {
     // Relative luminance via simplified sRGB
     const lum = (hex: string) => {
       const n = parseInt(hex.slice(1), 16);
-      return [((n >> 16) & 0xff), ((n >> 8) & 0xff), n & 0xff]
-        .map((c) => { const s = c / 255; return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4; })
+      return [(n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff]
+        .map((c) => {
+          const s = c / 255;
+          return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+        })
         .reduce((sum, c, i) => sum + c * [0.2126, 0.7152, 0.0722][i]!, 0);
     };
     const contrast = (fg: string, bg: string) => {

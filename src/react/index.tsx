@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import { renderEmail } from '../render.js';
 import type { EmailTemplate } from '../types.js';
 
@@ -25,7 +25,12 @@ export interface EmailPreviewProps {
  * }
  * ```
  */
-export function EmailPreview({ html, style, className, title }: EmailPreviewProps): React.ReactElement {
+export function EmailPreview({
+  html,
+  style,
+  className,
+  title,
+}: EmailPreviewProps): React.ReactElement {
   return (
     <iframe
       srcDoc={html}

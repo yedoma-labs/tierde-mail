@@ -1,4 +1,4 @@
-import type { ReactNode, CSSProperties, ReactElement } from 'react';
+import type { CSSProperties, ReactElement, ReactNode } from 'react';
 
 interface RowProps {
   children: ReactNode;
@@ -25,7 +25,12 @@ interface ColumnProps {
   valign?: 'top' | 'middle' | 'bottom';
 }
 
-export function Column({ children, width, align = 'left', valign = 'top' }: ColumnProps): ReactElement {
+export function Column({
+  children,
+  width,
+  align = 'left',
+  valign = 'top',
+}: ColumnProps): ReactElement {
   const style: CSSProperties = {
     verticalAlign: valign,
     textAlign: align,

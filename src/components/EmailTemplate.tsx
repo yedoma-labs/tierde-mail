@@ -1,7 +1,7 @@
-import type { ReactNode, CSSProperties, ReactElement } from 'react';
+import type { CSSProperties, ReactElement, ReactNode } from 'react';
 import { ThemeContext, useTheme } from '../ThemeContext.js';
 import type { Theme } from '../theme.js';
-import { defaultTheme, darkTheme } from '../theme.js';
+import { darkTheme, defaultTheme } from '../theme.js';
 
 // Generated once from darkTheme tokens — change darkTheme, all @media rules update automatically.
 const DARK_MEDIA_CSS = `
@@ -89,7 +89,6 @@ function EmailShell({
     fontSize: '0',
     lineHeight: '0',
   };
-
 
   return (
     <html lang={lang ?? 'en'} dir={dir ?? 'ltr'}>

@@ -1,15 +1,15 @@
-import { currentYear } from './utils.js';
-import type { BaseTemplateProps } from './shared.js';
-import { defineEmail } from '../define-email.js';
-import { EmailTemplate } from '../components/EmailTemplate.js';
-import { Heading } from '../components/Heading.js';
-import { Text } from '../components/Text.js';
+import { AlertBox } from '../components/AlertBox.js';
 import { Button } from '../components/Button.js';
+import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Footer } from '../components/Footer.js';
+import { Heading } from '../components/Heading.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
-import { AlertBox } from '../components/AlertBox.js';
+import { Text } from '../components/Text.js';
+import { defineEmail } from '../define-email.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
+import type { BaseTemplateProps } from './shared.js';
+import { currentYear } from './utils.js';
 
 export type AccountDeletionEvent = 'requested' | 'scheduled' | 'completed' | 'cancelled';
 
@@ -46,9 +46,11 @@ export const ACCOUNT_DELETION_CONFIRMATION_STRINGS: AccountDeletionConfirmationS
   greeting: (name) => `Hi ${name},`,
   body: (event, deletionDate) => {
     const map: Record<AccountDeletionEvent, string> = {
-      requested: 'We received your request to delete your account. Your account will be scheduled for deletion shortly.',
+      requested:
+        'We received your request to delete your account. Your account will be scheduled for deletion shortly.',
       scheduled: `Your account is scheduled to be permanently deleted on ${deletionDate ?? 'the specified date'}. You can cancel this request before then.`,
-      completed: 'Your account and all associated data have been permanently deleted. Thank you for using our service.',
+      completed:
+        'Your account and all associated data have been permanently deleted. Thank you for using our service.',
       cancelled: 'Your account deletion request has been cancelled. Your account remains active.',
     };
     return map[event];
@@ -59,7 +61,8 @@ export const ACCOUNT_DELETION_CONFIRMATION_STRINGS: AccountDeletionConfirmationS
   footer: (year, appName) => `© ${year} ${appName}. All rights reserved.`,
 };
 
-export interface AccountDeletionConfirmationProps extends BaseTemplateProps<AccountDeletionConfirmationStrings> {
+export interface AccountDeletionConfirmationProps
+  extends BaseTemplateProps<AccountDeletionConfirmationStrings> {
   name: string;
   event: AccountDeletionEvent;
   cancelUrl?: string;
@@ -67,34 +70,48 @@ export interface AccountDeletionConfirmationProps extends BaseTemplateProps<Acco
   dataRetentionDays?: number;
 }
 
-export const AccountDeletionConfirmation: EmailTemplateType<AccountDeletionConfirmationProps> = defineEmail<AccountDeletionConfirmationProps>({
-  subject: ({ event, appName = 'Our App', strings }) => {
-    const s = { ...ACCOUNT_DELETION_CONFIRMATION_STRINGS, ...strings };
-    return s.subject(event, appName);
-  },
-  component: ({ name, event, cancelUrl, deletionDate, dataRetentionDays = 30, appName = 'Our App', locale, dir, strings, theme }) => {
-    const s = { ...ACCOUNT_DELETION_CONFIRMATION_STRINGS, ...strings };
-    const year = currentYear(locale);
-    const showWarning = event === 'requested' || event === 'scheduled' || event === 'completed';
+export const AccountDeletionConfirmation: EmailTemplateType<AccountDeletionConfirmationProps> =
+  defineEmail<AccountDeletionConfirmationProps>({
+    subject: ({ event, appName = 'Our App', strings }) => {
+      const s = { ...ACCOUNT_DELETION_CONFIRMATION_STRINGS, ...strings };
+      return s.subject(event, appName);
+    },
+    component: ({
+      name,
+      event,
+      cancelUrl,
+      deletionDate,
+      dataRetentionDays = 30,
+      appName = 'Our App',
+      locale,
+      dir,
+      strings,
+      theme,
+    }) => {
+      const s = { ...ACCOUNT_DELETION_CONFIRMATION_STRINGS, ...strings };
+      const year = currentYear(locale);
+      const showWarning = event === 'requested' || event === 'scheduled' || event === 'completed';
 
-    return (
-      <EmailTemplate preview={s.subject(event, appName)} lang={locale} dir={dir} theme={theme}>
-        <Heading>{s.heading(event)}</Heading>
-        <Text>{s.greeting(name)}</Text>
-        <Text>{s.body(event, deletionDate)}</Text>
-        {showWarning && (
-          <Section>
-            <AlertBox variant={event === 'completed' ? 'danger' : 'warning'}>
-              {event === 'scheduled' ? s.dataNote(dataRetentionDays) : s.permanentNote}
-            </AlertBox>
-          </Section>
-        )}
-        {cancelUrl && event === 'scheduled' && (
-          <Button href={cancelUrl} variant="outline">{s.cancelCtaLabel}</Button>
-        )}
-        <Hr />
-        <Footer>{s.footer(year, appName)}</Footer>
-      </EmailTemplate>
-    );
-  },
-});
+      return (
+        <EmailTemplate preview={s.subject(event, appName)} lang={locale} dir={dir} theme={theme}>
+          <Heading>{s.heading(event)}</Heading>
+          <Text>{s.greeting(name)}</Text>
+          <Text>{s.body(event, deletionDate)}</Text>
+          {showWarning && (
+            <Section>
+              <AlertBox variant={event === 'completed' ? 'danger' : 'warning'}>
+                {event === 'scheduled' ? s.dataNote(dataRetentionDays) : s.permanentNote}
+              </AlertBox>
+            </Section>
+          )}
+          {cancelUrl && event === 'scheduled' && (
+            <Button href={cancelUrl} variant="outline">
+              {s.cancelCtaLabel}
+            </Button>
+          )}
+          <Hr />
+          <Footer>{s.footer(year, appName)}</Footer>
+        </EmailTemplate>
+      );
+    },
+  });

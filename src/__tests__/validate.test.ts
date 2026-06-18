@@ -1,5 +1,10 @@
-import { describe, it, expect } from 'vitest';
-import { validateEmail, normalizeAddress, normalizeAddresses, validateAttachment } from '../validate.js';
+import { describe, expect, it } from 'vitest';
+import {
+  normalizeAddress,
+  normalizeAddresses,
+  validateAttachment,
+  validateEmail,
+} from '../validate.js';
 
 describe('validateEmail', () => {
   it('accepts valid email', () => {
@@ -100,7 +105,11 @@ describe('validateAttachment', () => {
 
   it('rejects disallowed content type', () => {
     expect(() =>
-      validateAttachment({ filename: 'script.exe', content: '', contentType: 'application/x-executable' }),
+      validateAttachment({
+        filename: 'script.exe',
+        content: '',
+        contentType: 'application/x-executable',
+      }),
     ).toThrow(TypeError);
   });
 

@@ -104,5 +104,8 @@ export interface BatchSendResult<Props> {
 
 export interface Mailer {
   send<Props>(template: EmailTemplate<Props>, options: SendOptions<Props>): Promise<SendResult>;
-  sendBatch<Props>(template: EmailTemplate<Props>, options: BatchSendOptions<Props>): Promise<BatchSendResult<Props>>;
+  sendBatch<Props>(
+    template: EmailTemplate<Props>,
+    options: BatchSendOptions<Props>,
+  ): Promise<BatchSendResult<Props>>;
 }

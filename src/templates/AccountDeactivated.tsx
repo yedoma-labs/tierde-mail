@@ -1,13 +1,13 @@
-import { currentYear } from './utils.js';
-import { defineEmail } from '../define-email.js';
-import { EmailTemplate } from '../components/EmailTemplate.js';
-import { Heading } from '../components/Heading.js';
-import { Text } from '../components/Text.js';
 import { Button } from '../components/Button.js';
+import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Footer } from '../components/Footer.js';
+import { Heading } from '../components/Heading.js';
 import { Hr } from '../components/Hr.js';
-import type { BaseTemplateProps } from './shared.js';
+import { Text } from '../components/Text.js';
+import { defineEmail } from '../define-email.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
+import type { BaseTemplateProps } from './shared.js';
+import { currentYear } from './utils.js';
 
 export interface AccountDeactivatedStrings {
   subject: (appName: string) => string;
@@ -43,44 +43,42 @@ export interface AccountDeactivatedProps extends BaseTemplateProps<AccountDeacti
   supportEmail?: string;
 }
 
-export const AccountDeactivated: EmailTemplateType<AccountDeactivatedProps> = defineEmail<AccountDeactivatedProps>({
-  subject: ({ appName = 'Our App', strings }) => {
-    const s = { ...ACCOUNT_DEACTIVATED_STRINGS, ...strings };
-    return s.subject(appName);
-  },
-  component: ({
-    name,
-    reactivateUrl,
-    reason,
-    dataRetentionDays = 30,
-    supportEmail,
-    appName = 'Our App',
-    locale,
-    dir,
-    strings,
-    theme,
-  }) => {
-    const s = { ...ACCOUNT_DEACTIVATED_STRINGS, ...strings };
-    const year = currentYear(locale);
+export const AccountDeactivated: EmailTemplateType<AccountDeactivatedProps> =
+  defineEmail<AccountDeactivatedProps>({
+    subject: ({ appName = 'Our App', strings }) => {
+      const s = { ...ACCOUNT_DEACTIVATED_STRINGS, ...strings };
+      return s.subject(appName);
+    },
+    component: ({
+      name,
+      reactivateUrl,
+      reason,
+      dataRetentionDays = 30,
+      supportEmail,
+      appName = 'Our App',
+      locale,
+      dir,
+      strings,
+      theme,
+    }) => {
+      const s = { ...ACCOUNT_DEACTIVATED_STRINGS, ...strings };
+      const year = currentYear(locale);
 
-    return (
-      <EmailTemplate
-        preview={s.subject(appName)}
-        lang={locale}
-        dir={dir}
-        theme={theme}
-      >
-        <Heading>{s.heading}</Heading>
-        <Text>{s.greeting(name)}</Text>
-        <Text>{s.body(appName, reason)}</Text>
-        <Text muted size="sm">{s.dataNote(dataRetentionDays)}</Text>
-        <Button href={reactivateUrl}>{s.ctaLabel}</Button>
-        <Hr />
-        <Text muted size="sm">
-          {supportEmail && s.supportNote(supportEmail)}
-        </Text>
-        <Footer>{s.footer(year, appName)}</Footer>
-      </EmailTemplate>
-    );
-  },
-});
+      return (
+        <EmailTemplate preview={s.subject(appName)} lang={locale} dir={dir} theme={theme}>
+          <Heading>{s.heading}</Heading>
+          <Text>{s.greeting(name)}</Text>
+          <Text>{s.body(appName, reason)}</Text>
+          <Text muted size="sm">
+            {s.dataNote(dataRetentionDays)}
+          </Text>
+          <Button href={reactivateUrl}>{s.ctaLabel}</Button>
+          <Hr />
+          <Text muted size="sm">
+            {supportEmail && s.supportNote(supportEmail)}
+          </Text>
+          <Footer>{s.footer(year, appName)}</Footer>
+        </EmailTemplate>
+      );
+    },
+  });

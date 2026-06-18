@@ -1,19 +1,19 @@
-import { renderEmail } from '../render.js';
-import { htmlToPlainText } from '../plain-text.js';
-import { normalizeAddress, normalizeAddresses } from '../validate.js';
 import { executeBatch } from '../mailer.js';
+import { htmlToPlainText } from '../plain-text.js';
+import { renderEmail } from '../render.js';
 import type {
-  EmailProvider,
-  EmailMessage,
-  EmailTemplate,
-  SendOptions,
-  SendResult,
-  Mailer,
-  CreateMailerConfig,
-  EmailAddress,
   BatchSendOptions,
   BatchSendResult,
+  CreateMailerConfig,
+  EmailAddress,
+  EmailMessage,
+  EmailProvider,
+  EmailTemplate,
+  Mailer,
+  SendOptions,
+  SendResult,
 } from '../types.js';
+import { normalizeAddress, normalizeAddresses } from '../validate.js';
 
 export interface CapturedEmail {
   from: EmailAddress;
@@ -71,7 +71,10 @@ class CaptureMailer implements Mailer {
     this.#provider = provider;
   }
 
-  async send<Props>(template: EmailTemplate<Props>, options: SendOptions<Props>): Promise<SendResult> {
+  async send<Props>(
+    template: EmailTemplate<Props>,
+    options: SendOptions<Props>,
+  ): Promise<SendResult> {
     const props = options.props;
     const subject = template.subject(props);
     const element = template.component(props);
@@ -151,7 +154,8 @@ export function expectAttachment(
   });
 
   if (!match) {
-    const got = email.attachments.map((a) => `${a.filename} (${a.contentType})`).join(', ') || 'none';
+    const got =
+      email.attachments.map((a) => `${a.filename} (${a.contentType})`).join(', ') || 'none';
     const wanted = [
       filename ? `filename="${filename}"` : null,
       contentType ? `contentType="${contentType}"` : null,
@@ -172,9 +176,7 @@ export function expectAttachment(
  */
 export function expectAttachmentCount(email: CapturedEmail, count: number): void {
   if (email.attachments.length !== count) {
-    throw new Error(
-      `Expected ${count} attachment(s) but found ${email.attachments.length}`,
-    );
+    throw new Error(`Expected ${count} attachment(s) but found ${email.attachments.length}`);
   }
 }
 

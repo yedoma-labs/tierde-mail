@@ -1,45 +1,45 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { renderEmail } from '../render.js';
-import { Welcome } from '../templates/Welcome.js';
-import { PasswordReset } from '../templates/PasswordReset.js';
-import { EmailVerification } from '../templates/EmailVerification.js';
-import { TwoFactorAuth } from '../templates/TwoFactorAuth.js';
-import { Invoice } from '../templates/Invoice.js';
-import { MagicLink } from '../templates/MagicLink.js';
-import { OrderConfirmation } from '../templates/OrderConfirmation.js';
-import { ShippingUpdate } from '../templates/ShippingUpdate.js';
-import { SecurityAlert } from '../templates/SecurityAlert.js';
-import { AccountLocked } from '../templates/AccountLocked.js';
-import { AccountUnlocked } from '../templates/AccountUnlocked.js';
-import { RegistrationConfirmation } from '../templates/RegistrationConfirmation.js';
-import { EmailChangeVerification } from '../templates/EmailChangeVerification.js';
-import { PhoneVerification } from '../templates/PhoneVerification.js';
-import { ProfileUpdated } from '../templates/ProfileUpdated.js';
-import { PasswordChangedConfirmation } from '../templates/PasswordChangedConfirmation.js';
-import { LoginActivity } from '../templates/LoginActivity.js';
-import { DataExportRequest } from '../templates/DataExportRequest.js';
-import { AccountDeletionConfirmation } from '../templates/AccountDeletionConfirmation.js';
-import { NewsletterConfirmation } from '../templates/NewsletterConfirmation.js';
-import { PaymentFailed } from '../templates/PaymentFailed.js';
-import { PasswordlessOtp } from '../templates/PasswordlessOtp.js';
-import { TeamInvite } from '../templates/TeamInvite.js';
-import { RefundConfirmation } from '../templates/RefundConfirmation.js';
-import { Notification } from '../templates/Notification.js';
 import { AbandonedCart } from '../templates/AbandonedCart.js';
 import { AccountDeactivated } from '../templates/AccountDeactivated.js';
+import { AccountDeletionConfirmation } from '../templates/AccountDeletionConfirmation.js';
+import { AccountLocked } from '../templates/AccountLocked.js';
+import { AccountUnlocked } from '../templates/AccountUnlocked.js';
 import { BackInStock } from '../templates/BackInStock.js';
 import { CommentMention } from '../templates/CommentMention.js';
+import { DataExportRequest } from '../templates/DataExportRequest.js';
+import { EmailChangeVerification } from '../templates/EmailChangeVerification.js';
+import { EmailVerification } from '../templates/EmailVerification.js';
 import { ExportReady } from '../templates/ExportReady.js';
 import { FeatureAnnouncement } from '../templates/FeatureAnnouncement.js';
+import { Invoice } from '../templates/Invoice.js';
+import { LoginActivity } from '../templates/LoginActivity.js';
+import { MagicLink } from '../templates/MagicLink.js';
 import { MaintenanceNotification } from '../templates/MaintenanceNotification.js';
+import { NewsletterConfirmation } from '../templates/NewsletterConfirmation.js';
+import { Notification } from '../templates/Notification.js';
 import { OnboardingProgress } from '../templates/OnboardingProgress.js';
+import { OrderConfirmation } from '../templates/OrderConfirmation.js';
+import { PasswordChangedConfirmation } from '../templates/PasswordChangedConfirmation.js';
+import { PasswordlessOtp } from '../templates/PasswordlessOtp.js';
+import { PasswordReset } from '../templates/PasswordReset.js';
+import { PaymentFailed } from '../templates/PaymentFailed.js';
+import { PhoneVerification } from '../templates/PhoneVerification.js';
 import { PolicyUpdate } from '../templates/PolicyUpdate.js';
+import { ProfileUpdated } from '../templates/ProfileUpdated.js';
 import { Referral } from '../templates/Referral.js';
+import { RefundConfirmation } from '../templates/RefundConfirmation.js';
+import { RegistrationConfirmation } from '../templates/RegistrationConfirmation.js';
 import { ReviewRequest } from '../templates/ReviewRequest.js';
+import { SecurityAlert } from '../templates/SecurityAlert.js';
+import { ShippingUpdate } from '../templates/ShippingUpdate.js';
 import { Subscription } from '../templates/Subscription.js';
 import { SupportTicket } from '../templates/SupportTicket.js';
+import { TeamInvite } from '../templates/TeamInvite.js';
+import { TwoFactorAuth } from '../templates/TwoFactorAuth.js';
 import { UsageAlert } from '../templates/UsageAlert.js';
 import { WeeklyDigest } from '../templates/WeeklyDigest.js';
+import { Welcome } from '../templates/Welcome.js';
 import { WinBack } from '../templates/WinBack.js';
 
 describe('built-in templates', () => {
@@ -74,9 +74,7 @@ describe('built-in templates', () => {
   });
 
   it('TwoFactorAuth renders code', () => {
-    const html = renderEmail(
-      TwoFactorAuth.component({ username: 'alice', code: '123456' }),
-    );
+    const html = renderEmail(TwoFactorAuth.component({ username: 'alice', code: '123456' }));
     expect(html).toContain('123456');
   });
 
@@ -134,9 +132,7 @@ describe('built-in templates', () => {
   });
 
   it('PasswordlessOtp renders the code', () => {
-    const html = renderEmail(
-      PasswordlessOtp.component({ code: '847 293' }),
-    );
+    const html = renderEmail(PasswordlessOtp.component({ code: '847 293' }));
     expect(html).toContain('847 293');
   });
 
@@ -488,7 +484,12 @@ describe('additional templates', () => {
 
   it('Notification renders CTA when provided', () => {
     const html = renderEmail(
-      Notification.component({ title: 'Alert', body: 'Details', ctaLabel: 'View', ctaUrl: 'https://app.com' }),
+      Notification.component({
+        title: 'Alert',
+        body: 'Details',
+        ctaLabel: 'View',
+        ctaUrl: 'https://app.com',
+      }),
     );
     expect(html).toContain('View');
     expect(html).toContain('https://app.com');
@@ -602,9 +603,7 @@ describe('additional templates', () => {
   });
 
   it('MaintenanceNotification completed renders back-online message', () => {
-    const html = renderEmail(
-      MaintenanceNotification.component({ type: 'completed' }),
-    );
+    const html = renderEmail(MaintenanceNotification.component({ type: 'completed' }));
     expect(html).toContain('back online');
   });
 
@@ -771,7 +770,11 @@ describe('branch coverage — optional props', () => {
   // PasswordReset: expiresIn branch
   it('PasswordReset renders expiry note when expiresIn provided', () => {
     const html = renderEmail(
-      PasswordReset.component({ username: 'alice', resetUrl: 'https://app.com/reset', expiresIn: '1 hour' }),
+      PasswordReset.component({
+        username: 'alice',
+        resetUrl: 'https://app.com/reset',
+        expiresIn: '1 hour',
+      }),
     );
     expect(html).toContain('1 hour');
   });
@@ -779,7 +782,11 @@ describe('branch coverage — optional props', () => {
   // EmailVerification: expiresIn branch
   it('EmailVerification renders expiry note when expiresIn provided', () => {
     const html = renderEmail(
-      EmailVerification.component({ name: 'Alice', verifyUrl: 'https://app.com/verify', expiresIn: '24 hours' }),
+      EmailVerification.component({
+        name: 'Alice',
+        verifyUrl: 'https://app.com/verify',
+        expiresIn: '24 hours',
+      }),
     );
     expect(html).toContain('24 hours');
   });
@@ -787,7 +794,11 @@ describe('branch coverage — optional props', () => {
   // MagicLink: custom expiresIn
   it('MagicLink renders custom expiresIn', () => {
     const html = renderEmail(
-      MagicLink.component({ email: 'alice@example.com', loginUrl: 'https://app.com/magic', expiresIn: '30 minutes' }),
+      MagicLink.component({
+        email: 'alice@example.com',
+        loginUrl: 'https://app.com/magic',
+        expiresIn: '30 minutes',
+      }),
     );
     expect(html).toContain('30 minutes');
   });
@@ -887,7 +898,9 @@ describe('branch coverage — optional props', () => {
 
   // AccountUnlocked: optional loginActivity
   it('AccountUnlocked renders without loginUrl still works', () => {
-    const html = renderEmail(AccountUnlocked.component({ name: 'Alice', loginUrl: 'https://app.com/login' }));
+    const html = renderEmail(
+      AccountUnlocked.component({ name: 'Alice', loginUrl: 'https://app.com/login' }),
+    );
     expect(html).toContain('Alice');
     expect(html).toContain('https://app.com/login');
   });

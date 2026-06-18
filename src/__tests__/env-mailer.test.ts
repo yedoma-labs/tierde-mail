@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-const BASE_ENV = {
+const _BASE_ENV = {
   TIERDE_FROM_EMAIL: 'sender@example.com',
   TIERDE_FROM_NAME: undefined as string | undefined,
 };
@@ -16,10 +16,21 @@ function setEnv(vars: Record<string, string | undefined>) {
 }
 
 const PROVIDER_ENV_KEYS = [
-  'TIERDE_PROVIDER', 'TIERDE_FROM_EMAIL', 'TIERDE_FROM_NAME',
-  'RESEND_API_KEY', 'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS', 'SMTP_SECURE',
-  'SES_REGION', 'AWS_REGION', 'SENDGRID_API_KEY', 'POSTMARK_SERVER_TOKEN',
-  'MAILPIT_HOST', 'MAILPIT_PORT',
+  'TIERDE_PROVIDER',
+  'TIERDE_FROM_EMAIL',
+  'TIERDE_FROM_NAME',
+  'RESEND_API_KEY',
+  'SMTP_HOST',
+  'SMTP_PORT',
+  'SMTP_USER',
+  'SMTP_PASS',
+  'SMTP_SECURE',
+  'SES_REGION',
+  'AWS_REGION',
+  'SENDGRID_API_KEY',
+  'POSTMARK_SERVER_TOKEN',
+  'MAILPIT_HOST',
+  'MAILPIT_PORT',
 ];
 
 let savedEnv: Record<string, string | undefined> = {};

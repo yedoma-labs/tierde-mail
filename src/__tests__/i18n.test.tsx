@@ -1,8 +1,8 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { renderEmail } from '../render.js';
-import { Welcome, WELCOME_STRINGS } from '../templates/Welcome.js';
-import { PasswordReset } from '../templates/PasswordReset.js';
 import { Invoice } from '../templates/Invoice.js';
+import { PasswordReset } from '../templates/PasswordReset.js';
+import { WELCOME_STRINGS, Welcome } from '../templates/Welcome.js';
 
 describe('template i18n — string overrides', () => {
   it('Welcome uses English defaults with no strings prop', () => {
@@ -57,7 +57,8 @@ describe('template i18n — string overrides', () => {
           heading: 'Passwort zurücksetzen',
           greeting: (u: string) => `Hallo ${u},`,
           ctaLabel: 'Passwort zurücksetzen',
-          securityNote: 'Falls Sie diese Anfrage nicht gestellt haben, ignorieren Sie diese E-Mail.',
+          securityNote:
+            'Falls Sie diese Anfrage nicht gestellt haben, ignorieren Sie diese E-Mail.',
         },
       }),
     );
@@ -107,9 +108,7 @@ describe('template i18n — string overrides', () => {
 
 describe('EmailTemplate dir/lang props', () => {
   it('defaults to ltr and en', () => {
-    const html = renderEmail(
-      Welcome.component({ name: 'X', loginUrl: 'https://x.com' }),
-    );
+    const html = renderEmail(Welcome.component({ name: 'X', loginUrl: 'https://x.com' }));
     expect(html).toContain('lang="en"');
     expect(html).toContain('dir="ltr"');
   });

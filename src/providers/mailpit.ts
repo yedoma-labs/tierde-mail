@@ -1,4 +1,4 @@
-import type { EmailProvider, EmailMessage, SendResult, EmailAddress } from '../types.js';
+import type { EmailAddress, EmailMessage, EmailProvider, SendResult } from '../types.js';
 
 interface MailpitConfig {
   /** SMTP host. Default: `'localhost'` */

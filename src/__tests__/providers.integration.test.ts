@@ -19,11 +19,11 @@
  *   smtp:      SMTP_HOST (+ optional SMTP_PORT, SMTP_USER, SMTP_PASS)
  *   mailpit:   TIERDE_TEST_MAILPIT=true  (assumes localhost:1025)
  */
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import type { EmailMessage } from '../types.js';
 
-const FROM = process.env['TIERDE_TEST_FROM'];
-const TO = process.env['TIERDE_TEST_TO'];
+const FROM = process.env.TIERDE_TEST_FROM;
+const TO = process.env.TIERDE_TEST_TO;
 
 function testMessage(provider: string): EmailMessage {
   return {
@@ -42,12 +42,12 @@ function hasBaseEnv(): boolean {
 // ---------------------------------------------------------------------------
 // Resend
 // ---------------------------------------------------------------------------
-describe.skipIf(!hasBaseEnv() || !process.env['RESEND_API_KEY'])(
+describe.skipIf(!hasBaseEnv() || !process.env.RESEND_API_KEY)(
   'resend provider (integration)',
   () => {
     it('sends email and returns id', async () => {
       const { resend } = await import('../providers/resend.js');
-      const provider = resend({ apiKey: process.env['RESEND_API_KEY']! });
+      const provider = resend({ apiKey: process.env.RESEND_API_KEY! });
       const result = await provider.send(testMessage('resend'));
       expect(result.provider).toBe('resend');
       expect(result.id).toBeTruthy();
@@ -58,12 +58,12 @@ describe.skipIf(!hasBaseEnv() || !process.env['RESEND_API_KEY'])(
 // ---------------------------------------------------------------------------
 // SendGrid
 // ---------------------------------------------------------------------------
-describe.skipIf(!hasBaseEnv() || !process.env['SENDGRID_API_KEY'])(
+describe.skipIf(!hasBaseEnv() || !process.env.SENDGRID_API_KEY)(
   'sendgrid provider (integration)',
   () => {
     it('sends email and returns id', async () => {
       const { sendgrid } = await import('../providers/sendgrid.js');
-      const provider = sendgrid({ apiKey: process.env['SENDGRID_API_KEY']! });
+      const provider = sendgrid({ apiKey: process.env.SENDGRID_API_KEY! });
       const result = await provider.send(testMessage('sendgrid'));
       expect(result.provider).toBe('sendgrid');
       expect(result.id).toBeTruthy();
@@ -74,12 +74,12 @@ describe.skipIf(!hasBaseEnv() || !process.env['SENDGRID_API_KEY'])(
 // ---------------------------------------------------------------------------
 // Postmark
 // ---------------------------------------------------------------------------
-describe.skipIf(!hasBaseEnv() || !process.env['POSTMARK_SERVER_TOKEN'])(
+describe.skipIf(!hasBaseEnv() || !process.env.POSTMARK_SERVER_TOKEN)(
   'postmark provider (integration)',
   () => {
     it('sends email and returns id', async () => {
       const { postmark } = await import('../providers/postmark.js');
-      const provider = postmark({ serverToken: process.env['POSTMARK_SERVER_TOKEN']! });
+      const provider = postmark({ serverToken: process.env.POSTMARK_SERVER_TOKEN! });
       const result = await provider.send(testMessage('postmark'));
       expect(result.provider).toBe('postmark');
       expect(result.id).toBeTruthy();
@@ -90,31 +90,28 @@ describe.skipIf(!hasBaseEnv() || !process.env['POSTMARK_SERVER_TOKEN'])(
 // ---------------------------------------------------------------------------
 // SMTP
 // ---------------------------------------------------------------------------
-describe.skipIf(!hasBaseEnv() || !process.env['SMTP_HOST'])(
-  'smtp provider (integration)',
-  () => {
-    it('sends email and returns id', async () => {
-      const { smtp } = await import('../providers/smtp.js');
-      const host = process.env['SMTP_HOST']!;
-      const port = process.env['SMTP_PORT'] ? Number(process.env['SMTP_PORT']) : 587;
-      const provider = smtp({
-        host,
-        port,
-        ...(process.env['SMTP_USER'] && process.env['SMTP_PASS']
-          ? { auth: { user: process.env['SMTP_USER']!, pass: process.env['SMTP_PASS']! } }
-          : {}),
-      });
-      const result = await provider.send(testMessage('smtp'));
-      expect(result.provider).toBe('smtp');
-      expect(result.id).toBeTruthy();
+describe.skipIf(!hasBaseEnv() || !process.env.SMTP_HOST)('smtp provider (integration)', () => {
+  it('sends email and returns id', async () => {
+    const { smtp } = await import('../providers/smtp.js');
+    const host = process.env.SMTP_HOST!;
+    const port = process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587;
+    const provider = smtp({
+      host,
+      port,
+      ...(process.env.SMTP_USER && process.env.SMTP_PASS
+        ? { auth: { user: process.env.SMTP_USER!, pass: process.env.SMTP_PASS! } }
+        : {}),
     });
-  },
-);
+    const result = await provider.send(testMessage('smtp'));
+    expect(result.provider).toBe('smtp');
+    expect(result.id).toBeTruthy();
+  });
+});
 
 // ---------------------------------------------------------------------------
 // Mailpit / MailHog (local SMTP dev tool)
 // ---------------------------------------------------------------------------
-describe.skipIf(!hasBaseEnv() || !process.env['TIERDE_TEST_MAILPIT'])(
+describe.skipIf(!hasBaseEnv() || !process.env.TIERDE_TEST_MAILPIT)(
   'mailpit provider (integration)',
   () => {
     it('delivers to local Mailpit on localhost:1025', async () => {
@@ -127,8 +124,8 @@ describe.skipIf(!hasBaseEnv() || !process.env['TIERDE_TEST_MAILPIT'])(
 
     it('delivers to custom host/port', async () => {
       const { mailpit } = await import('../providers/mailpit.js');
-      const host = process.env['MAILPIT_HOST'] ?? 'localhost';
-      const port = process.env['MAILPIT_PORT'] ? Number(process.env['MAILPIT_PORT']) : 1025;
+      const host = process.env.MAILPIT_HOST ?? 'localhost';
+      const port = process.env.MAILPIT_PORT ? Number(process.env.MAILPIT_PORT) : 1025;
       const provider = mailpit({ host, port });
       const result = await provider.send(testMessage('mailpit-custom'));
       expect(result.provider).toBe('mailpit');
@@ -140,12 +137,12 @@ describe.skipIf(!hasBaseEnv() || !process.env['TIERDE_TEST_MAILPIT'])(
 // ---------------------------------------------------------------------------
 // SES
 // ---------------------------------------------------------------------------
-describe.skipIf(!hasBaseEnv() || !(process.env['SES_REGION'] ?? process.env['AWS_REGION']))(
+describe.skipIf(!hasBaseEnv() || !(process.env.SES_REGION ?? process.env.AWS_REGION))(
   'ses provider (integration)',
   () => {
     it('sends email and returns id', async () => {
       const { ses } = await import('../providers/ses.js');
-      const region = (process.env['SES_REGION'] ?? process.env['AWS_REGION'])!;
+      const region = (process.env.SES_REGION ?? process.env.AWS_REGION)!;
       const provider = ses({ region });
       const result = await provider.send(testMessage('ses'));
       expect(result.provider).toBe('ses');

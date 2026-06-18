@@ -1,14 +1,14 @@
-import { currentYear } from './utils.js';
+import { Button } from '../components/Button.js';
+import { EmailTemplate } from '../components/EmailTemplate.js';
+import { Footer } from '../components/Footer.js';
+import { Heading } from '../components/Heading.js';
+import { Hr } from '../components/Hr.js';
+import { Text } from '../components/Text.js';
 import { defineEmail } from '../define-email.js';
 import { defaultTheme } from '../theme.js';
-import { EmailTemplate } from '../components/EmailTemplate.js';
-import { Heading } from '../components/Heading.js';
-import { Text } from '../components/Text.js';
-import { Button } from '../components/Button.js';
-import { Footer } from '../components/Footer.js';
-import { Hr } from '../components/Hr.js';
-import type { BaseTemplateProps } from './shared.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
+import type { BaseTemplateProps } from './shared.js';
+import { currentYear } from './utils.js';
 
 export interface WinBackStrings {
   subject: (name: string, appName: string) => string;
@@ -76,7 +76,9 @@ export const WinBack: EmailTemplateType<WinBackProps> = defineEmail<WinBackProps
           {unsubscribeUrl && (
             <>
               {' '}
-              <a href={unsubscribeUrl} style={{ color: t.textMuted }}>Unsubscribe</a>
+              <a href={unsubscribeUrl} style={{ color: t.textMuted }}>
+                Unsubscribe
+              </a>
             </>
           )}
         </Text>

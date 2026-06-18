@@ -1,4 +1,4 @@
-import type { ReactNode, CSSProperties, ReactElement } from 'react';
+import type { CSSProperties, ReactElement, ReactNode } from 'react';
 import { useTheme } from '../ThemeContext.js';
 
 interface HeadingProps {
@@ -15,7 +15,12 @@ const sizeMap: Record<number, CSSProperties> = {
   4: { fontSize: '16px' },
 };
 
-export function Heading({ children, level = 1, color, align = 'left' }: HeadingProps): ReactElement {
+export function Heading({
+  children,
+  level = 1,
+  color,
+  align = 'left',
+}: HeadingProps): ReactElement {
   const theme = useTheme();
   const Tag = `h${level}` as 'h1' | 'h2' | 'h3' | 'h4';
   const style: CSSProperties = {

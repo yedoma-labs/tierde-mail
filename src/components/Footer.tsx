@@ -1,4 +1,4 @@
-import type { ReactNode, CSSProperties, ReactElement } from 'react';
+import type { CSSProperties, ReactElement, ReactNode } from 'react';
 import { useTheme } from '../ThemeContext.js';
 
 interface FooterProps {

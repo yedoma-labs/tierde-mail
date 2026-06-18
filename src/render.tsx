@@ -1,6 +1,6 @@
-import { renderToStaticMarkup } from 'react-dom/server';
 import { inline } from '@css-inline/css-inline';
 import type { ReactElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 
 const DOCTYPE = '<!DOCTYPE html>';
 

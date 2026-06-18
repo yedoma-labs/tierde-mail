@@ -1,48 +1,50 @@
-export type { BaseTemplateProps, SecurityDetails, ChangeRecord, LoginEvent } from './templates/shared.js';
-export { unsubscribeHeaders } from './unsubscribe.js';
-export type { UnsubscribeOptions } from './unsubscribe.js';
-
-export { defineEmail } from './define-email.js';
-export { createMailer } from './mailer.js';
-export { createMailerFromEnv } from './env-mailer.js';
-export { createTheme, defaultTheme } from './theme.js';
-export type { Theme } from './theme.js';
-
+export type { AlertBoxVariant, KeyValueRow } from './components/index.js';
 export {
-  EmailTemplate,
-  Heading,
-  Text,
+  AlertBox,
   Button,
+  Column,
+  EmailTemplate,
   Footer,
+  Heading,
   Hr,
   Image,
-  Link,
-  Preview,
-  Section,
-  Row,
-  Column,
-  LogoHeader,
   KeyValueTable,
-  AlertBox,
+  Link,
+  LogoHeader,
+  Preview,
+  Row,
+  Section,
+  Text,
 } from './components/index.js';
-export type { KeyValueRow, AlertBoxVariant } from './components/index.js';
-
+export { defineEmail } from './define-email.js';
+export { createMailerFromEnv } from './env-mailer.js';
+export { createMailer } from './mailer.js';
 export type {
+  BaseTemplateProps,
+  ChangeRecord,
+  LoginEvent,
+  SecurityDetails,
+} from './templates/shared.js';
+export type { Theme } from './theme.js';
+export { createTheme, defaultTheme } from './theme.js';
+export type {
+  Attachment,
+  BatchItemResult,
+  BatchRecipient,
+  BatchSendOptions,
+  BatchSendResult,
+  CreateMailerConfig,
   EmailAddress,
   EmailAddressInput,
+  EmailDefinition,
   EmailMessage,
   EmailProvider,
   EmailTemplate as EmailTemplateType,
-  EmailDefinition,
-  SendResult,
-  SendOptions,
   Mailer,
-  CreateMailerConfig,
-  SingleProviderMailerConfig,
   MultiProviderMailerConfig,
-  Attachment,
-  BatchRecipient,
-  BatchSendOptions,
-  BatchItemResult,
-  BatchSendResult,
+  SendOptions,
+  SendResult,
+  SingleProviderMailerConfig,
 } from './types.js';
+export type { UnsubscribeOptions } from './unsubscribe.js';
+export { unsubscribeHeaders } from './unsubscribe.js';

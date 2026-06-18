@@ -1,16 +1,16 @@
-import { currentYear } from './utils.js';
-import type { BaseTemplateProps, ChangeRecord } from './shared.js';
-import { defineEmail } from '../define-email.js';
-import { defaultTheme } from '../theme.js';
-import { EmailTemplate } from '../components/EmailTemplate.js';
-import { Heading } from '../components/Heading.js';
-import { Text } from '../components/Text.js';
+import type { CSSProperties } from 'react';
 import { Button } from '../components/Button.js';
+import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Footer } from '../components/Footer.js';
+import { Heading } from '../components/Heading.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
-import type { CSSProperties } from 'react';
+import { Text } from '../components/Text.js';
+import { defineEmail } from '../define-email.js';
+import { defaultTheme } from '../theme.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
+import type { BaseTemplateProps, ChangeRecord } from './shared.js';
+import { currentYear } from './utils.js';
 
 export interface ProfileUpdatedStrings {
   subject: (appName: string) => string;
@@ -42,73 +42,94 @@ export interface ProfileUpdatedProps extends BaseTemplateProps<ProfileUpdatedStr
   accountUrl: string;
 }
 
-export const ProfileUpdated: EmailTemplateType<ProfileUpdatedProps> = defineEmail<ProfileUpdatedProps>({
-  subject: ({ appName = 'Our App', strings }) => {
-    const s = { ...PROFILE_UPDATED_STRINGS, ...strings };
-    return s.subject(appName);
-  },
-  component: ({ name, changes, accountUrl, appName = 'Our App', locale, dir, strings, theme }) => {
-    const s = { ...PROFILE_UPDATED_STRINGS, ...strings };
-    const t = { ...defaultTheme, ...theme };
-    const year = currentYear(locale);
+export const ProfileUpdated: EmailTemplateType<ProfileUpdatedProps> =
+  defineEmail<ProfileUpdatedProps>({
+    subject: ({ appName = 'Our App', strings }) => {
+      const s = { ...PROFILE_UPDATED_STRINGS, ...strings };
+      return s.subject(appName);
+    },
+    component: ({
+      name,
+      changes,
+      accountUrl,
+      appName = 'Our App',
+      locale,
+      dir,
+      strings,
+      theme,
+    }) => {
+      const s = { ...PROFILE_UPDATED_STRINGS, ...strings };
+      const t = { ...defaultTheme, ...theme };
+      const year = currentYear(locale);
 
-    const thStyle: CSSProperties = {
-      textAlign: 'left',
-      fontSize: '11px',
-      fontWeight: '600',
-      textTransform: 'uppercase',
-      letterSpacing: '0.05em',
-      color: t.textMuted,
-      paddingBottom: '8px',
-      borderBottom: `1px solid ${t.border}`,
-    };
+      const thStyle: CSSProperties = {
+        textAlign: 'left',
+        fontSize: '11px',
+        fontWeight: '600',
+        textTransform: 'uppercase',
+        letterSpacing: '0.05em',
+        color: t.textMuted,
+        paddingBottom: '8px',
+        borderBottom: `1px solid ${t.border}`,
+      };
 
-    const tdStyle: CSSProperties = {
-      fontSize: '14px',
-      color: t.textPrimary,
-      padding: '8px 8px 8px 0',
-      borderBottom: `1px solid ${t.borderSubtle}`,
-      verticalAlign: 'top',
-    };
+      const tdStyle: CSSProperties = {
+        fontSize: '14px',
+        color: t.textPrimary,
+        padding: '8px 8px 8px 0',
+        borderBottom: `1px solid ${t.borderSubtle}`,
+        verticalAlign: 'top',
+      };
 
-    const oldValueStyle: CSSProperties = {
-      color: t.textMuted,
-      textDecoration: 'line-through',
-    };
+      const oldValueStyle: CSSProperties = {
+        color: t.textMuted,
+        textDecoration: 'line-through',
+      };
 
-    return (
-      <EmailTemplate preview={s.subject(appName)} lang={locale} dir={dir} theme={theme}>
-        <Heading>{s.heading}</Heading>
-        <Text>{s.greeting(name)}</Text>
-        <Text>{s.body}</Text>
-        <Section>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }} cellPadding="0" cellSpacing="0">
-            <thead>
-              <tr>
-                <th style={thStyle}>{s.fieldLabel}</th>
-                <th style={{ ...thStyle, paddingLeft: '8px' }}>{s.toLabel}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {changes.map((change) => (
-                <tr key={change.field}>
-                  <td style={tdStyle}><strong>{change.field}</strong></td>
-                  <td style={{ ...tdStyle, paddingLeft: '8px' }}>
-                    {change.oldValue && (
-                      <span style={oldValueStyle}>{change.oldValue}<br /></span>
-                    )}
-                    {change.newValue}
-                  </td>
+      return (
+        <EmailTemplate preview={s.subject(appName)} lang={locale} dir={dir} theme={theme}>
+          <Heading>{s.heading}</Heading>
+          <Text>{s.greeting(name)}</Text>
+          <Text>{s.body}</Text>
+          <Section>
+            <table
+              style={{ width: '100%', borderCollapse: 'collapse' }}
+              cellPadding="0"
+              cellSpacing="0"
+            >
+              <thead>
+                <tr>
+                  <th style={thStyle}>{s.fieldLabel}</th>
+                  <th style={{ ...thStyle, paddingLeft: '8px' }}>{s.toLabel}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </Section>
-        <Button href={accountUrl}>{s.reviewCtaLabel}</Button>
-        <Hr />
-        <Text muted size="sm">{s.notYouNote}</Text>
-        <Footer>{s.footer(year, appName)}</Footer>
-      </EmailTemplate>
-    );
-  },
-});
+              </thead>
+              <tbody>
+                {changes.map((change) => (
+                  <tr key={change.field}>
+                    <td style={tdStyle}>
+                      <strong>{change.field}</strong>
+                    </td>
+                    <td style={{ ...tdStyle, paddingLeft: '8px' }}>
+                      {change.oldValue && (
+                        <span style={oldValueStyle}>
+                          {change.oldValue}
+                          <br />
+                        </span>
+                      )}
+                      {change.newValue}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Section>
+          <Button href={accountUrl}>{s.reviewCtaLabel}</Button>
+          <Hr />
+          <Text muted size="sm">
+            {s.notYouNote}
+          </Text>
+          <Footer>{s.footer(year, appName)}</Footer>
+        </EmailTemplate>
+      );
+    },
+  });

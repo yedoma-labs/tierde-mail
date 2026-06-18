@@ -1,13 +1,13 @@
-import { currentYear } from './utils.js';
-import { defineEmail } from '../define-email.js';
-import { EmailTemplate } from '../components/EmailTemplate.js';
-import { Heading } from '../components/Heading.js';
-import { Text } from '../components/Text.js';
 import { Button } from '../components/Button.js';
+import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Footer } from '../components/Footer.js';
+import { Heading } from '../components/Heading.js';
 import { Hr } from '../components/Hr.js';
-import type { BaseTemplateProps } from './shared.js';
+import { Text } from '../components/Text.js';
+import { defineEmail } from '../define-email.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
+import type { BaseTemplateProps } from './shared.js';
+import { currentYear } from './utils.js';
 
 export interface EmailVerificationStrings {
   subject: (appName: string) => string;
@@ -39,34 +39,44 @@ export interface EmailVerificationProps extends BaseTemplateProps<EmailVerificat
   expiresIn?: string;
 }
 
-export const EmailVerification: EmailTemplateType<EmailVerificationProps> = defineEmail<EmailVerificationProps>({
-  subject: ({ appName = 'your account', strings }) => {
-    const s = { ...EMAIL_VERIFICATION_STRINGS, ...strings };
-    return s.subject(appName);
-  },
-  component: ({ name, verifyUrl, expiresIn = '24 hours', appName = 'Our App', locale, dir, strings, theme }) => {
-    const s = { ...EMAIL_VERIFICATION_STRINGS, ...strings };
-    const year = currentYear(locale);
-    return (
-      <EmailTemplate
-        preview="Please verify your email address to get started."
-        lang={locale}
-        dir={dir}
-        theme={theme}
-      >
-        <Heading>{s.heading}</Heading>
-        <Text>{s.greeting(name)}</Text>
-        <Text>{s.body(appName)}</Text>
-        <Button href={verifyUrl}>{s.ctaLabel}</Button>
-        <Text muted size="sm" align="center">
-          {s.expiryNote(expiresIn)}
-        </Text>
-        <Hr />
-        <Text muted size="sm">
-          {s.securityNote(appName)}
-        </Text>
-        <Footer>{s.footer(year, appName)}</Footer>
-      </EmailTemplate>
-    );
-  },
-});
+export const EmailVerification: EmailTemplateType<EmailVerificationProps> =
+  defineEmail<EmailVerificationProps>({
+    subject: ({ appName = 'your account', strings }) => {
+      const s = { ...EMAIL_VERIFICATION_STRINGS, ...strings };
+      return s.subject(appName);
+    },
+    component: ({
+      name,
+      verifyUrl,
+      expiresIn = '24 hours',
+      appName = 'Our App',
+      locale,
+      dir,
+      strings,
+      theme,
+    }) => {
+      const s = { ...EMAIL_VERIFICATION_STRINGS, ...strings };
+      const year = currentYear(locale);
+      return (
+        <EmailTemplate
+          preview="Please verify your email address to get started."
+          lang={locale}
+          dir={dir}
+          theme={theme}
+        >
+          <Heading>{s.heading}</Heading>
+          <Text>{s.greeting(name)}</Text>
+          <Text>{s.body(appName)}</Text>
+          <Button href={verifyUrl}>{s.ctaLabel}</Button>
+          <Text muted size="sm" align="center">
+            {s.expiryNote(expiresIn)}
+          </Text>
+          <Hr />
+          <Text muted size="sm">
+            {s.securityNote(appName)}
+          </Text>
+          <Footer>{s.footer(year, appName)}</Footer>
+        </EmailTemplate>
+      );
+    },
+  });

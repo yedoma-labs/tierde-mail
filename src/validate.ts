@@ -1,4 +1,4 @@
-import type { EmailAddress, EmailAddressInput, Attachment } from './types.js';
+import type { Attachment, EmailAddress, EmailAddressInput } from './types.js';
 
 const ALLOWED_CONTENT_TYPES = new Set([
   'application/pdf',
@@ -24,7 +24,7 @@ export function validateEmail(email: string): void {
   const atIdx = email.lastIndexOf('@');
   const local = email.slice(0, atIdx);
   const domain = email.slice(atIdx + 1);
-  if (!local || !domain || !domain.includes('.') || domain.startsWith('.') || domain.endsWith('.')) {
+  if (!local || !domain?.includes('.') || domain.startsWith('.') || domain.endsWith('.')) {
     throw new TypeError(`Invalid email address: ${email}`);
   }
   // Reject spaces in local or domain part
@@ -42,12 +42,8 @@ export function normalizeAddress(input: EmailAddressInput): EmailAddress {
   return input;
 }
 
-export function normalizeAddresses(
-  input: EmailAddressInput | EmailAddressInput[],
-): EmailAddress[] {
-  const addresses = Array.isArray(input)
-    ? input.map(normalizeAddress)
-    : [normalizeAddress(input)];
+export function normalizeAddresses(input: EmailAddressInput | EmailAddressInput[]): EmailAddress[] {
+  const addresses = Array.isArray(input) ? input.map(normalizeAddress) : [normalizeAddress(input)];
   if (addresses.length === 0) {
     throw new TypeError('At least one recipient address is required');
   }

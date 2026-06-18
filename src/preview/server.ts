@@ -1,7 +1,7 @@
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { createLogger } from '@yedoma-labs/suruk-logger';
-import { renderEmail } from '../render.js';
 import { htmlToPlainText } from '../plain-text.js';
+import { renderEmail } from '../render.js';
 import type { EmailTemplate } from '../types.js';
 
 const logger = createLogger({ name: 'tierde-mail:preview' });
@@ -55,9 +55,10 @@ function injectDarkMode(html: string): string {
     if (depth === 0) darkRules.push(html.slice(start, i - 1).trim());
   }
 
-  const injected = darkRules.length > 0
-    ? `<style>${darkRules.join('\n')}</style>`
-    : '<style>body{background:#1a1a1a;color:#e5e7eb}</style>';
+  const injected =
+    darkRules.length > 0
+      ? `<style>${darkRules.join('\n')}</style>`
+      : '<style>body{background:#1a1a1a;color:#e5e7eb}</style>';
 
   return html.includes('</head>') ? html.replace('</head>', `${injected}</head>`) : injected + html;
 }
@@ -341,7 +342,7 @@ export function createPreviewServer(config: PreviewServerConfig): PreviewServer 
       }
       try {
         let html = renderEmail(entry.template.component(entry.props));
-        if (query['dark'] === '1') html = injectDarkMode(html);
+        if (query.dark === '1') html = injectDarkMode(html);
         const text = htmlToPlainText(html);
         const subject = entry.template.subject(entry.props);
         sendJson(res, { name, subject, html, text });

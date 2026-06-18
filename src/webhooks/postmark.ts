@@ -1,5 +1,5 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
-import type { WebhookHandler, WebhookEvent, WebhookEventType } from './types.js';
+import type { WebhookEvent, WebhookEventType, WebhookHandler } from './types.js';
 import { WebhookVerificationError } from './types.js';
 
 interface PostmarkWebhookConfig {
@@ -7,12 +7,9 @@ interface PostmarkWebhookConfig {
   token: string;
 }
 
-function getHeader(
-  headers: Record<string, string | string[] | undefined>,
-  name: string,
-): string {
+function getHeader(headers: Record<string, string | string[] | undefined>, name: string): string {
   const val = headers[name] ?? headers[name.toLowerCase()];
-  return Array.isArray(val) ? val[0] ?? '' : val ?? '';
+  return Array.isArray(val) ? (val[0] ?? '') : (val ?? '');
 }
 
 const RECORD_TYPE_MAP: Record<string, WebhookEventType> = {
@@ -45,10 +42,7 @@ class PostmarkWebhookHandler implements WebhookHandler {
     const expectedBuf = Buffer.from(expected);
     const sigBuf = Buffer.from(sig);
 
-    if (
-      sigBuf.length !== expectedBuf.length ||
-      !timingSafeEqual(sigBuf, expectedBuf)
-    ) {
+    if (sigBuf.length !== expectedBuf.length || !timingSafeEqual(sigBuf, expectedBuf)) {
       throw new WebhookVerificationError('Webhook signature verification failed');
     }
 
@@ -58,23 +52,23 @@ class PostmarkWebhookHandler implements WebhookHandler {
 }
 
 function normalizePostmarkEvent(payload: Record<string, unknown>): WebhookEvent {
-  const recordType = String(payload['RecordType'] ?? '');
+  const recordType = String(payload.RecordType ?? '');
   const type: WebhookEventType = RECORD_TYPE_MAP[recordType] ?? recordType.toLowerCase();
 
-  const recipient = String(payload['Recipient'] ?? payload['Email'] ?? '');
-  const messageId = String(payload['MessageID'] ?? '');
+  const recipient = String(payload.Recipient ?? payload.Email ?? '');
+  const messageId = String(payload.MessageID ?? '');
 
   // Postmark Bounce/Delivery include metadata about the original message
-  const metadata = (payload['Metadata'] ?? {}) as Record<string, unknown>;
-  const from = String(metadata['From'] ?? payload['From'] ?? '');
-  const subject = metadata['Subject'] ? String(metadata['Subject']) : undefined;
+  const metadata = (payload.Metadata ?? {}) as Record<string, unknown>;
+  const from = String(metadata.From ?? payload.From ?? '');
+  const subject = metadata.Subject ? String(metadata.Subject) : undefined;
 
   const timestamp = String(
-    payload['DeliveredAt'] ??
-    payload['BouncedAt'] ??
-    payload['ReceivedAt'] ??
-    payload['Date'] ??
-    new Date().toISOString(),
+    payload.DeliveredAt ??
+      payload.BouncedAt ??
+      payload.ReceivedAt ??
+      payload.Date ??
+      new Date().toISOString(),
   );
 
   return {

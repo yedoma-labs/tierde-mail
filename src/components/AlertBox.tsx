@@ -1,4 +1,4 @@
-import type { ReactNode, CSSProperties, ReactElement } from 'react';
+import type { CSSProperties, ReactElement, ReactNode } from 'react';
 import { useTheme } from '../ThemeContext.js';
 
 export type AlertBoxVariant = 'danger' | 'warning' | 'success' | 'info';
@@ -18,10 +18,10 @@ const iconStyle: CSSProperties = {
 export function AlertBox({ variant = 'info', icon, children }: AlertBoxProps): ReactElement {
   const theme = useTheme();
   const variants: Record<AlertBoxVariant, { bg: string; border: string; text: string }> = {
-    danger:  { bg: theme.dangerBg, border: theme.dangerBorder, text: theme.dangerText },
+    danger: { bg: theme.dangerBg, border: theme.dangerBorder, text: theme.dangerText },
     warning: { bg: theme.warningBg, border: theme.warningBorder, text: theme.warningText },
     success: { bg: theme.successBg, border: theme.successBorder, text: theme.successText },
-    info:    { bg: theme.infoBg, border: theme.infoBorder, text: theme.infoText },
+    info: { bg: theme.infoBg, border: theme.infoBorder, text: theme.infoText },
   };
   const v = variants[variant];
   const boxStyle: CSSProperties = {

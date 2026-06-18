@@ -1,16 +1,16 @@
-import { currentYear } from './utils.js';
-import { defineEmail } from '../define-email.js';
-import { defaultTheme } from '../theme.js';
-import { EmailTemplate } from '../components/EmailTemplate.js';
-import { Heading } from '../components/Heading.js';
-import { Text } from '../components/Text.js';
+import type { CSSProperties } from 'react';
 import { Button } from '../components/Button.js';
+import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Footer } from '../components/Footer.js';
+import { Heading } from '../components/Heading.js';
 import { Hr } from '../components/Hr.js';
 import { Section } from '../components/Section.js';
-import type { CSSProperties } from 'react';
-import type { BaseTemplateProps } from './shared.js';
+import { Text } from '../components/Text.js';
+import { defineEmail } from '../define-email.js';
+import { defaultTheme } from '../theme.js';
 import type { EmailTemplate as EmailTemplateType } from '../types.js';
+import type { BaseTemplateProps } from './shared.js';
+import { currentYear } from './utils.js';
 
 export type MentionEventType = 'mention' | 'comment' | 'reply' | 'reaction';
 
@@ -66,71 +66,72 @@ export interface CommentMentionProps extends BaseTemplateProps<CommentMentionStr
   commentUrl: string;
 }
 
-export const CommentMention: EmailTemplateType<CommentMentionProps> = defineEmail<CommentMentionProps>({
-  subject: ({ event, actorName, contextName, strings }) => {
-    const s = { ...COMMENT_MENTION_STRINGS, ...strings };
-    return s.subject(event, actorName, contextName);
-  },
-  component: ({
-    name,
-    event,
-    actorName,
-    contextName,
-    commentText,
-    commentUrl,
-    appName = 'Our App',
-    locale,
-    dir,
-    strings,
-    theme,
-  }) => {
-    const s = { ...COMMENT_MENTION_STRINGS, ...strings };
-    const t = { ...defaultTheme, ...theme };
-    const year = currentYear(locale);
+export const CommentMention: EmailTemplateType<CommentMentionProps> =
+  defineEmail<CommentMentionProps>({
+    subject: ({ event, actorName, contextName, strings }) => {
+      const s = { ...COMMENT_MENTION_STRINGS, ...strings };
+      return s.subject(event, actorName, contextName);
+    },
+    component: ({
+      name,
+      event,
+      actorName,
+      contextName,
+      commentText,
+      commentUrl,
+      appName = 'Our App',
+      locale,
+      dir,
+      strings,
+      theme,
+    }) => {
+      const s = { ...COMMENT_MENTION_STRINGS, ...strings };
+      const t = { ...defaultTheme, ...theme };
+      const year = currentYear(locale);
 
-    const quoteBlockStyle: CSSProperties = {
-      backgroundColor: t.surfaceSubtle,
-      borderLeft: `3px solid ${t.primary}`,
-      borderRadius: '0 6px 6px 0',
-      padding: '12px 16px',
-      margin: '0',
-    };
+      const quoteBlockStyle: CSSProperties = {
+        backgroundColor: t.surfaceSubtle,
+        borderLeft: `3px solid ${t.primary}`,
+        borderRadius: '0 6px 6px 0',
+        padding: '12px 16px',
+        margin: '0',
+      };
 
-    const quoteTextStyle: CSSProperties = {
-      fontSize: '14px',
-      color: t.textSecondary,
-      fontStyle: 'italic',
-      margin: 0,
-      lineHeight: '1.6',
-    };
+      const quoteTextStyle: CSSProperties = {
+        fontSize: '14px',
+        color: t.textSecondary,
+        fontStyle: 'italic',
+        margin: 0,
+        lineHeight: '1.6',
+      };
 
-    const contextStyle: CSSProperties = {
-      fontSize: '12px',
-      color: t.textMuted,
-      margin: '8px 0 0',
-    };
+      const contextStyle: CSSProperties = {
+        fontSize: '12px',
+        color: t.textMuted,
+        margin: '8px 0 0',
+      };
 
-    return (
-      <EmailTemplate
-        preview={s.subject(event, actorName, contextName)}
-        lang={locale}
-        dir={dir}
-        theme={theme}
-      >
-        <Heading>{s.heading(event, actorName)}</Heading>
-        <Text>{s.greeting(name)}</Text>
-        {commentText && (
-          <Section>
-            <div style={quoteBlockStyle}>
-              <p style={quoteTextStyle}>"{commentText}"</p>
-              <p style={contextStyle}>{s.context(contextName)}</p>
-            </div>
-          </Section>
-        )}
-        <Button href={commentUrl}>{s.ctaLabel(event)}</Button>
-        <Hr />
-        <Footer>{s.footer(year, appName)}</Footer>
-      </EmailTemplate>
-    );
-  },
-});
+      return (
+        <EmailTemplate
+          preview={s.subject(event, actorName, contextName)}
+          lang={locale}
+          dir={dir}
+          theme={theme}
+        >
+          <Heading>{s.heading(event, actorName)}</Heading>
+          <Text>{s.greeting(name)}</Text>
+          {commentText && (
+            <Section>
+              <div style={quoteBlockStyle}>
+                <p style={quoteTextStyle}>"{commentText}"</p>
+                <p style={contextStyle}>{s.context(contextName)}</p>
+              </div>
+            </Section>
+          )}
+          <Button href={commentUrl}>{s.ctaLabel(event)}</Button>
+          <Hr />
+          <Footer>{s.footer(year, appName)}</Footer>
+        </EmailTemplate>
+      );
+    },
+  });

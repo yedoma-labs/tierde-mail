@@ -1,19 +1,19 @@
-import { renderEmail } from './render.js';
 import { htmlToPlainText } from './plain-text.js';
-import { normalizeAddress, normalizeAddresses, validateAttachment } from './validate.js';
+import { renderEmail } from './render.js';
 import type {
-  EmailMessage,
+  BatchItemResult,
+  BatchSendOptions,
+  BatchSendResult,
   CreateMailerConfig,
+  EmailMessage,
   EmailProvider,
   EmailTemplate,
   Mailer,
+  MultiProviderMailerConfig,
   SendOptions,
   SendResult,
-  MultiProviderMailerConfig,
-  BatchSendOptions,
-  BatchSendResult,
-  BatchItemResult,
 } from './types.js';
+import { normalizeAddress, normalizeAddresses, validateAttachment } from './validate.js';
 
 function isMultiProvider(config: CreateMailerConfig): config is MultiProviderMailerConfig {
   return 'providers' in config;
@@ -44,7 +44,10 @@ class MailerImpl implements Mailer {
     }
   }
 
-  async send<Props>(template: EmailTemplate<Props>, options: SendOptions<Props>): Promise<SendResult> {
+  async send<Props>(
+    template: EmailTemplate<Props>,
+    options: SendOptions<Props>,
+  ): Promise<SendResult> {
     for (const attachment of options.attachments ?? []) {
       validateAttachment(attachment);
     }
@@ -59,9 +62,7 @@ class MailerImpl implements Mailer {
     const html = renderEmail(element);
     const text = htmlToPlainText(html);
 
-    const replyTo = options.replyTo
-      ? normalizeAddress(options.replyTo)
-      : this.#defaultReplyTo;
+    const replyTo = options.replyTo ? normalizeAddress(options.replyTo) : this.#defaultReplyTo;
 
     const message: EmailMessage = {
       from: this.#from,
@@ -80,7 +81,7 @@ class MailerImpl implements Mailer {
       const idx = this.#roundRobinIndex % this.#providers.length;
       this.#roundRobinIndex++;
       const provider = this.#providers[idx];
-      return provider!.send(message);
+      return provider?.send(message);
     }
 
     // failover: try each provider in order

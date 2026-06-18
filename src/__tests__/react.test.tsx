@@ -1,8 +1,7 @@
-import { describe, it, expect } from 'vitest';
-import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { EmailPreview, renderEmailHtml } from '../react/index.js';
+import { describe, expect, it } from 'vitest';
 import { defineEmail, EmailTemplate, Heading } from '../index.js';
+import { EmailPreview, renderEmailHtml } from '../react/index.js';
 
 const HelloEmail = defineEmail<{ name: string }>({
   subject: ({ name }) => `Hello, ${name}!`,
