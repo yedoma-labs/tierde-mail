@@ -178,18 +178,7 @@ await mailer.send(Welcome, {
 });
 ```
 
-**Local development** - the repo ships a `docker-compose.yml` that starts a full local mail stack in one command:
-
-```bash
-docker compose up -d
-```
-
-This starts three services:
-- **Mailpit** — SMTP sink + web inbox at `http://localhost:8025` (catches all outgoing mail)
-- **WireMock** — HTTP mock at `http://localhost:8080` (stubs Resend, SendGrid, Postmark APIs)
-- **LocalStack** — AWS-compatible SES endpoint at `http://localhost:4566`
-
-See the full section below for wiring each provider to its mock.
+For local development without real credentials, see **Local testing with Docker** below.
 
 ## Usage examples
 
