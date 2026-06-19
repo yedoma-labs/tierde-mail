@@ -160,15 +160,25 @@ export async function executeBatch<Props>(
   template: EmailTemplate<Props>,
   options: BatchSendOptions<Props>,
 ): Promise<BatchSendResult<Props>> {
-  const { recipients, concurrency = 5, delayMs = 0, maxPerSecond, onResult } = options;
+  const {
+    recipients,
+    concurrency = 5,
+    delayMs = 0,
+    maxPerSecond,
+    onResult,
+    collectResults = true,
+  } = options;
   const results: BatchItemResult<Props>[] = [];
+  let sent = 0;
+  let failed = 0;
 
   if (maxPerSecond !== undefined && maxPerSecond > 0) {
     // Token-bucket: track the earliest time each slot is free.
     // `concurrency` slots rotate; each slot must wait minGapMs before reuse.
     const minGapMs = 1000 / maxPerSecond;
     const slotFreeAt: number[] = Array.from({ length: concurrency }, () => 0);
-    const ordered: BatchItemResult<Props>[] = new Array(recipients.length);
+    // Preserve recipient order only when collecting; otherwise tally as results arrive.
+    const ordered: BatchItemResult<Props>[] = collectResults ? new Array(recipients.length) : [];
 
     await Promise.all(
       recipients.map(async (recipient, idx): Promise<void> => {
@@ -189,16 +199,14 @@ export async function executeBatch<Props>(
             error: err instanceof Error ? err : new Error(String(err)),
           };
         }
+        if (item.error) failed++;
+        else sent++;
         onResult?.(item);
-        ordered[idx] = item;
+        if (collectResults) ordered[idx] = item;
       }),
     );
 
-    return {
-      results: ordered,
-      sent: ordered.filter((r) => !r.error).length,
-      failed: ordered.filter((r) => !!r.error).length,
-    };
+    return { results: ordered, sent, failed };
   }
 
   // Chunk-based path (original behaviour)
@@ -223,14 +231,14 @@ export async function executeBatch<Props>(
         }
       }),
     );
-    results.push(...chunkResults);
+    for (const item of chunkResults) {
+      if (item.error) failed++;
+      else sent++;
+      if (collectResults) results.push(item);
+    }
   }
 
-  return {
-    results,
-    sent: results.filter((r) => !r.error).length,
-    failed: results.filter((r) => !!r.error).length,
-  };
+  return { results, sent, failed };
 }
 
 export function createMailer(config: CreateMailerConfig): Mailer {

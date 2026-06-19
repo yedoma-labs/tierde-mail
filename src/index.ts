@@ -35,11 +35,13 @@ export type {
   BatchSendOptions,
   BatchSendResult,
   CreateMailerConfig,
+  DefinedEmail,
   EmailAddress,
   EmailAddressInput,
   EmailDefinition,
   EmailMessage,
   EmailProvider,
+  /** @deprecated Use `DefinedEmail` instead. Retained for backwards compatibility. */
   EmailTemplate as EmailTemplateType,
   Mailer,
   MailMiddleware,

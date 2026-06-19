@@ -288,4 +288,64 @@ describe('mailer.sendBatch', () => {
     expect(result.sent).toBe(4);
     expect(result.failed).toBe(1);
   });
+
+  it('collectResults:false returns empty results but accurate counts (chunk path)', async () => {
+    const provider = mockProvider();
+    const mailer = createMailer({ provider, from: 'sender@example.com' });
+    const seen: string[] = [];
+
+    const result = await mailer.sendBatch(TestEmail, {
+      recipients: Array.from({ length: 4 }, (_, i) => ({
+        to: `r${i}@example.com`,
+        props: { name: `R${i}` },
+      })),
+      collectResults: false,
+      onResult: (r) => seen.push(String(r.to)),
+    });
+
+    expect(result.results).toHaveLength(0);
+    expect(result.sent).toBe(4);
+    expect(result.failed).toBe(0);
+    // All sends still happened and were reported via onResult.
+    expect(provider.calls).toHaveLength(4);
+    expect(seen).toHaveLength(4);
+  });
+
+  it('collectResults:false returns empty results but accurate counts (maxPerSecond path)', async () => {
+    let callCount = 0;
+    const provider: EmailProvider = {
+      name: 'flaky',
+      async send(): Promise<SendResult> {
+        callCount++;
+        if (callCount === 2) throw new Error('boom');
+        return { id: `id-${callCount}`, provider: 'flaky' };
+      },
+    };
+    const mailer = createMailer({ provider, from: 'sender@example.com' });
+
+    const result = await mailer.sendBatch(TestEmail, {
+      recipients: Array.from({ length: 3 }, (_, i) => ({
+        to: `r${i}@example.com`,
+        props: { name: `R${i}` },
+      })),
+      maxPerSecond: 100,
+      concurrency: 3,
+      collectResults: false,
+    });
+
+    expect(result.results).toHaveLength(0);
+    expect(result.sent).toBe(2);
+    expect(result.failed).toBe(1);
+  });
+
+  it('collectResults defaults to true (results populated when omitted)', async () => {
+    const provider = mockProvider();
+    const mailer = createMailer({ provider, from: 'sender@example.com' });
+
+    const result = await mailer.sendBatch(TestEmail, {
+      recipients: [{ to: 'a@a.com', props: { name: 'A' } }],
+    });
+
+    expect(result.results).toHaveLength(1);
+  });
 });

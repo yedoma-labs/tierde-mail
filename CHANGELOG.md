@@ -8,6 +8,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+## [0.8.0] — 2026-06-19
+
 ### Added
 
 - **Middleware pipeline** — `middleware?: MailMiddleware[]` option on `createMailer`. An ordered array of transform functions that run on the fully-rendered `EmailMessage` before it reaches the provider. Supports sync and async transforms.
@@ -15,6 +17,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 - **Inline attachments (CID)** — `cid?: string` field on `Attachment`. When set, providers mark the attachment as inline. All HTTP providers updated: SMTP passes `cid` to nodemailer, SendGrid uses `disposition: inline` + `content_id`, Postmark uses `ContentID`, Resend uses `inline: true` + `content_id`.
 - **Batch attachments** — `attachments?: Attachment[]` on `BatchSendOptions` (shared to all recipients) and on `BatchRecipient` (per-recipient, appended after shared). Previously the batch path silently dropped all attachments.
 - **`embedImages()` fetch caching** — fetched images are cached per middleware instance, keyed by URL. A batch send now fetches each image once and reuses it for every recipient instead of re-fetching per send. Failed fetches are not cached, so transient errors retry on the next send.
+- **`collectResults?: boolean` on `BatchSendOptions`** (default `true`) — set to `false` for very large batches to skip retaining one result (and its `props`) per recipient in memory; `sent`/`failed` counts stay accurate and results are still delivered via `onResult`.
+- **`DefinedEmail<Props>` type** — canonical, clearly-named alias for the value returned by `defineEmail`. The previous `EmailTemplateType` export is retained but deprecated (it only existed to avoid clashing with the `EmailTemplate` component).
 - **`validateAttachment` is now exported** so authors of custom middleware can validate attachments they generate.
 
 ### Security
