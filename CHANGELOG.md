@@ -18,7 +18,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 ### Security
 
 - `validateAttachment` now validates the `cid` field: rejects empty strings and strings containing CR, LF, or other control characters to prevent MIME header injection.
+- `validateAttachment` now rejects `image/svg+xml` (and `image/svg`): SVG is active content that can embed scripts, so it is blocked even though it matches the `image/*` allowlist prefix.
+- Attachments are re-validated **after** middleware runs, not only on the caller-supplied `options.attachments`. Closes a gap where a custom `MailMiddleware` could inject attachments with path-traversal filenames, disallowed content types, or malformed CIDs that reached the provider unchecked.
+- `embedImages()` clamps the server-supplied `Content-Type` to a raster `image/*` type, falling back to `image/png` otherwise. Prevents a misbehaving or malicious CDN from returning `text/html` (an allowed type) and producing an inline HTML attachment.
 - `embedImages()` SSRF risk documented: calling without a URL filter embeds all remote `src` values; do not use with user-controlled image URLs.
+
+### Changed
+
+- Bumped `nodemailer` to `^9.0.1`, `@aws-sdk/client-ses` to `^3.1072.0`, and `@types/node` to `^26.0.0`.
 
 ---
 
