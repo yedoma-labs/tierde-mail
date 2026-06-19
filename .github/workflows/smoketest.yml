@@ -1,0 +1,63 @@
+name: Smoketest
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  smoketest:
+    name: Provider smoketests
+    runs-on: ubuntu-latest
+
+    services:
+      mailpit:
+        image: axllent/mailpit:latest
+        ports:
+          - 1025:1025
+          - 8025:8025
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Debug env (non-sensitive)
+        env:
+          TIERDE_TEST_FROM: ${{ vars.TIERDE_TEST_FROM }}
+          TIERDE_TEST_TO: ${{ vars.TIERDE_TEST_TO }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          POSTMARK_SERVER_TOKEN: ${{ secrets.POSTMARK_SERVER_TOKEN }}
+        run: |
+          echo "TIERDE_TEST_FROM set: ${{ vars.TIERDE_TEST_FROM != '' }}"
+          echo "TIERDE_TEST_TO set: ${{ vars.TIERDE_TEST_TO != '' }}"
+          echo "RESEND_API_KEY set: ${{ secrets.RESEND_API_KEY != '' }}"
+          echo "SENDGRID_API_KEY set: ${{ secrets.SENDGRID_API_KEY != '' }}"
+          echo "POSTMARK_SERVER_TOKEN set: ${{ secrets.POSTMARK_SERVER_TOKEN != '' }}"
+
+      - name: Run provider smoketests
+        env:
+          TIERDE_TEST_FROM: ${{ vars.TIERDE_TEST_FROM }}
+          TIERDE_TEST_TO: ${{ vars.TIERDE_TEST_TO }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          POSTMARK_SERVER_TOKEN: ${{ secrets.POSTMARK_SERVER_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SES_REGION: ${{ secrets.SES_REGION }}
+          TIERDE_TEST_MAILPIT: "true"
+        run: pnpm vitest run --reporter=verbose src/__tests__/providers.integration.test.ts

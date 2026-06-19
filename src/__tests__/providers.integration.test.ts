@@ -19,19 +19,44 @@
  *   smtp:      SMTP_HOST (+ optional SMTP_PORT, SMTP_USER, SMTP_PASS)
  *   mailpit:   TIERDE_TEST_MAILPIT=true  (assumes localhost:1025)
  */
+import React from 'react';
 import { describe, expect, it } from 'vitest';
+import { htmlToPlainText } from '../plain-text.js';
+import { renderEmail } from '../render.js';
+import { FeatureAnnouncement } from '../templates/FeatureAnnouncement.js';
 import type { EmailMessage } from '../types.js';
 
 const FROM = process.env.TIERDE_TEST_FROM;
 const TO = process.env.TIERDE_TEST_TO;
 
 function testMessage(provider: string): EmailMessage {
+  const props = {
+    name: 'tierde CI',
+    appName: 'tierde-mail',
+    featureName: `Integration smoketest — ${provider}`,
+    description: `This email was sent automatically by the tierde-mail CI pipeline to verify the ${provider} provider is working correctly.`,
+    ctaUrl: 'https://github.com/yedoma-labs/tierde-mail',
+    changes: [
+      {
+        type: 'new' as const,
+        title: 'Provider verified',
+        description: `${provider} delivered this message successfully.`,
+      },
+      {
+        type: 'improvement' as const,
+        title: 'Multi-provider support',
+        description: 'Resend, SendGrid, Postmark, SES, SMTP, Mailpit.',
+      },
+      { type: 'fix' as const, title: 'Timestamp', description: new Date().toISOString() },
+    ],
+  };
+  const html = renderEmail(React.createElement(FeatureAnnouncement.component, props));
   return {
     from: { email: FROM! },
     to: { email: TO! },
-    subject: `[tierde integration] ${provider} — ${new Date().toISOString()}`,
-    html: `<p>Integration test from <strong>${provider}</strong> provider.</p>`,
-    text: `Integration test from ${provider} provider.`,
+    subject: FeatureAnnouncement.subject({ ...props, appName: 'tierde-mail' }),
+    html,
+    text: htmlToPlainText(html),
   };
 }
 
