@@ -439,6 +439,87 @@ middleware: [embedImages()]
 - `embedImages` fetches images at send time. For high-volume batch sends, pre-fetch and cache image Buffers and pass them via `attachments` directly instead of using the middleware.
 - Each unique URL is fetched once per send, even if it appears multiple times in the HTML.
 - Existing `attachments` on the message are preserved.
+- **SSRF warning**: when called without a URL list (`embedImages()`), every remote `src` in the rendered HTML is fetched server-side. Do not use with templates whose `src` values come from untrusted user input.
+
+---
+
+## Attachments
+
+Pass file attachments via the `attachments` option on `send` or `sendBatch`.
+
+```ts
+await mailer.send(InvoiceEmail, {
+  to: 'customer@example.com',
+  props: { ... },
+  attachments: [
+    {
+      filename: 'invoice-2026-01.pdf',
+      content: pdfBuffer,          // Buffer or base64 string
+      contentType: 'application/pdf',
+    },
+  ],
+});
+```
+
+### Allowed content types
+
+| Category | Types |
+|---|---|
+| Documents | `application/pdf`, `application/zip`, `application/octet-stream` |
+| Images | `image/png`, `image/jpeg`, `image/gif`, `image/webp`, any `image/*` |
+| Text | `text/plain`, `text/csv`, `text/html` |
+
+Any other content type throws a `TypeError` at send time (before the provider is called).
+
+### Batch attachments
+
+```ts
+await mailer.sendBatch(InvoiceEmail, {
+  // Shared: every recipient gets this
+  attachments: [
+    { filename: 'terms.pdf', content: termsBuffer, contentType: 'application/pdf' },
+  ],
+  recipients: [
+    {
+      to: 'alice@example.com',
+      props: { ... },
+      // Per-recipient: appended after shared attachments
+      attachments: [
+        { filename: 'invoice-alice.pdf', content: alicePdf, contentType: 'application/pdf' },
+      ],
+    },
+    {
+      to: 'bob@example.com',
+      props: { ... },
+      attachments: [
+        { filename: 'invoice-bob.pdf', content: bobPdf, contentType: 'application/pdf' },
+      ],
+    },
+  ],
+});
+```
+
+### Inline attachments (CID)
+
+Set `cid` on an attachment to embed it inline. Reference it in JSX via `src="cid:<cid>"`. See [Inline image embedding](#inline-image-embedding) for the built-in `embedImages` middleware that handles this automatically.
+
+```ts
+attachments: [
+  {
+    filename: 'logo.png',
+    content: logoBuffer,
+    contentType: 'image/png',
+    cid: 'logo.png',
+  },
+]
+// In JSX: <img src="cid:logo.png" alt="Logo" />
+```
+
+### Security
+
+- Filenames are validated: no `..`, `/`, `\`, or control characters.
+- CID values are validated: no CR/LF or control characters (MIME header injection prevention).
+- Validation runs before the provider is called — invalid attachments throw `TypeError` without making a network request.
 
 ---
 

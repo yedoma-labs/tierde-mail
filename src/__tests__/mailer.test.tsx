@@ -321,6 +321,104 @@ describe('middleware', () => {
   });
 });
 
+describe('attachments (single send)', () => {
+  it('passes attachments to provider', async () => {
+    const provider = mockProvider();
+    const mailer = createMailer({ provider, from: 'sender@example.com' });
+
+    await mailer.send(TestEmail, {
+      to: 'user@example.com',
+      props: { name: 'Alice' },
+      attachments: [
+        { filename: 'report.pdf', content: Buffer.from('pdf'), contentType: 'application/pdf' },
+      ],
+    });
+
+    expect(provider.calls[0]?.attachments).toHaveLength(1);
+    expect(provider.calls[0]?.attachments![0]!.filename).toBe('report.pdf');
+  });
+
+  it('passes multiple attachments in order', async () => {
+    const provider = mockProvider();
+    const mailer = createMailer({ provider, from: 'sender@example.com' });
+
+    await mailer.send(TestEmail, {
+      to: 'user@example.com',
+      props: { name: 'Alice' },
+      attachments: [
+        { filename: 'a.pdf', content: 'a', contentType: 'application/pdf' },
+        { filename: 'b.png', content: 'b', contentType: 'image/png' },
+      ],
+    });
+
+    const atts = provider.calls[0]?.attachments ?? [];
+    expect(atts).toHaveLength(2);
+    expect(atts[0]!.filename).toBe('a.pdf');
+    expect(atts[1]!.filename).toBe('b.png');
+  });
+
+  it('no attachments when omitted', async () => {
+    const provider = mockProvider();
+    const mailer = createMailer({ provider, from: 'sender@example.com' });
+
+    await mailer.send(TestEmail, { to: 'user@example.com', props: { name: 'Alice' } });
+
+    expect(provider.calls[0]?.attachments ?? []).toHaveLength(0);
+  });
+
+  it('rejects attachment with path traversal in filename', async () => {
+    const provider = mockProvider();
+    const mailer = createMailer({ provider, from: 'sender@example.com' });
+
+    await expect(
+      mailer.send(TestEmail, {
+        to: 'user@example.com',
+        props: { name: 'Alice' },
+        attachments: [{ filename: '../secret.pdf', content: 'x', contentType: 'application/pdf' }],
+      }),
+    ).rejects.toThrow(TypeError);
+  });
+
+  it('rejects attachment with disallowed content type', async () => {
+    const provider = mockProvider();
+    const mailer = createMailer({ provider, from: 'sender@example.com' });
+
+    await expect(
+      mailer.send(TestEmail, {
+        to: 'user@example.com',
+        props: { name: 'Alice' },
+        attachments: [{ filename: 'exploit.exe', content: 'x', contentType: 'application/x-msdownload' }],
+      }),
+    ).rejects.toThrow(TypeError);
+  });
+
+  it('rejects inline attachment with cid containing control characters', async () => {
+    const provider = mockProvider();
+    const mailer = createMailer({ provider, from: 'sender@example.com' });
+
+    await expect(
+      mailer.send(TestEmail, {
+        to: 'user@example.com',
+        props: { name: 'Alice' },
+        attachments: [{ filename: 'img.png', content: 'x', contentType: 'image/png', cid: 'bad\r\ncid' }],
+      }),
+    ).rejects.toThrow(TypeError);
+  });
+
+  it('rejects inline attachment with empty cid', async () => {
+    const provider = mockProvider();
+    const mailer = createMailer({ provider, from: 'sender@example.com' });
+
+    await expect(
+      mailer.send(TestEmail, {
+        to: 'user@example.com',
+        props: { name: 'Alice' },
+        attachments: [{ filename: 'img.png', content: 'x', contentType: 'image/png', cid: '' }],
+      }),
+    ).rejects.toThrow(TypeError);
+  });
+});
+
 describe('no middleware — tracking isolation', () => {
   it('html contains no tracking pixel', async () => {
     const provider = mockProvider();

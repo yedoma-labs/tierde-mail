@@ -8,6 +8,18 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Added
+
+- **Middleware pipeline** — `middleware?: MailMiddleware[]` option on `createMailer`. An ordered array of transform functions that run on the fully-rendered `EmailMessage` before it reaches the provider. Supports sync and async transforms.
+- **`embedImages(urls?)`** — built-in middleware that fetches remote images, attaches them inline via CID, and rewrites `src` attributes so email clients that block remote loading still display embedded images. Supported on SMTP, Resend, SendGrid, and Postmark. SES limitation documented.
+- **Inline attachments (CID)** — `cid?: string` field on `Attachment`. When set, providers mark the attachment as inline. All HTTP providers updated: SMTP passes `cid` to nodemailer, SendGrid uses `disposition: inline` + `content_id`, Postmark uses `ContentID`, Resend uses `inline: true` + `content_id`.
+- **Batch attachments** — `attachments?: Attachment[]` on `BatchSendOptions` (shared to all recipients) and on `BatchRecipient` (per-recipient, appended after shared). Previously the batch path silently dropped all attachments.
+
+### Security
+
+- `validateAttachment` now validates the `cid` field: rejects empty strings and strings containing CR, LF, or other control characters to prevent MIME header injection.
+- `embedImages()` SSRF risk documented: calling without a URL filter embeds all remote `src` values; do not use with user-controlled image URLs.
+
 ---
 
 ## [0.7.0] — 2026-06-19

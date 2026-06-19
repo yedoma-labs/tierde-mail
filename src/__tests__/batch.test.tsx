@@ -151,6 +151,77 @@ describe('mailer.sendBatch', () => {
     expect(provider.calls).toHaveLength(0);
   });
 
+  it('sends shared attachments to every recipient', async () => {
+    const provider = mockProvider();
+    const mailer = createMailer({ provider, from: 'sender@example.com' });
+    const shared = { filename: 'terms.pdf', content: 'pdf', contentType: 'application/pdf' };
+
+    await mailer.sendBatch(TestEmail, {
+      recipients: [
+        { to: 'a@a.com', props: { name: 'A' } },
+        { to: 'b@b.com', props: { name: 'B' } },
+      ],
+      attachments: [shared],
+    });
+
+    expect(provider.calls).toHaveLength(2);
+    expect(provider.calls[0]?.attachments).toHaveLength(1);
+    expect(provider.calls[0]?.attachments![0]!.filename).toBe('terms.pdf');
+    expect(provider.calls[1]?.attachments![0]!.filename).toBe('terms.pdf');
+  });
+
+  it('sends per-recipient attachments only to that recipient', async () => {
+    const provider = mockProvider();
+    const mailer = createMailer({ provider, from: 'sender@example.com' });
+
+    await mailer.sendBatch(TestEmail, {
+      recipients: [
+        {
+          to: 'a@a.com',
+          props: { name: 'A' },
+          attachments: [{ filename: 'invoice-a.pdf', content: 'a', contentType: 'application/pdf' }],
+        },
+        { to: 'b@b.com', props: { name: 'B' } },
+      ],
+    });
+
+    expect(provider.calls[0]?.attachments).toHaveLength(1);
+    expect(provider.calls[0]?.attachments![0]!.filename).toBe('invoice-a.pdf');
+    expect(provider.calls[1]?.attachments ?? []).toHaveLength(0);
+  });
+
+  it('merges shared and per-recipient attachments — shared first', async () => {
+    const provider = mockProvider();
+    const mailer = createMailer({ provider, from: 'sender@example.com' });
+
+    await mailer.sendBatch(TestEmail, {
+      recipients: [
+        {
+          to: 'a@a.com',
+          props: { name: 'A' },
+          attachments: [{ filename: 'personal.pdf', content: 'p', contentType: 'application/pdf' }],
+        },
+      ],
+      attachments: [{ filename: 'shared.pdf', content: 's', contentType: 'application/pdf' }],
+    });
+
+    const atts = provider.calls[0]?.attachments ?? [];
+    expect(atts).toHaveLength(2);
+    expect(atts[0]!.filename).toBe('shared.pdf');
+    expect(atts[1]!.filename).toBe('personal.pdf');
+  });
+
+  it('no attachments when none provided in batch', async () => {
+    const provider = mockProvider();
+    const mailer = createMailer({ provider, from: 'sender@example.com' });
+
+    await mailer.sendBatch(TestEmail, {
+      recipients: [{ to: 'a@a.com', props: { name: 'A' } }],
+    });
+
+    expect(provider.calls[0]?.attachments ?? []).toHaveLength(0);
+  });
+
   it('passes cc and bcc per recipient', async () => {
     const provider = mockProvider();
     const mailer = createMailer({ provider, from: 'sender@example.com' });

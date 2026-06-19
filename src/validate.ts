@@ -65,4 +65,13 @@ export function validateAttachment(attachment: Attachment): void {
   if (!ALLOWED_CONTENT_TYPES.has(baseType) && !baseType.startsWith('image/')) {
     throw new TypeError(`Disallowed attachment content type: ${ct}`);
   }
+  if (attachment.cid !== undefined) {
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: intentional — rejects MIME header injection
+    if (/[\r\n\x00-\x1f]/.test(attachment.cid)) {
+      throw new TypeError(`Unsafe attachment cid: contains control characters`);
+    }
+    if (attachment.cid.length === 0) {
+      throw new TypeError(`Unsafe attachment cid: must not be empty`);
+    }
+  }
 }

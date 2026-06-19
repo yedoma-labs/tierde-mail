@@ -2,6 +2,7 @@ import { htmlToPlainText } from './plain-text.js';
 import { renderEmail } from './render.js';
 import type {
   BatchItemResult,
+  BatchRecipient,
   BatchSendOptions,
   BatchSendResult,
   CreateMailerConfig,
@@ -121,6 +122,23 @@ function delay(ms: number): Promise<void> {
   return new Promise<void>((resolve) => setTimeout(resolve, ms));
 }
 
+function buildSendOptions<Props>(
+  options: BatchSendOptions<Props>,
+  recipient: BatchRecipient<Props>,
+): SendOptions<Props> {
+  const mergedAttachments = [
+    ...(options.attachments ?? []),
+    ...(recipient.attachments ?? []),
+  ];
+  return {
+    to: recipient.to,
+    props: recipient.props,
+    ...(recipient.cc ? { cc: recipient.cc } : {}),
+    ...(recipient.bcc ? { bcc: recipient.bcc } : {}),
+    ...(mergedAttachments.length > 0 ? { attachments: mergedAttachments } : {}),
+  };
+}
+
 export async function executeBatch<Props>(
   mailer: Mailer,
   template: EmailTemplate<Props>,
@@ -146,12 +164,7 @@ export async function executeBatch<Props>(
 
         let item: BatchItemResult<Props>;
         try {
-          const result = await mailer.send(template, {
-            to: recipient.to,
-            props: recipient.props,
-            ...(recipient.cc ? { cc: recipient.cc } : {}),
-            ...(recipient.bcc ? { bcc: recipient.bcc } : {}),
-          });
+          const result = await mailer.send(template, buildSendOptions(options, recipient));
           item = { to: recipient.to, props: recipient.props, result };
         } catch (err) {
           item = {
@@ -179,12 +192,7 @@ export async function executeBatch<Props>(
     const chunkResults = await Promise.all(
       chunk.map(async (recipient): Promise<BatchItemResult<Props>> => {
         try {
-          const result = await mailer.send(template, {
-            to: recipient.to,
-            props: recipient.props,
-            ...(recipient.cc ? { cc: recipient.cc } : {}),
-            ...(recipient.bcc ? { bcc: recipient.bcc } : {}),
-          });
+          const result = await mailer.send(template, buildSendOptions(options, recipient));
           const item: BatchItemResult<Props> = { to: recipient.to, props: recipient.props, result };
           onResult?.(item);
           return item;

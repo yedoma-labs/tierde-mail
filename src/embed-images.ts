@@ -1,4 +1,5 @@
-import type { MailMiddleware } from './types.js';
+import type { Attachment, MailMiddleware } from './types.js';
+import { validateAttachment } from './validate.js';
 
 /**
  * Middleware that fetches remote images and embeds them as inline CID attachments.
@@ -7,7 +8,7 @@ import type { MailMiddleware } from './types.js';
  *
  * @example
  * ```ts
- * import { embedImages } from '@yedoma-labs/tierde-mail';
+ * import { createMailer, embedImages } from '@yedoma-labs/tierde-mail';
  *
  * const mailer = createMailer({
  *   provider: smtp({ ... }),
@@ -25,29 +26,40 @@ import type { MailMiddleware } from './types.js';
  *
  * **SES limitation**: `SendEmailCommand` does not support attachments. Use `SendRawEmailCommand`
  * (outside tierde-mail) if you need inline images with SES.
+ *
+ * **SSRF warning**: when called without a URL list, every remote `src` in the rendered HTML
+ * is fetched server-side. Do not use with templates whose `src` values come from untrusted
+ * user input.
  */
 export function embedImages(urls?: string[]): MailMiddleware {
+  const urlSet = urls ? new Set(urls) : null;
+
   return async (message) => {
     const srcPattern = /\bsrc="(https?:\/\/[^"]+)"/g;
     const candidates = new Set<string>();
 
     for (const [, src] of message.html.matchAll(srcPattern)) {
-      if (src && (!urls || urls.includes(src))) candidates.add(src);
+      if (src && (!urlSet || urlSet.has(src))) candidates.add(src);
     }
 
     if (candidates.size === 0) return message;
 
     const cidMap = new Map<string, string>();
-    const inlineAttachments: typeof message.attachments = [];
+    const inlineAttachments: Attachment[] = [];
     const filenameCounts = new Map<string, number>();
 
-    for (const url of candidates) {
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`embedImages: failed to fetch ${url} — HTTP ${res.status}`);
+    const fetched = await Promise.all(
+      [...candidates].map(async (url) => {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`embedImages: failed to fetch ${url} — HTTP ${res.status}`);
 
-      const buffer = Buffer.from(await res.arrayBuffer());
-      const contentType = res.headers.get('content-type')?.split(';')[0]?.trim() ?? 'image/png';
+        const buffer = Buffer.from(await res.arrayBuffer());
+        const contentType = res.headers.get('content-type')?.split(';')[0]?.trim() ?? 'image/png';
+        return { url, buffer, contentType };
+      }),
+    );
 
+    for (const { url, buffer, contentType } of fetched) {
       const urlPath = new URL(url).pathname;
       const basename = urlPath.split('/').pop() ?? 'image';
       const filename = basename.includes('.') ? basename : `${basename}.${contentType.split('/')[1] ?? 'bin'}`;
@@ -56,8 +68,11 @@ export function embedImages(urls?: string[]): MailMiddleware {
       filenameCounts.set(filename, count + 1);
       const cid = count === 0 ? filename : `${count}-${filename}`;
 
+      const attachment: Attachment = { filename, content: buffer, contentType, cid };
+      validateAttachment(attachment);
+
       cidMap.set(url, cid);
-      inlineAttachments.push({ filename, content: buffer, contentType, cid });
+      inlineAttachments.push(attachment);
     }
 
     const html = message.html.replace(

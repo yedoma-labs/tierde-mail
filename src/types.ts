@@ -80,6 +80,8 @@ export interface BatchRecipient<Props> {
   props: Props;
   cc?: EmailAddressInput | EmailAddressInput[];
   bcc?: EmailAddressInput | EmailAddressInput[];
+  /** Per-recipient attachments. Merged after any shared attachments set on BatchSendOptions. */
+  attachments?: Attachment[];
 }
 
 export interface BatchSendOptions<Props> {
@@ -92,6 +94,8 @@ export interface BatchSendOptions<Props> {
   maxPerSecond?: number;
   /** Called after each send attempt, success or failure */
   onResult?: (result: BatchItemResult<Props>) => void;
+  /** Attachments sent to every recipient in the batch. Per-recipient attachments are appended after these. */
+  attachments?: Attachment[];
 }
 
 export interface BatchItemResult<Props> {

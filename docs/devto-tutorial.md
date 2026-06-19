@@ -488,6 +488,63 @@ const Newsletter = defineEmail<{ tier: 'free' | 'pro'; proFeatures?: string[] }>
 });
 ```
 
+### Attachments
+
+Pass PDFs, images, or CSVs alongside any email:
+
+```ts
+await mailer.send(InvoiceEmail, {
+  to: 'customer@example.com',
+  props: { invoiceNumber: 'INV-2026-001', total: 149.00 },
+  attachments: [
+    {
+      filename: 'invoice-2026-001.pdf',
+      content: pdfBuffer,          // Buffer or base64 string
+      contentType: 'application/pdf',
+    },
+  ],
+});
+```
+
+For batch sends with a shared attachment (e.g. terms PDF) plus a per-recipient one (personal invoice):
+
+```ts
+await mailer.sendBatch(InvoiceEmail, {
+  attachments: [
+    { filename: 'terms.pdf', content: termsBuffer, contentType: 'application/pdf' },
+  ],
+  recipients: customers.map((c) => ({
+    to: c.email,
+    props: { invoiceNumber: c.invoiceNumber, total: c.total },
+    attachments: [
+      { filename: `invoice-${c.invoiceNumber}.pdf`, content: c.pdfBuffer, contentType: 'application/pdf' },
+    ],
+  })),
+});
+```
+
+Allowed content types: `application/pdf`, `application/zip`, `image/*`, `text/plain`, `text/csv`. Anything else throws before a provider call is made.
+
+### Inline images (embedded)
+
+Use `embedImages` middleware to fetch remote images and embed them inline. Recipients see the image even with remote image loading blocked:
+
+```ts
+import { createMailer, embedImages } from '@yedoma-labs/tierde-mail';
+
+const mailer = createMailer({
+  provider: smtp({ ... }),
+  from: 'hello@example.com',
+  middleware: [
+    embedImages([
+      'https://cdn.example.com/logo.png',
+    ]),
+  ],
+});
+```
+
+Your template references the image by its original URL — `embedImages` rewrites `src` to `cid:logo.png` at send time and attaches the file inline.
+
 ## Architecture decisions and trade-offs
 
 ### Why server-side render, not client-side?

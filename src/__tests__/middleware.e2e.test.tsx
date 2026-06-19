@@ -17,6 +17,12 @@ import { Text } from '../components/Text.js';
 import { Button } from '../components/Button.js';
 import type { MailMiddleware } from '../types.js';
 
+interface MailpitMessage {
+  ID: string;
+  Subject: string;
+  Attachments?: Array<{ FileName: string; ContentType: string; Size: number }>;
+}
+
 const MAILPIT_API = 'http://localhost:8025/api/v1';
 
 const TrackingEmail = defineEmail<{ name: string }>({
@@ -29,17 +35,29 @@ const TrackingEmail = defineEmail<{ name: string }>({
   ),
 });
 
-async function getLatestMailpitMessage(subjectFragment: string): Promise<string> {
+async function findMailpitMessage(subjectFragment: string): Promise<MailpitMessage> {
   const res = await fetch(`${MAILPIT_API}/messages`);
   if (!res.ok) throw new Error(`Mailpit /messages returned ${res.status}`);
-  const list = await res.json() as { messages?: Array<{ ID: string; Subject: string }> };
+  const list = await res.json() as { messages?: MailpitMessage[] };
 
   const match = list.messages?.find((m) => m.Subject.includes(subjectFragment));
   if (!match) throw new Error(`No Mailpit message with subject containing "${subjectFragment}"`);
+  return match;
+}
+
+async function getLatestMailpitMessage(subjectFragment: string): Promise<string> {
+  const match = await findMailpitMessage(subjectFragment);
 
   const body = await fetch(`${MAILPIT_API}/message/${match.ID}/body.html`);
   if (!body.ok) throw new Error(`Mailpit body.html returned ${body.status}`);
   return body.text();
+}
+
+async function getMailpitMessageMeta(subjectFragment: string): Promise<MailpitMessage> {
+  const match = await findMailpitMessage(subjectFragment);
+  const res = await fetch(`${MAILPIT_API}/message/${match.ID}`);
+  if (!res.ok) throw new Error(`Mailpit message/${match.ID} returned ${res.status}`);
+  return res.json() as Promise<MailpitMessage>;
 }
 
 describe.skipIf(!process.env.TIERDE_TEST_MAILPIT)('middleware e2e (Mailpit)', () => {
@@ -154,5 +172,62 @@ describe.skipIf(!process.env.TIERDE_TEST_MAILPIT)('middleware e2e (Mailpit)', ()
     for (const href of hrefs) {
       expect(href).toMatch(/^https:\/\/track\.example\.com\/click\?url=/);
     }
+  });
+
+  it('attachment is delivered and visible via Mailpit API', async () => {
+    const trackingId = randomUUID();
+    const mailer = createMailer({ provider: mailpit(), from: 'test@localhost' });
+
+    await mailer.send(TrackingEmail, {
+      to: 'inbox@localhost',
+      props: { name: `attach-${trackingId.slice(0, 8)}` },
+      attachments: [
+        {
+          filename: 'report.pdf',
+          content: Buffer.from('%PDF-1.4 fake pdf content'),
+          contentType: 'application/pdf',
+        },
+      ],
+    });
+
+    const meta = await getMailpitMessageMeta(`attach-${trackingId.slice(0, 8)}`);
+    expect(meta.Attachments).toBeDefined();
+    expect(meta.Attachments!.length).toBe(1);
+    expect(meta.Attachments![0]!.FileName).toBe('report.pdf');
+    expect(meta.Attachments![0]!.ContentType).toBe('application/pdf');
+    expect(meta.Attachments![0]!.Size).toBeGreaterThan(0);
+  });
+
+  it('multiple attachments all delivered', async () => {
+    const trackingId = randomUUID();
+    const mailer = createMailer({ provider: mailpit(), from: 'test@localhost' });
+
+    await mailer.send(TrackingEmail, {
+      to: 'inbox@localhost',
+      props: { name: `multi-attach-${trackingId.slice(0, 8)}` },
+      attachments: [
+        { filename: 'a.pdf', content: Buffer.from('pdf-a'), contentType: 'application/pdf' },
+        { filename: 'b.png', content: Buffer.from('png-b'), contentType: 'image/png' },
+      ],
+    });
+
+    const meta = await getMailpitMessageMeta(`multi-attach-${trackingId.slice(0, 8)}`);
+    expect(meta.Attachments).toHaveLength(2);
+    const names = meta.Attachments!.map((a) => a.FileName);
+    expect(names).toContain('a.pdf');
+    expect(names).toContain('b.png');
+  });
+
+  it('no attachments on clean send', async () => {
+    const trackingId = randomUUID();
+    const mailer = createMailer({ provider: mailpit(), from: 'test@localhost' });
+
+    await mailer.send(TrackingEmail, {
+      to: 'inbox@localhost',
+      props: { name: `no-attach-${trackingId.slice(0, 8)}` },
+    });
+
+    const meta = await getMailpitMessageMeta(`no-attach-${trackingId.slice(0, 8)}`);
+    expect(meta.Attachments ?? []).toHaveLength(0);
   });
 });
