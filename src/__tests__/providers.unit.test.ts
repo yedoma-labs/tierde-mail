@@ -97,7 +97,12 @@ describe('resend provider', () => {
     await resend({ apiKey: 'k' }).send({
       ...baseMessage,
       attachments: [
-        { filename: 'banner.png', content: Buffer.from('img'), contentType: 'image/png', cid: 'banner.png' },
+        {
+          filename: 'banner.png',
+          content: Buffer.from('img'),
+          contentType: 'image/png',
+          cid: 'banner.png',
+        },
       ],
     });
 
@@ -116,9 +121,7 @@ describe('resend provider', () => {
     const { resend } = await import('../providers/resend.js');
     await resend({ apiKey: 'k' }).send({
       ...baseMessage,
-      attachments: [
-        { filename: 'doc.pdf', content: 'base64data', contentType: 'application/pdf' },
-      ],
+      attachments: [{ filename: 'doc.pdf', content: 'base64data', contentType: 'application/pdf' }],
     });
 
     const [, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
@@ -208,7 +211,12 @@ describe('sendgrid provider', () => {
     await sendgrid({ apiKey: 'k' }).send({
       ...baseMessage,
       attachments: [
-        { filename: 'banner.png', content: Buffer.from('img'), contentType: 'image/png', cid: 'banner.png' },
+        {
+          filename: 'banner.png',
+          content: Buffer.from('img'),
+          contentType: 'image/png',
+          cid: 'banner.png',
+        },
       ],
     });
 
@@ -227,9 +235,7 @@ describe('sendgrid provider', () => {
     const { sendgrid } = await import('../providers/sendgrid.js');
     await sendgrid({ apiKey: 'k' }).send({
       ...baseMessage,
-      attachments: [
-        { filename: 'doc.pdf', content: 'base64data', contentType: 'application/pdf' },
-      ],
+      attachments: [{ filename: 'doc.pdf', content: 'base64data', contentType: 'application/pdf' }],
     });
 
     const [, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
@@ -301,7 +307,12 @@ describe('postmark provider', () => {
     await postmark({ serverToken: 'k' }).send({
       ...baseMessage,
       attachments: [
-        { filename: 'banner.png', content: Buffer.from('img'), contentType: 'image/png', cid: 'banner.png' },
+        {
+          filename: 'banner.png',
+          content: Buffer.from('img'),
+          contentType: 'image/png',
+          cid: 'banner.png',
+        },
       ],
     });
 
@@ -319,9 +330,7 @@ describe('postmark provider', () => {
     const { postmark } = await import('../providers/postmark.js');
     await postmark({ serverToken: 'k' }).send({
       ...baseMessage,
-      attachments: [
-        { filename: 'doc.pdf', content: 'base64data', contentType: 'application/pdf' },
-      ],
+      attachments: [{ filename: 'doc.pdf', content: 'base64data', contentType: 'application/pdf' }],
     });
 
     const [, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
@@ -384,7 +393,12 @@ describe('smtp provider', () => {
     await smtp({ host: 'smtp.example.com' }).send({
       ...baseMessage,
       attachments: [
-        { filename: 'banner.png', content: Buffer.from('img'), contentType: 'image/png', cid: 'banner.png' },
+        {
+          filename: 'banner.png',
+          content: Buffer.from('img'),
+          contentType: 'image/png',
+          cid: 'banner.png',
+        },
       ],
     });
 
@@ -398,9 +412,7 @@ describe('smtp provider', () => {
     const { smtp } = await import('../providers/smtp.js');
     await smtp({ host: 'smtp.example.com' }).send({
       ...baseMessage,
-      attachments: [
-        { filename: 'doc.pdf', content: 'base64data', contentType: 'application/pdf' },
-      ],
+      attachments: [{ filename: 'doc.pdf', content: 'base64data', contentType: 'application/pdf' }],
     });
 
     const call = mockSendMail.mock.calls[0]?.[0];

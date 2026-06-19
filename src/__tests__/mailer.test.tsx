@@ -117,8 +117,56 @@ describe('createMailer', () => {
     });
 
     await expect(mailer.send(TestEmail, { to: 'u@u.com', props: { name: 'D' } })).rejects.toThrow(
-      'p2 down',
+      /All 2 providers failed/,
     );
+  });
+
+  it('wraps multi-provider failure and preserves the last error as cause', async () => {
+    const mailer = createMailer({
+      providers: [
+        {
+          name: 'p1',
+          async send() {
+            throw new Error('p1 down');
+          },
+        },
+        {
+          name: 'p2',
+          async send() {
+            throw new Error('p2 down');
+          },
+        },
+      ],
+      strategy: 'failover',
+      from: 'sender@example.com',
+    });
+
+    const err = await mailer
+      .send(TestEmail, { to: 'u@u.com', props: { name: 'D' } })
+      .catch((e: unknown) => e);
+
+    expect(err).toBeInstanceOf(Error);
+    expect((err as Error).message).toContain('p2 down');
+    expect((err as Error).cause).toBeInstanceOf(Error);
+    expect(((err as Error).cause as Error).message).toBe('p2 down');
+  });
+
+  it('rethrows the original error unchanged for a single provider', async () => {
+    const mailer = createMailer({
+      provider: {
+        name: 'solo',
+        async send() {
+          throw new Error('solo down');
+        },
+      },
+      from: 'sender@example.com',
+    });
+
+    const err = await mailer
+      .send(TestEmail, { to: 'u@u.com', props: { name: 'D' } })
+      .catch((e: unknown) => e);
+
+    expect((err as Error).message).toBe('solo down');
   });
 
   it('rejects invalid to address', async () => {
@@ -176,7 +224,7 @@ describe('middleware', () => {
     const provider = mockProvider();
     const pixel: MailMiddleware = (msg) => ({
       ...msg,
-      html: msg.html + '<img src="https://track.example.com/open/1" width="1" height="1" alt="" />',
+      html: `${msg.html}<img src="https://track.example.com/open/1" width="1" height="1" alt="" />`,
     });
 
     const mailer = createMailer({ provider, from: 'sender@example.com', middleware: [pixel] });
@@ -204,9 +252,18 @@ describe('middleware', () => {
     const provider = mockProvider();
     const order: number[] = [];
 
-    const first: MailMiddleware = (msg) => { order.push(1); return { ...msg, html: msg.html + '<!--1-->' }; };
-    const second: MailMiddleware = (msg) => { order.push(2); return { ...msg, html: msg.html + '<!--2-->' }; };
-    const third: MailMiddleware = (msg) => { order.push(3); return { ...msg, html: msg.html + '<!--3-->' }; };
+    const first: MailMiddleware = (msg) => {
+      order.push(1);
+      return { ...msg, html: `${msg.html}<!--1-->` };
+    };
+    const second: MailMiddleware = (msg) => {
+      order.push(2);
+      return { ...msg, html: `${msg.html}<!--2-->` };
+    };
+    const third: MailMiddleware = (msg) => {
+      order.push(3);
+      return { ...msg, html: `${msg.html}<!--3-->` };
+    };
 
     const mailer = createMailer({
       provider,
@@ -225,7 +282,7 @@ describe('middleware', () => {
     const provider = mockProvider();
     const asyncMw: MailMiddleware = async (msg) => {
       await Promise.resolve();
-      return { ...msg, html: msg.html + '<!--async-->' };
+      return { ...msg, html: `${msg.html}<!--async-->` };
     };
 
     const mailer = createMailer({ provider, from: 'sender@example.com', middleware: [asyncMw] });
@@ -237,7 +294,10 @@ describe('middleware', () => {
   it('receives full EmailMessage context', async () => {
     const provider = mockProvider();
     const captured: EmailMessage[] = [];
-    const spy: MailMiddleware = (msg) => { captured.push(msg); return msg; };
+    const spy: MailMiddleware = (msg) => {
+      captured.push(msg);
+      return msg;
+    };
 
     const mailer = createMailer({ provider, from: 'sender@example.com', middleware: [spy] });
     await mailer.send(TestEmail, {
@@ -254,7 +314,9 @@ describe('middleware', () => {
 
   it('propagates middleware errors', async () => {
     const provider = mockProvider();
-    const boom: MailMiddleware = () => { throw new Error('middleware boom'); };
+    const boom: MailMiddleware = () => {
+      throw new Error('middleware boom');
+    };
 
     const mailer = createMailer({ provider, from: 'sender@example.com', middleware: [boom] });
 
@@ -299,7 +361,7 @@ describe('middleware', () => {
     const provider = mockProvider();
     const htmlOnly: MailMiddleware = (msg) => ({
       ...msg,
-      html: msg.html + '<img src="https://track.example.com/open/1" width="1" height="1" alt="" />',
+      html: `${msg.html}<img src="https://track.example.com/open/1" width="1" height="1" alt="" />`,
     });
 
     const mailer = createMailer({ provider, from: 'sender@example.com', middleware: [htmlOnly] });
@@ -335,7 +397,7 @@ describe('attachments (single send)', () => {
     });
 
     expect(provider.calls[0]?.attachments).toHaveLength(1);
-    expect(provider.calls[0]?.attachments![0]!.filename).toBe('report.pdf');
+    expect(provider.calls[0]?.attachments?.[0]?.filename).toBe('report.pdf');
   });
 
   it('passes multiple attachments in order', async () => {
@@ -387,7 +449,9 @@ describe('attachments (single send)', () => {
       mailer.send(TestEmail, {
         to: 'user@example.com',
         props: { name: 'Alice' },
-        attachments: [{ filename: 'exploit.exe', content: 'x', contentType: 'application/x-msdownload' }],
+        attachments: [
+          { filename: 'exploit.exe', content: 'x', contentType: 'application/x-msdownload' },
+        ],
       }),
     ).rejects.toThrow(TypeError);
   });
@@ -400,7 +464,9 @@ describe('attachments (single send)', () => {
       mailer.send(TestEmail, {
         to: 'user@example.com',
         props: { name: 'Alice' },
-        attachments: [{ filename: 'img.png', content: 'x', contentType: 'image/png', cid: 'bad\r\ncid' }],
+        attachments: [
+          { filename: 'img.png', content: 'x', contentType: 'image/png', cid: 'bad\r\ncid' },
+        ],
       }),
     ).rejects.toThrow(TypeError);
   });
@@ -446,6 +512,44 @@ describe('attachments (single send)', () => {
     await expect(
       mailer.send(TestEmail, { to: 'user@example.com', props: { name: 'Alice' } }),
     ).rejects.toThrow(TypeError);
+    expect(provider.calls).toHaveLength(0);
+  });
+
+  it('middleware-injected attachment with unsafe cid is rejected post-middleware', async () => {
+    const provider = mockProvider();
+    const badMw: MailMiddleware = (msg) => ({
+      ...msg,
+      attachments: [
+        ...(msg.attachments ?? []),
+        { filename: 'img.png', content: 'x', contentType: 'image/png', cid: 'a\r\nb' },
+      ],
+    });
+
+    const mailer = createMailer({ provider, from: 'sender@example.com', middleware: [badMw] });
+
+    await expect(
+      mailer.send(TestEmail, { to: 'user@example.com', props: { name: 'Alice' } }),
+    ).rejects.toThrow(TypeError);
+    expect(provider.calls).toHaveLength(0);
+  });
+
+  it('middleware that injects CRLF into the subject is rejected post-middleware', async () => {
+    const provider = mockProvider();
+    const headerInjection: MailMiddleware = (msg) => ({
+      ...msg,
+      subject: `${msg.subject}\r\nBcc: victim@example.com`,
+    });
+
+    const mailer = createMailer({
+      provider,
+      from: 'sender@example.com',
+      middleware: [headerInjection],
+    });
+
+    await expect(
+      mailer.send(TestEmail, { to: 'user@example.com', props: { name: 'Alice' } }),
+    ).rejects.toThrow(TypeError);
+    expect(provider.calls).toHaveLength(0);
   });
 });
 

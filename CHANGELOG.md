@@ -14,17 +14,22 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 - **`embedImages(urls?)`** — built-in middleware that fetches remote images, attaches them inline via CID, and rewrites `src` attributes so email clients that block remote loading still display embedded images. Supported on SMTP, Resend, SendGrid, and Postmark. SES limitation documented.
 - **Inline attachments (CID)** — `cid?: string` field on `Attachment`. When set, providers mark the attachment as inline. All HTTP providers updated: SMTP passes `cid` to nodemailer, SendGrid uses `disposition: inline` + `content_id`, Postmark uses `ContentID`, Resend uses `inline: true` + `content_id`.
 - **Batch attachments** — `attachments?: Attachment[]` on `BatchSendOptions` (shared to all recipients) and on `BatchRecipient` (per-recipient, appended after shared). Previously the batch path silently dropped all attachments.
+- **`embedImages()` fetch caching** — fetched images are cached per middleware instance, keyed by URL. A batch send now fetches each image once and reuses it for every recipient instead of re-fetching per send. Failed fetches are not cached, so transient errors retry on the next send.
+- **`validateAttachment` is now exported** so authors of custom middleware can validate attachments they generate.
 
 ### Security
 
 - `validateAttachment` now validates the `cid` field: rejects empty strings and strings containing CR, LF, or other control characters to prevent MIME header injection.
 - `validateAttachment` now rejects `image/svg+xml` (and `image/svg`): SVG is active content that can embed scripts, so it is blocked even though it matches the `image/*` allowlist prefix.
 - Attachments are re-validated **after** middleware runs, not only on the caller-supplied `options.attachments`. Closes a gap where a custom `MailMiddleware` could inject attachments with path-traversal filenames, disallowed content types, or malformed CIDs that reached the provider unchecked.
-- `embedImages()` clamps the server-supplied `Content-Type` to a raster `image/*` type, falling back to `image/png` otherwise. Prevents a misbehaving or malicious CDN from returning `text/html` (an allowed type) and producing an inline HTML attachment.
+- The subject line is re-validated for CR/LF **after** middleware runs, closing a header-injection gap where a middleware could rewrite the subject to inject extra headers (e.g. `Bcc:`).
+- `embedImages()` clamps the server-supplied `Content-Type` to a raster `image/*` type (case-insensitive), falling back to `image/png` otherwise. Prevents a misbehaving or malicious CDN from returning `text/html` (an allowed type) or `Image/SVG+XML` (mixed case) and producing an active-content inline attachment.
 - `embedImages()` SSRF risk documented: calling without a URL filter embeds all remote `src` values; do not use with user-controlled image URLs.
 
 ### Changed
 
+- Validation and config errors now consistently throw `TypeError` (previously the subject CR/LF check and the "at least one provider" check threw plain `Error`).
+- Failover with multiple providers now throws a wrapped error naming how many providers were tried, with the last underlying error preserved as `cause`. A single-provider mailer still rethrows the original provider error unchanged.
 - Bumped `nodemailer` to `^9.0.1`, `@aws-sdk/client-ses` to `^3.1072.0`, and `@types/node` to `^26.0.0`.
 
 ---

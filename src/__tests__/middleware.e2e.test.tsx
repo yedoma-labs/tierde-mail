@@ -6,15 +6,15 @@
  *   docker compose up -d
  *   TIERDE_TEST_MAILPIT=true pnpm vitest run src/__tests__/middleware.e2e.test.ts
  */
-import React from 'react';
+
 import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
+import { Button } from '../components/Button.js';
+import { EmailTemplate } from '../components/EmailTemplate.js';
+import { Text } from '../components/Text.js';
 import { defineEmail } from '../define-email.js';
 import { createMailer } from '../mailer.js';
 import { mailpit } from '../providers/mailpit.js';
-import { EmailTemplate } from '../components/EmailTemplate.js';
-import { Text } from '../components/Text.js';
-import { Button } from '../components/Button.js';
 import type { MailMiddleware } from '../types.js';
 
 interface MailpitMessage {
@@ -38,7 +38,7 @@ const TrackingEmail = defineEmail<{ name: string }>({
 async function findMailpitMessage(subjectFragment: string): Promise<MailpitMessage> {
   const res = await fetch(`${MAILPIT_API}/messages`);
   if (!res.ok) throw new Error(`Mailpit /messages returned ${res.status}`);
-  const list = await res.json() as { messages?: MailpitMessage[] };
+  const list = (await res.json()) as { messages?: MailpitMessage[] };
 
   const match = list.messages?.find((m) => m.Subject.includes(subjectFragment));
   if (!match) throw new Error(`No Mailpit message with subject containing "${subjectFragment}"`);
@@ -67,7 +67,7 @@ describe.skipIf(!process.env.TIERDE_TEST_MAILPIT)('middleware e2e (Mailpit)', ()
 
     const pixel: MailMiddleware = (msg) => ({
       ...msg,
-      html: msg.html + `<img src="${pixelUrl}" width="1" height="1" alt="" />`,
+      html: `${msg.html}<img src="${pixelUrl}" width="1" height="1" alt="" />`,
     });
 
     const mailer = createMailer({
@@ -143,7 +143,7 @@ describe.skipIf(!process.env.TIERDE_TEST_MAILPIT)('middleware e2e (Mailpit)', ()
 
     const pixel: MailMiddleware = (msg) => ({
       ...msg,
-      html: msg.html + `<img src="${pixelUrl}" width="1" height="1" alt="" />`,
+      html: `${msg.html}<img src="${pixelUrl}" width="1" height="1" alt="" />`,
     });
 
     const rewrite: MailMiddleware = (msg) => ({

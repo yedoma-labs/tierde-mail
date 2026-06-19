@@ -9,8 +9,8 @@ import type {
   EmailMessage,
   EmailProvider,
   EmailTemplate,
-  MailMiddleware,
   Mailer,
+  MailMiddleware,
   MultiProviderMailerConfig,
   SendOptions,
   SendResult,
@@ -39,7 +39,7 @@ class MailerImpl implements Mailer {
 
     if (isMultiProvider(config)) {
       if (!config.providers || config.providers.length === 0) {
-        throw new Error('At least one provider is required');
+        throw new TypeError('At least one provider is required');
       }
       this.#providers = config.providers;
       this.#strategy = config.strategy;
@@ -61,7 +61,7 @@ class MailerImpl implements Mailer {
     const subject = template.subject(props);
     // Prevent SMTP header injection via CRLF in subject
     if (/[\r\n]/.test(subject)) {
-      throw new Error('Subject line contains invalid characters');
+      throw new TypeError('Subject line contains invalid characters');
     }
     const element = template.component(props);
     const html = renderEmail(element);
@@ -86,6 +86,11 @@ class MailerImpl implements Mailer {
       message = await mw(message);
     }
 
+    // Re-validate after middleware: middleware can rewrite the subject or inject attachments,
+    // so the pre-middleware checks above are not sufficient on their own.
+    if (/[\r\n]/.test(message.subject)) {
+      throw new TypeError('Subject line contains invalid characters');
+    }
     for (const attachment of message.attachments ?? []) {
       validateAttachment(attachment);
     }
@@ -107,7 +112,17 @@ class MailerImpl implements Mailer {
         lastError = err;
       }
     }
-    throw lastError ?? new Error('All providers failed with no error message');
+    // Single provider: rethrow its error unchanged. Multiple providers: wrap so the caller
+    // knows every provider was tried, preserving the last error as `cause`.
+    if (this.#providers.length === 1) {
+      throw lastError ?? new Error('Provider failed with no error message');
+    }
+    throw new Error(
+      `All ${this.#providers.length} providers failed. Last error: ${
+        lastError instanceof Error ? lastError.message : String(lastError)
+      }`,
+      lastError !== undefined ? { cause: lastError } : undefined,
+    );
   }
 
   async sendBatch<Props>(
@@ -130,10 +145,7 @@ function buildSendOptions<Props>(
   options: BatchSendOptions<Props>,
   recipient: BatchRecipient<Props>,
 ): SendOptions<Props> {
-  const mergedAttachments = [
-    ...(options.attachments ?? []),
-    ...(recipient.attachments ?? []),
-  ];
+  const mergedAttachments = [...(options.attachments ?? []), ...(recipient.attachments ?? [])];
   return {
     to: recipient.to,
     props: recipient.props,

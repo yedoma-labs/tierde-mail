@@ -41,8 +41,8 @@ export type {
   EmailMessage,
   EmailProvider,
   EmailTemplate as EmailTemplateType,
-  MailMiddleware,
   Mailer,
+  MailMiddleware,
   MultiProviderMailerConfig,
   SendOptions,
   SendResult,
@@ -50,3 +50,4 @@ export type {
 } from './types.js';
 export type { UnsubscribeOptions } from './unsubscribe.js';
 export { unsubscribeHeaders } from './unsubscribe.js';
+export { validateAttachment } from './validate.js';

@@ -136,7 +136,8 @@ describe('mailer.sendBatch', () => {
 
     await mailer.sendBatch(TestEmail, { recipients, concurrency: 3 });
 
-    expect(maxConcurrent).toBeLessThanOrEqual(3);
+    // Must cap at 3, and must actually reach 3 (a serial impl would pass <= 3 alone).
+    expect(maxConcurrent).toBe(3);
   });
 
   it('empty recipients returns zero counts', async () => {
@@ -166,8 +167,8 @@ describe('mailer.sendBatch', () => {
 
     expect(provider.calls).toHaveLength(2);
     expect(provider.calls[0]?.attachments).toHaveLength(1);
-    expect(provider.calls[0]?.attachments![0]!.filename).toBe('terms.pdf');
-    expect(provider.calls[1]?.attachments![0]!.filename).toBe('terms.pdf');
+    expect(provider.calls[0]?.attachments?.[0]?.filename).toBe('terms.pdf');
+    expect(provider.calls[1]?.attachments?.[0]?.filename).toBe('terms.pdf');
   });
 
   it('sends per-recipient attachments only to that recipient', async () => {
@@ -179,14 +180,16 @@ describe('mailer.sendBatch', () => {
         {
           to: 'a@a.com',
           props: { name: 'A' },
-          attachments: [{ filename: 'invoice-a.pdf', content: 'a', contentType: 'application/pdf' }],
+          attachments: [
+            { filename: 'invoice-a.pdf', content: 'a', contentType: 'application/pdf' },
+          ],
         },
         { to: 'b@b.com', props: { name: 'B' } },
       ],
     });
 
     expect(provider.calls[0]?.attachments).toHaveLength(1);
-    expect(provider.calls[0]?.attachments![0]!.filename).toBe('invoice-a.pdf');
+    expect(provider.calls[0]?.attachments?.[0]?.filename).toBe('invoice-a.pdf');
     expect(provider.calls[1]?.attachments ?? []).toHaveLength(0);
   });
 
