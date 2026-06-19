@@ -28,6 +28,16 @@ node dist/bin/tierde.js send welcome --to test@example.com --props '{"name":"Ali
 
 Run `pnpm dev` (`vite build --watch`) to rebuild on file changes.
 
+## Lint & types
+
+```bash
+pnpm lint        # biome check src
+pnpm lint:fix    # biome check src --write
+pnpm typecheck   # tsc --noEmit
+```
+
+The `pre-push` git hook runs `lint`, `typecheck`, `test`, and `build` — run them locally before pushing to avoid a failed hook.
+
 ## Tests
 
 ```bash
@@ -35,6 +45,15 @@ pnpm test           # run once
 pnpm test:watch     # watch mode
 pnpm test:coverage  # with coverage
 pnpm wcag           # WCAG AA audit across all 52 template variants
+```
+
+### Middleware / attachment e2e tests
+
+`src/__tests__/middleware.e2e.test.tsx` sends through Mailpit and asserts on the delivered message via the Mailpit REST API. It is skipped unless `TIERDE_TEST_MAILPIT=true`:
+
+```bash
+docker compose up -d
+TIERDE_TEST_MAILPIT=true pnpm vitest run src/__tests__/middleware.e2e.test.tsx
 ```
 
 ## Local mail stack

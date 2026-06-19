@@ -383,6 +383,11 @@ const mailer = createMailer({
 - Keep middleware synchronous when possible. Async middleware (e.g., DB writes) adds latency per send and is felt at batch scale. Record tracking events in `onResult` after the send confirms instead.
 - Middleware does not run on the plain-text part. Link rewriting applies to HTML only.
 - Order matters: pixel injection before link rewriting is the conventional order.
+- The subject and all attachments are re-validated **after** middleware runs (CR/LF in the subject and unsafe attachment filenames/content-types/CIDs throw `TypeError`). If your middleware adds attachments, validate them yourself with the exported `validateAttachment` to surface errors early:
+
+  ```ts
+  import { validateAttachment } from '@yedoma-labs/tierde-mail';
+  ```
 
 ### Inline image embedding
 
@@ -436,8 +441,9 @@ middleware: [embedImages()]
 | SES | ❌ `SendEmailCommand` does not support attachments — use `SendRawEmailCommand` directly |
 
 **Notes:**
-- `embedImages` fetches images at send time. For high-volume batch sends, pre-fetch and cache image Buffers and pass them via `attachments` directly instead of using the middleware.
 - Each unique URL is fetched once per send, even if it appears multiple times in the HTML.
+- Fetched images are cached per `embedImages` instance, keyed by URL. In a batch send the same banner is fetched once and reused for every recipient instead of re-fetched per send. Failed fetches are not cached, so a transient error retries on the next send. To pick up an image changed at its URL, create a fresh mailer (or call `embedImages()` again).
+- The server-supplied `Content-Type` is clamped to a raster `image/*` type (case-insensitive); anything else — including `text/html` and `image/svg+xml` — falls back to `image/png`, so a misbehaving CDN cannot inject active-content inline attachments.
 - Existing `attachments` on the message are preserved.
 - **SSRF warning**: when called without a URL list (`embedImages()`), every remote `src` in the rendered HTML is fetched server-side. Do not use with templates whose `src` values come from untrusted user input.
 
@@ -822,6 +828,23 @@ await mailer.sendBatch(NewsletterEmail, {
 
 `maxPerSecond` and `delayMs` are mutually exclusive — `maxPerSecond` takes precedence when both are set.
 
+### Large batches — `collectResults`
+
+By default `sendBatch` returns a `results` array holding one entry (with its `props`) per recipient. For very large batches that retention is `O(n)` heap. Set `collectResults: false` to skip it — `sent`/`failed` counts stay accurate, and you consume each result through `onResult` as it completes:
+
+```ts
+let sent = 0;
+await mailer.sendBatch(NewsletterEmail, {
+  recipients: hundredsOfThousands,
+  maxPerSecond: 10,
+  collectResults: false,        // results array stays empty; no per-recipient retention
+  onResult: (r) => {
+    if (r.result) sent++;
+    else logBounce(r.to, r.error);
+  },
+});
+```
+
 ---
 
 ## Webhooks
@@ -914,6 +937,18 @@ export const OrderConfirmation = defineEmail<OrderConfirmationProps>({
   ),
 });
 ```
+
+The value `defineEmail` returns has the type `DefinedEmail<Props>` — use it when you need to annotate a template (e.g. a function that accepts any template):
+
+```ts
+import type { DefinedEmail } from '@yedoma-labs/tierde-mail';
+
+function describe<P>(tmpl: DefinedEmail<P>, props: P): string {
+  return tmpl.subject(props);
+}
+```
+
+> The older `EmailTemplateType` export is a deprecated alias of `DefinedEmail` and still works.
 
 ---
 

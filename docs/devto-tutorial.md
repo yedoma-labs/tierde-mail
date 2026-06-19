@@ -91,7 +91,7 @@ Under the hood, the render phase is synchronous - no network I/O. Providers hand
 **Where to get it:**
 - npm: [`@yedoma-labs/tierde-mail`](https://www.npmjs.com/package/@yedoma-labs/tierde-mail)
 - GitHub: [`yedoma-labs/tierde-mail`](https://github.com/yedoma-labs/tierde-mail)
-- Latest version: 0.6.0
+- Latest version: 0.8.0
 
 **Install core + peer dependencies:**
 
@@ -227,6 +227,17 @@ console.log(`${result.sent} sent, ${result.failed} failed`);
 // → 4821 sent, 3 failed
 ```
 
+For very large lists, add `collectResults: false` so the batch doesn't retain one result object (plus its `props`) per recipient — counts stay accurate and you handle each outcome in `onResult`:
+
+```ts
+await mailer.sendBatch(Welcome, {
+  recipients: hundredsOfThousands,
+  maxPerSecond: 10,
+  collectResults: false,   // results array stays empty; no O(n) retention
+  onResult: (r) => (r.error ? logBounce(r.to, r.error) : metrics.sent++),
+});
+```
+
 **4. Test sends without hitting a network.** The testing util captures emails in memory:
 
 ```ts
@@ -239,7 +250,7 @@ expect(inbox[0].subject).toBe('Welcome, Alice!');
 expect(inbox[0].html).toContain('Get Started');
 ```
 
-## Local testing with Docker (0.6.0)
+## Local testing with Docker
 
 No real provider credentials needed for local work. The repo ships a `docker-compose.yml` with a complete mock stack.
 
@@ -532,7 +543,7 @@ const mailer = createMailer({
 });
 ```
 
-Your template references the image by its original URL — `embedImages` rewrites `src` to `cid:logo.png` at send time and attaches the file inline.
+Your template references the image by its original URL — `embedImages` rewrites `src` to `cid:logo.png` at send time and attaches the file inline. Fetched images are cached per middleware instance, so a batch send fetches each image once and reuses it for every recipient rather than re-fetching per send.
 
 ## Architecture decisions and trade-offs
 
