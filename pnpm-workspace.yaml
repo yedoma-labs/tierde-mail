@@ -42,3 +42,5 @@ minimumReleaseAgeExclude:
   - '@css-inline/css-inline-win32-arm64-msvc@0.21.0'
   - '@css-inline/css-inline-win32-x64-msvc@0.21.0'
   - '@css-inline/css-inline@0.21.0'
+  - '@aws-sdk/client-ses@3.1072.0'
+  - '@types/node@26.0.0'
