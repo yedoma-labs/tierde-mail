@@ -106,7 +106,7 @@ const templates = {
 const template = templates[templateName];
 if (!template) {
   console.error(
-    `Template "${templateName}" not found. Available: ${Object.keys(templates).join(', ')}`
+    `Template "${templateName}" not found. Available: ${Object.keys(templates).join(', ')}`,
   );
   process.exit(1);
 }
@@ -116,11 +116,7 @@ const mockMailer = createMailer({
   provider: {
     name: 'mock',
     async send(message) {
-      const htmlFile = resolve(
-        pkgDir,
-        'preview',
-        `${templateName}.html`
-      );
+      const htmlFile = resolve(pkgDir, 'preview', `${templateName}.html`);
 
       // Write HTML with auto-refresh meta tag for browser
       const html = `<!DOCTYPE html>
@@ -215,9 +211,7 @@ const sampleProps = {
   Invoice: {
     customerName: 'Alice Smith',
     invoiceNumber: 'INV-2024-001',
-    items: [
-      { description: 'Professional Services', quantity: 10, price: 100, total: 1000 },
-    ],
+    items: [{ description: 'Professional Services', quantity: 10, price: 100, total: 1000 }],
     subtotal: 1000,
     tax: 100,
     total: 1100,
@@ -348,8 +342,17 @@ const sampleProps = {
     steps: [
       { title: 'Create your account', completed: true },
       { title: 'Verify your email address', completed: true },
-      { title: 'Add a sending domain', description: 'Set up SPF, DKIM, and DMARC for best deliverability.', completed: true },
-      { title: 'Send your first email', description: 'Try the API or pick a template.', completed: false, url: 'https://example.com/send' },
+      {
+        title: 'Add a sending domain',
+        description: 'Set up SPF, DKIM, and DMARC for best deliverability.',
+        completed: true,
+      },
+      {
+        title: 'Send your first email',
+        description: 'Try the API or pick a template.',
+        completed: false,
+        url: 'https://example.com/send',
+      },
       { title: 'Invite your team', completed: false, url: 'https://example.com/team' },
     ],
   },
@@ -409,7 +412,7 @@ const sampleProps = {
     name: 'Alice Smith',
     returnUrl: 'https://example.com/login',
     daysSince: 45,
-    offer: "Come back and get 20% off your next month — use code COMEBACK20.",
+    offer: 'Come back and get 20% off your next month — use code COMEBACK20.',
     unsubscribeUrl: 'https://example.com/unsubscribe',
     appName: 'Acme',
   },
@@ -420,7 +423,8 @@ const sampleProps = {
     ticketTitle: 'Emails not delivering to Gmail',
     ticketUrl: 'https://example.com/support/SUP-1042',
     agentName: 'Sarah from Support',
-    agentMessage: "Hi Alice, I've investigated your issue and found that your SPF record is missing the Acme mail server. I've added instructions to your ticket. Please update the record and let us know if that resolves it.",
+    agentMessage:
+      "Hi Alice, I've investigated your issue and found that your SPF record is missing the Acme mail server. I've added instructions to your ticket. Please update the record and let us know if that resolves it.",
     priority: 'high',
     appName: 'Acme',
   },
@@ -436,12 +440,26 @@ const sampleProps = {
   FeatureAnnouncement: {
     name: 'Alice Smith',
     featureName: 'Dark Mode Support',
-    description: 'All your emails now automatically adapt to your recipients\' system dark mode preference — no extra configuration needed.',
+    description:
+      "All your emails now automatically adapt to your recipients' system dark mode preference — no extra configuration needed.",
     ctaUrl: 'https://example.com/changelog',
     changes: [
-      { type: 'new', title: 'Dark mode for all templates', description: 'Automatic @media (prefers-color-scheme: dark) support across all 31 templates.' },
-      { type: 'improvement', title: 'Faster rendering', description: 'CSS inlining is now 3x faster using our Rust-based engine.' },
-      { type: 'fix', title: 'Outlook button border radius', description: 'Fixed rounded corners on buttons not rendering correctly in Outlook 2019.' },
+      {
+        type: 'new',
+        title: 'Dark mode for all templates',
+        description:
+          'Automatic @media (prefers-color-scheme: dark) support across all 31 templates.',
+      },
+      {
+        type: 'improvement',
+        title: 'Faster rendering',
+        description: 'CSS inlining is now 3x faster using our Rust-based engine.',
+      },
+      {
+        type: 'fix',
+        title: 'Outlook button border radius',
+        description: 'Fixed rounded corners on buttons not rendering correctly in Outlook 2019.',
+      },
     ],
     appName: 'Acme',
   },
@@ -460,7 +478,8 @@ const sampleProps = {
     event: 'mention',
     actorName: 'Bob Johnson',
     contextName: 'Q3 Email Campaign',
-    commentText: 'Hey @alice can you review the subject line for this one? I think it might need a tweak.',
+    commentText:
+      'Hey @alice can you review the subject line for this one? I think it might need a tweak.',
     commentUrl: 'https://example.com/projects/123#comment-456',
     appName: 'Acme',
   },
@@ -510,9 +529,24 @@ const sampleProps = {
   LoginActivity: {
     name: 'Alice Smith',
     events: [
-      { timestamp: 'June 16, 2026 14:32 UTC', location: 'Berlin, Germany', device: 'Chrome on macOS', status: 'success' },
-      { timestamp: 'June 15, 2026 09:11 UTC', location: 'Hamburg, Germany', device: 'Safari on iPhone', status: 'success' },
-      { timestamp: 'June 14, 2026 22:45 UTC', location: 'Unknown', device: 'Firefox on Windows', status: 'failed' },
+      {
+        timestamp: 'June 16, 2026 14:32 UTC',
+        location: 'Berlin, Germany',
+        device: 'Chrome on macOS',
+        status: 'success',
+      },
+      {
+        timestamp: 'June 15, 2026 09:11 UTC',
+        location: 'Hamburg, Germany',
+        device: 'Safari on iPhone',
+        status: 'success',
+      },
+      {
+        timestamp: 'June 14, 2026 22:45 UTC',
+        location: 'Unknown',
+        device: 'Firefox on Windows',
+        status: 'failed',
+      },
     ],
     securityUrl: 'https://example.com/account/security',
     appName: 'Acme',

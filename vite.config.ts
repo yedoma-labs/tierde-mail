@@ -34,9 +34,7 @@ const rawImportInlinePlugin = {
       /^import (\w+) from ['"]([^'"]+\?raw)['"];?$/gm,
       (_match: string, binding: string, specifier: string) => {
         const rawPath = specifier.replace('?raw', '');
-        const absolutePath = rawPath.startsWith('.')
-          ? resolve(dirname(id), rawPath)
-          : rawPath;
+        const absolutePath = rawPath.startsWith('.') ? resolve(dirname(id), rawPath) : rawPath;
         const content = readFileSync(absolutePath, 'utf-8');
         return `const ${binding} = ${JSON.stringify(content)};`;
       },

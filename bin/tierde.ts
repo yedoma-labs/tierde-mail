@@ -129,7 +129,8 @@ function rewriteImports(source: string): string {
 
   if (typeNames.length > 0) {
     const uniqueTypes = [...new Set(typeNames)];
-    result = `import type { ${uniqueTypes.join(', ')} } from '@yedoma-labs/tierde-mail';\n` + result;
+    result =
+      `import type { ${uniqueTypes.join(', ')} } from '@yedoma-labs/tierde-mail';\n` + result;
   }
 
   if (names.length > 0) {
@@ -141,7 +142,10 @@ function rewriteImports(source: string): string {
 }
 
 function toPascalCase(kebab: string): string {
-  return kebab.split('-').map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join('');
+  return kebab
+    .split('-')
+    .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+    .join('');
 }
 
 function usage(): void {
@@ -418,7 +422,10 @@ async function devServer(args: string[]): Promise<void> {
 
   if (!userPath || includeBuiltin) {
     // Load built-in templates
-    Object.assign(emails, templatesFromModule(builtinTemplates as Record<string, unknown>, SAMPLE_PROPS));
+    Object.assign(
+      emails,
+      templatesFromModule(builtinTemplates as Record<string, unknown>, SAMPLE_PROPS),
+    );
   }
 
   if (userPath) {
@@ -428,7 +435,10 @@ async function devServer(args: string[]): Promise<void> {
     console.log(`Loaded ${Object.keys(custom).length} custom template(s) from ${userPath}`);
   }
 
-  const server = createPreviewServer({ port, emails: emails as Parameters<typeof createPreviewServer>[0]['emails'] });
+  const server = createPreviewServer({
+    port,
+    emails: emails as Parameters<typeof createPreviewServer>[0]['emails'],
+  });
   server.start();
   console.log(`tierde preview server running at http://localhost:${port}`);
   console.log('Press Ctrl+C to stop.');
