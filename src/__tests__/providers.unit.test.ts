@@ -86,6 +86,46 @@ describe('resend provider', () => {
     const { resend } = await import('../providers/resend.js');
     expect(resend({ apiKey: 'k' }).name).toBe('resend');
   });
+
+  it('sends inline attachment with cid', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ id: 'z' }),
+    } as Response);
+
+    const { resend } = await import('../providers/resend.js');
+    await resend({ apiKey: 'k' }).send({
+      ...baseMessage,
+      attachments: [
+        { filename: 'banner.png', content: Buffer.from('img'), contentType: 'image/png', cid: 'banner.png' },
+      ],
+    });
+
+    const [, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
+    const body = JSON.parse(init.body as string);
+    expect(body.attachments[0].inline).toBe(true);
+    expect(body.attachments[0].content_id).toBe('banner.png');
+  });
+
+  it('sends regular attachment without cid', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ id: 'z' }),
+    } as Response);
+
+    const { resend } = await import('../providers/resend.js');
+    await resend({ apiKey: 'k' }).send({
+      ...baseMessage,
+      attachments: [
+        { filename: 'doc.pdf', content: 'base64data', contentType: 'application/pdf' },
+      ],
+    });
+
+    const [, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
+    const body = JSON.parse(init.body as string);
+    expect(body.attachments[0].inline).toBeUndefined();
+    expect(body.attachments[0].content_id).toBeUndefined();
+  });
 });
 
 // ─── SendGrid ──────────────────────────────────────────────────────────────
@@ -157,6 +197,46 @@ describe('sendgrid provider', () => {
     expect(body.personalizations[0].cc).toEqual([{ email: 'cc@example.com' }]);
     expect(body.personalizations[0].bcc).toEqual([{ email: 'bcc@example.com', name: 'Hidden' }]);
   });
+
+  it('sends inline attachment with disposition inline and content_id', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      headers: { get: () => 'sg-x' },
+    } as unknown as Response);
+
+    const { sendgrid } = await import('../providers/sendgrid.js');
+    await sendgrid({ apiKey: 'k' }).send({
+      ...baseMessage,
+      attachments: [
+        { filename: 'banner.png', content: Buffer.from('img'), contentType: 'image/png', cid: 'banner.png' },
+      ],
+    });
+
+    const [, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
+    const body = JSON.parse(init.body as string);
+    expect(body.attachments[0].disposition).toBe('inline');
+    expect(body.attachments[0].content_id).toBe('banner.png');
+  });
+
+  it('sends regular attachment with disposition attachment and no content_id', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      headers: { get: () => 'sg-x' },
+    } as unknown as Response);
+
+    const { sendgrid } = await import('../providers/sendgrid.js');
+    await sendgrid({ apiKey: 'k' }).send({
+      ...baseMessage,
+      attachments: [
+        { filename: 'doc.pdf', content: 'base64data', contentType: 'application/pdf' },
+      ],
+    });
+
+    const [, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
+    const body = JSON.parse(init.body as string);
+    expect(body.attachments[0].disposition).toBe('attachment');
+    expect(body.attachments[0].content_id).toBeUndefined();
+  });
 });
 
 // ─── Postmark ──────────────────────────────────────────────────────────────
@@ -210,6 +290,44 @@ describe('postmark provider', () => {
       'Postmark API error 401',
     );
   });
+
+  it('sends inline attachment with ContentID', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ MessageID: 'pm-x' }),
+    } as Response);
+
+    const { postmark } = await import('../providers/postmark.js');
+    await postmark({ serverToken: 'k' }).send({
+      ...baseMessage,
+      attachments: [
+        { filename: 'banner.png', content: Buffer.from('img'), contentType: 'image/png', cid: 'banner.png' },
+      ],
+    });
+
+    const [, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
+    const body = JSON.parse(init.body as string);
+    expect(body.Attachments[0].ContentID).toBe('cid:banner.png');
+  });
+
+  it('sends regular attachment without ContentID', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ MessageID: 'pm-x' }),
+    } as Response);
+
+    const { postmark } = await import('../providers/postmark.js');
+    await postmark({ serverToken: 'k' }).send({
+      ...baseMessage,
+      attachments: [
+        { filename: 'doc.pdf', content: 'base64data', contentType: 'application/pdf' },
+      ],
+    });
+
+    const [, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
+    const body = JSON.parse(init.body as string);
+    expect(body.Attachments[0].ContentID).toBeUndefined();
+  });
 });
 
 // ─── SMTP ──────────────────────────────────────────────────────────────────
@@ -257,6 +375,36 @@ describe('smtp provider', () => {
     const { smtp } = await import('../providers/smtp.js');
     const result = await smtp({ host: 'smtp.example.com' }).send(baseMessage);
     expect(result.id).toMatch(/^smtp-/);
+  });
+
+  it('passes cid to nodemailer for inline attachment', async () => {
+    mockSendMail.mockResolvedValueOnce({ messageId: '<x>' });
+
+    const { smtp } = await import('../providers/smtp.js');
+    await smtp({ host: 'smtp.example.com' }).send({
+      ...baseMessage,
+      attachments: [
+        { filename: 'banner.png', content: Buffer.from('img'), contentType: 'image/png', cid: 'banner.png' },
+      ],
+    });
+
+    const call = mockSendMail.mock.calls[0]?.[0];
+    expect(call.attachments[0].cid).toBe('banner.png');
+  });
+
+  it('omits cid from regular attachments', async () => {
+    mockSendMail.mockResolvedValueOnce({ messageId: '<x>' });
+
+    const { smtp } = await import('../providers/smtp.js');
+    await smtp({ host: 'smtp.example.com' }).send({
+      ...baseMessage,
+      attachments: [
+        { filename: 'doc.pdf', content: 'base64data', contentType: 'application/pdf' },
+      ],
+    });
+
+    const call = mockSendMail.mock.calls[0]?.[0];
+    expect(call.attachments[0].cid).toBeUndefined();
   });
 });
 

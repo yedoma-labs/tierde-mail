@@ -45,6 +45,7 @@ class ResendProvider implements EmailProvider {
         filename: a.filename,
         content: typeof a.content === 'string' ? a.content : a.content.toString('base64'),
         content_type: a.contentType,
+        ...(a.cid ? { inline: true, content_id: a.cid } : {}),
       }));
     }
 

@@ -8,6 +8,7 @@ import type {
   EmailMessage,
   EmailProvider,
   EmailTemplate,
+  MailMiddleware,
   Mailer,
   MultiProviderMailerConfig,
   SendOptions,
@@ -25,6 +26,7 @@ class MailerImpl implements Mailer {
   readonly #defaultReplyTo;
   readonly #providers: EmailProvider[];
   readonly #strategy: 'failover' | 'round-robin';
+  readonly #middleware: MailMiddleware[];
   #roundRobinIndex = 0;
 
   constructor(config: CreateMailerConfig) {
@@ -32,6 +34,7 @@ class MailerImpl implements Mailer {
     this.#defaultReplyTo = config.defaultReplyTo
       ? normalizeAddress(config.defaultReplyTo)
       : undefined;
+    this.#middleware = config.middleware ?? [];
 
     if (isMultiProvider(config)) {
       if (!config.providers || config.providers.length === 0) {
@@ -65,7 +68,7 @@ class MailerImpl implements Mailer {
 
     const replyTo = options.replyTo ? normalizeAddress(options.replyTo) : this.#defaultReplyTo;
 
-    const message: EmailMessage = {
+    let message: EmailMessage = {
       from: this.#from,
       to: normalizeAddresses(options.to),
       ...(options.cc ? { cc: normalizeAddresses(options.cc) } : {}),
@@ -77,6 +80,10 @@ class MailerImpl implements Mailer {
       attachments: options.attachments ?? [],
       headers: { 'X-Mailer': `tierde-mail/${VERSION}`, ...options.headers },
     };
+
+    for (const mw of this.#middleware) {
+      message = await mw(message);
+    }
 
     if (this.#strategy === 'round-robin') {
       const idx = this.#roundRobinIndex % this.#providers.length;

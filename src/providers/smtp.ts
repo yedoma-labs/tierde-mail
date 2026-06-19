@@ -65,6 +65,7 @@ class SmtpProvider implements EmailProvider {
         content: a.content,
         contentType: a.contentType,
         encoding: a.encoding,
+        ...(a.cid ? { cid: a.cid } : {}),
       })),
     });
 

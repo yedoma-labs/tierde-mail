@@ -8,6 +8,8 @@ export interface Attachment {
   content: Buffer | string;
   contentType: string;
   encoding?: 'base64' | 'utf-8';
+  /** Content-ID for inline embedding. When set, the attachment is embedded inline and HTML can reference it via `src="cid:<cid>"`. */
+  cid?: string;
 }
 
 export interface EmailMessage {
@@ -54,9 +56,12 @@ export type EmailTemplate<Props> = EmailDefinition<Props> & {
   readonly __propsType: Props;
 };
 
+export type MailMiddleware = (message: EmailMessage) => EmailMessage | Promise<EmailMessage>;
+
 export interface MailerConfig {
   from: EmailAddressInput;
   defaultReplyTo?: EmailAddressInput;
+  middleware?: MailMiddleware[];
 }
 
 export interface SingleProviderMailerConfig extends MailerConfig {

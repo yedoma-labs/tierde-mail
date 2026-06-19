@@ -50,7 +50,8 @@ class SendGridProvider implements EmailProvider {
         filename: a.filename,
         content: typeof a.content === 'string' ? a.content : a.content.toString('base64'),
         type: a.contentType,
-        disposition: 'attachment',
+        disposition: a.cid ? 'inline' : 'attachment',
+        ...(a.cid ? { content_id: a.cid } : {}),
       }));
     }
 

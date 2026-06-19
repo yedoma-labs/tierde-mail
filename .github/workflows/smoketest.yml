@@ -60,4 +60,4 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           SES_REGION: ${{ secrets.SES_REGION }}
           TIERDE_TEST_MAILPIT: "true"
-        run: pnpm vitest run --reporter=verbose src/__tests__/providers.integration.test.ts
+        run: pnpm vitest run --reporter=verbose src/__tests__/providers.integration.test.ts src/__tests__/middleware.e2e.test.tsx

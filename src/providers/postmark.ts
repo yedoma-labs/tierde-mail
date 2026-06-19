@@ -50,6 +50,7 @@ class PostmarkProvider implements EmailProvider {
         Name: a.filename,
         Content: typeof a.content === 'string' ? a.content : a.content.toString('base64'),
         ContentType: a.contentType,
+        ...(a.cid ? { ContentID: `cid:${a.cid}` } : {}),
       }));
     }
 

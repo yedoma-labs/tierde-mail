@@ -17,6 +17,7 @@ export {
   Text,
 } from './components/index.js';
 export { defineEmail } from './define-email.js';
+export { embedImages } from './embed-images.js';
 export { createMailerFromEnv } from './env-mailer.js';
 export { createMailer } from './mailer.js';
 export type {
@@ -40,6 +41,7 @@ export type {
   EmailMessage,
   EmailProvider,
   EmailTemplate as EmailTemplateType,
+  MailMiddleware,
   Mailer,
   MultiProviderMailerConfig,
   SendOptions,

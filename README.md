@@ -323,6 +323,125 @@ const mailer = createMailer({
 
 ---
 
+## Middleware
+
+`middleware` is an ordered array of transform functions that run on the fully-rendered `EmailMessage` before it reaches the provider. Each function receives the message and returns a (possibly modified) copy.
+
+```ts
+import type { MailMiddleware } from '@yedoma-labs/tierde-mail';
+
+const mailer = createMailer({
+  provider: smtp({ ... }),
+  from: 'hello@example.com',
+  middleware: [myMiddleware],
+});
+```
+
+### Type
+
+```ts
+type MailMiddleware = (message: EmailMessage) => EmailMessage | Promise<EmailMessage>;
+```
+
+### Tracking pixels
+
+Providers like Resend, SendGrid, and Postmark handle open/click tracking automatically via their dashboards. For SMTP or self-hosted setups you can inject tracking yourself via middleware:
+
+```ts
+import type { MailMiddleware } from '@yedoma-labs/tierde-mail';
+import { randomUUID } from 'node:crypto';
+
+// Open tracking — 1×1 pixel appended to HTML body
+export const trackOpens = (baseUrl: string): MailMiddleware =>
+  (msg) => ({
+    ...msg,
+    html: msg.html + `<img src="${baseUrl}/${randomUUID()}" width="1" height="1" alt="" />`,
+  });
+
+// Click tracking — rewrites href attributes through a redirect
+export const trackClicks = (baseUrl: string): MailMiddleware =>
+  (msg) => ({
+    ...msg,
+    html: msg.html.replace(
+      /href="(https?:[^"]+)"/g,
+      (_, url) => `href="${baseUrl}?url=${encodeURIComponent(url)}"`,
+    ),
+  });
+
+const mailer = createMailer({
+  provider: smtp({ ... }),
+  from: 'hello@example.com',
+  middleware: [
+    trackOpens('https://track.example.com/open'),
+    trackClicks('https://track.example.com/click'),
+  ],
+});
+```
+
+**Notes:**
+- Middleware runs per-recipient — each send gets its own pixel URL.
+- Keep middleware synchronous when possible. Async middleware (e.g., DB writes) adds latency per send and is felt at batch scale. Record tracking events in `onResult` after the send confirms instead.
+- Middleware does not run on the plain-text part. Link rewriting applies to HTML only.
+- Order matters: pixel injection before link rewriting is the conventional order.
+
+### Inline image embedding
+
+`embedImages` is a built-in middleware that fetches remote images and embeds them as CID inline attachments. Email clients that block remote image loading will still display inline-embedded images.
+
+```ts
+import { createMailer, embedImages } from '@yedoma-labs/tierde-mail';
+
+const mailer = createMailer({
+  provider: smtp({ ... }),
+  from: 'hello@example.com',
+  middleware: [
+    embedImages([
+      'https://raw.githubusercontent.com/yedoma-labs/assets/main/resized/banner-resized.png',
+    ]),
+  ],
+});
+```
+
+Reference the image in your JSX template by its original URL — `embedImages` replaces the `src` with `cid:<filename>` and attaches the image inline before sending:
+
+```tsx
+const MyEmail = defineEmail<{}>({
+  subject: () => 'Hello',
+  component: () => (
+    <EmailTemplate>
+      <Image
+        src="https://raw.githubusercontent.com/yedoma-labs/assets/main/resized/banner-resized.png"
+        alt="Banner"
+        width={600}
+      />
+    </EmailTemplate>
+  ),
+});
+```
+
+Pass no argument to embed **all** remote `https://` images found in the rendered HTML:
+
+```ts
+middleware: [embedImages()]
+```
+
+**Provider support:**
+
+| Provider | CID inline |
+|---|---|
+| SMTP / Mailpit | ✅ native (nodemailer) |
+| SendGrid | ✅ `disposition: inline` |
+| Postmark | ✅ `ContentID` |
+| Resend | ✅ `inline: true` |
+| SES | ❌ `SendEmailCommand` does not support attachments — use `SendRawEmailCommand` directly |
+
+**Notes:**
+- `embedImages` fetches images at send time. For high-volume batch sends, pre-fetch and cache image Buffers and pass them via `attachments` directly instead of using the middleware.
+- Each unique URL is fetched once per send, even if it appears multiple times in the HTML.
+- Existing `attachments` on the message are preserved.
+
+---
+
 ## Environment-based setup
 
 For twelve-factor apps, configure via environment variables:
