@@ -34,8 +34,8 @@ class SendGridProvider implements EmailProvider {
         : { email: message.from.email },
       subject: message.subject,
       content: [
-        { type: 'text/html', value: message.html },
         ...(message.text ? [{ type: 'text/plain', value: message.text }] : []),
+        { type: 'text/html', value: message.html },
       ],
     };
 
