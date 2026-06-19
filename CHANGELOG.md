@@ -10,6 +10,20 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ---
 
+## [0.7.0] — 2026-06-19
+
+### Added
+
+- `X-Mailer: tierde-mail/<version>` header injected automatically on every send via `createMailer`; caller-supplied headers take precedence
+- `src/version.ts` — single source of truth for the library version string
+- CI smoketest workflow (`.github/workflows/smoketest.yml`) — runs provider integration tests against real APIs on every push to `main`; uses `FeatureAnnouncement` template for a rich HTML payload; skips any provider whose secrets are absent
+
+### Fixed
+
+- SendGrid provider: `text/plain` content entry now placed before `text/html` as required by the SendGrid API (previously caused `400` errors when a plain-text body was supplied)
+
+---
+
 ## [0.6.0] — 2026-06-18
 
 ### Added

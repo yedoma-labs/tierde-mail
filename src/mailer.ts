@@ -14,6 +14,7 @@ import type {
   SendResult,
 } from './types.js';
 import { normalizeAddress, normalizeAddresses, validateAttachment } from './validate.js';
+import { VERSION } from './version.js';
 
 function isMultiProvider(config: CreateMailerConfig): config is MultiProviderMailerConfig {
   return 'providers' in config;
@@ -74,7 +75,7 @@ class MailerImpl implements Mailer {
       html,
       text,
       attachments: options.attachments ?? [],
-      headers: options.headers ?? {},
+      headers: { 'X-Mailer': `tierde-mail/${VERSION}`, ...options.headers },
     };
 
     if (this.#strategy === 'round-robin') {
