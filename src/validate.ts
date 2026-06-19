@@ -13,6 +13,10 @@ const ALLOWED_CONTENT_TYPES = new Set([
   'text/html',
 ]);
 
+// Active-content image types that can execute scripts — explicitly blocked even though
+// they match the image/* prefix check below.
+const BLOCKED_IMAGE_TYPES = new Set(['image/svg+xml', 'image/svg']);
+
 export function validateEmail(email: string): void {
   if (typeof email !== 'string' || !email.includes('@')) {
     throw new TypeError(`Invalid email address: ${email}`);
@@ -62,7 +66,8 @@ export function validateAttachment(attachment: Attachment): void {
   }
   const ct = attachment.contentType;
   const baseType = ct.split(';')[0]?.trim().toLowerCase() ?? '';
-  if (!ALLOWED_CONTENT_TYPES.has(baseType) && !baseType.startsWith('image/')) {
+  const isAllowedImage = baseType.startsWith('image/') && !BLOCKED_IMAGE_TYPES.has(baseType);
+  if (!ALLOWED_CONTENT_TYPES.has(baseType) && !isAllowedImage) {
     throw new TypeError(`Disallowed attachment content type: ${ct}`);
   }
   if (attachment.cid !== undefined) {

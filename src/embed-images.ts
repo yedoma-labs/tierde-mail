@@ -54,7 +54,12 @@ export function embedImages(urls?: string[]): MailMiddleware {
         if (!res.ok) throw new Error(`embedImages: failed to fetch ${url} — HTTP ${res.status}`);
 
         const buffer = Buffer.from(await res.arrayBuffer());
-        const contentType = res.headers.get('content-type')?.split(';')[0]?.trim() ?? 'image/png';
+        const raw = res.headers.get('content-type')?.split(';')[0]?.trim() ?? 'image/png';
+        // Only accept rasterised image types; reject active-content types (SVG, HTML) that
+        // a misbehaving CDN might supply.
+        const contentType = raw.startsWith('image/') && raw !== 'image/svg+xml' && raw !== 'image/svg'
+          ? raw
+          : 'image/png';
         return { url, buffer, contentType };
       }),
     );

@@ -417,6 +417,36 @@ describe('attachments (single send)', () => {
       }),
     ).rejects.toThrow(TypeError);
   });
+
+  it('rejects attachment with image/svg+xml content type', async () => {
+    const provider = mockProvider();
+    const mailer = createMailer({ provider, from: 'sender@example.com' });
+
+    await expect(
+      mailer.send(TestEmail, {
+        to: 'user@example.com',
+        props: { name: 'Alice' },
+        attachments: [{ filename: 'icon.svg', content: '<svg/>', contentType: 'image/svg+xml' }],
+      }),
+    ).rejects.toThrow(TypeError);
+  });
+
+  it('middleware-injected attachment with disallowed content type is rejected post-middleware', async () => {
+    const provider = mockProvider();
+    const badMw: MailMiddleware = (msg) => ({
+      ...msg,
+      attachments: [
+        ...(msg.attachments ?? []),
+        { filename: 'shell.sh', content: '#!/bin/bash', contentType: 'application/x-sh' },
+      ],
+    });
+
+    const mailer = createMailer({ provider, from: 'sender@example.com', middleware: [badMw] });
+
+    await expect(
+      mailer.send(TestEmail, { to: 'user@example.com', props: { name: 'Alice' } }),
+    ).rejects.toThrow(TypeError);
+  });
 });
 
 describe('no middleware — tracking isolation', () => {

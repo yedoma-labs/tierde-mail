@@ -186,4 +186,30 @@ describe('embedImages', () => {
 
     expect(result.attachments![0]!.contentType).toBe('image/webp');
   });
+
+  it('falls back to image/png when server returns non-image content-type', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      arrayBuffer: async () => new Uint8Array([1]).buffer,
+      headers: { get: (h: string) => (h === 'content-type' ? 'text/html' : null) },
+    } as unknown as Response);
+
+    const msg = makeMessage(`<img src="${IMAGE_URL}" />`);
+    const result = await embedImages([IMAGE_URL])(msg);
+
+    expect(result.attachments![0]!.contentType).toBe('image/png');
+  });
+
+  it('falls back to image/png when server returns image/svg+xml', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      arrayBuffer: async () => new Uint8Array([1]).buffer,
+      headers: { get: (h: string) => (h === 'content-type' ? 'image/svg+xml' : null) },
+    } as unknown as Response);
+
+    const msg = makeMessage(`<img src="${IMAGE_URL}" />`);
+    const result = await embedImages([IMAGE_URL])(msg);
+
+    expect(result.attachments![0]!.contentType).toBe('image/png');
+  });
 });

@@ -86,6 +86,10 @@ class MailerImpl implements Mailer {
       message = await mw(message);
     }
 
+    for (const attachment of message.attachments ?? []) {
+      validateAttachment(attachment);
+    }
+
     if (this.#strategy === 'round-robin') {
       const idx = this.#roundRobinIndex % this.#providers.length;
       this.#roundRobinIndex++;

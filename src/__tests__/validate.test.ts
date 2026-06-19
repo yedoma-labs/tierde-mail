@@ -113,10 +113,16 @@ describe('validateAttachment', () => {
     ).toThrow(TypeError);
   });
 
-  it('accepts image/* content types', () => {
+  it('accepts image/* content types (avif, bmp, etc.)', () => {
     expect(() =>
-      validateAttachment({ filename: 'photo.svg', content: '', contentType: 'image/svg+xml' }),
+      validateAttachment({ filename: 'photo.avif', content: '', contentType: 'image/avif' }),
     ).not.toThrow();
+  });
+
+  it('rejects image/svg+xml — active content', () => {
+    expect(() =>
+      validateAttachment({ filename: 'icon.svg', content: '', contentType: 'image/svg+xml' }),
+    ).toThrow(TypeError);
   });
 
   it('accepts CSV attachment', () => {
