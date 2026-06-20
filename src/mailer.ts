@@ -153,7 +153,7 @@ class MailerImpl implements Mailer {
         return await provider.send(message);
       } catch (err) {
         if (attempt >= this.#maxRetries || !this.#retryOn(err)) throw err;
-        await delay(this.#initialRetryDelayMs * Math.pow(2, attempt));
+        await delay(this.#initialRetryDelayMs * 2 ** attempt);
         attempt++;
       }
     }

@@ -188,9 +188,7 @@ describe('createPostmarkWebhookHandler', () => {
 const { privateKey: sgPrivateKey, publicKey: sgPublicKey } = generateKeyPairSync('ec', {
   namedCurve: 'P-256',
 });
-const SENDGRID_PUBLIC_KEY = sgPublicKey
-  .export({ type: 'spki', format: 'der' })
-  .toString('base64');
+const SENDGRID_PUBLIC_KEY = sgPublicKey.export({ type: 'spki', format: 'der' }).toString('base64');
 
 function sgSign(body: string, ts: string): string {
   const sign = createSign('SHA256');
@@ -218,8 +216,18 @@ const sgDeliveryPayload = JSON.stringify([
 ]);
 
 const sgBouncePayload = JSON.stringify([
-  { event: 'bounce', email: 'bad@example.com', sg_message_id: 'sg.bounce.1', timestamp: 1718539200 },
-  { event: 'spamreport', email: 'spam@example.com', sg_message_id: 'sg.spam.1', timestamp: 1718539201 },
+  {
+    event: 'bounce',
+    email: 'bad@example.com',
+    sg_message_id: 'sg.bounce.1',
+    timestamp: 1718539200,
+  },
+  {
+    event: 'spamreport',
+    email: 'spam@example.com',
+    sg_message_id: 'sg.spam.1',
+    timestamp: 1718539201,
+  },
 ]);
 
 // ---------------------------------------------------------------------------

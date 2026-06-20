@@ -640,7 +640,9 @@ describe('mailer retry / backoff', () => {
   it('throws after exhausting retries', async () => {
     const provider: EmailProvider = {
       name: 'always-fail',
-      send: vi.fn(async () => { throw retryableError(503); }),
+      send: vi.fn(async () => {
+        throw retryableError(503);
+      }),
     };
 
     const mailer = createMailer({
@@ -650,18 +652,29 @@ describe('mailer retry / backoff', () => {
       initialRetryDelayMs: 0,
     });
 
-    await expect(mailer.send(TestEmail, { to: 'b@example.com', props: { name: 'B' } })).rejects.toThrow('503');
+    await expect(
+      mailer.send(TestEmail, { to: 'b@example.com', props: { name: 'B' } }),
+    ).rejects.toThrow('503');
     expect(provider.send).toHaveBeenCalledTimes(3); // 1 initial + 2 retries
   });
 
   it('does not retry non-retryable errors', async () => {
     const provider: EmailProvider = {
       name: 'auth-fail',
-      send: vi.fn(async () => { throw new Error('API error 401: unauthorized'); }),
+      send: vi.fn(async () => {
+        throw new Error('API error 401: unauthorized');
+      }),
     };
 
-    const mailer = createMailer({ provider, from: 'a@example.com', maxRetries: 3, initialRetryDelayMs: 0 });
-    await expect(mailer.send(TestEmail, { to: 'b@example.com', props: { name: 'B' } })).rejects.toThrow('401');
+    const mailer = createMailer({
+      provider,
+      from: 'a@example.com',
+      maxRetries: 3,
+      initialRetryDelayMs: 0,
+    });
+    await expect(
+      mailer.send(TestEmail, { to: 'b@example.com', props: { name: 'B' } }),
+    ).rejects.toThrow('401');
     expect(provider.send).toHaveBeenCalledTimes(1);
   });
 
@@ -683,18 +696,24 @@ describe('mailer retry / backoff', () => {
       retryOn: (err) => err instanceof Error && err.message.includes('custom-retryable'),
     });
 
-    await expect(mailer.send(TestEmail, { to: 'b@example.com', props: { name: 'B' } })).rejects.toThrow('custom-retryable');
+    await expect(
+      mailer.send(TestEmail, { to: 'b@example.com', props: { name: 'B' } }),
+    ).rejects.toThrow('custom-retryable');
     expect(calls).toBe(3);
   });
 
   it('does not retry when maxRetries is 0 (default)', async () => {
     const provider: EmailProvider = {
       name: 'fail',
-      send: vi.fn(async () => { throw retryableError(429); }),
+      send: vi.fn(async () => {
+        throw retryableError(429);
+      }),
     };
 
     const mailer = createMailer({ provider, from: 'a@example.com' });
-    await expect(mailer.send(TestEmail, { to: 'b@example.com', props: { name: 'B' } })).rejects.toThrow('429');
+    await expect(
+      mailer.send(TestEmail, { to: 'b@example.com', props: { name: 'B' } }),
+    ).rejects.toThrow('429');
     expect(provider.send).toHaveBeenCalledTimes(1);
   });
 });

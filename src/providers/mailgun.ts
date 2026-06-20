@@ -49,8 +49,7 @@ class MailgunProvider implements EmailProvider {
 
     if (message.attachments && message.attachments.length > 0) {
       for (const a of message.attachments) {
-        const buf =
-          typeof a.content === 'string' ? Buffer.from(a.content, 'base64') : a.content;
+        const buf = typeof a.content === 'string' ? Buffer.from(a.content, 'base64') : a.content;
         const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer;
         const blob = new Blob([ab], { type: a.contentType });
         form.append(a.cid ? 'inline' : 'attachment', blob, a.filename);
