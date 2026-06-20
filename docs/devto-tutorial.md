@@ -91,7 +91,7 @@ Under the hood, the render phase is synchronous - no network I/O. Providers hand
 **Where to get it:**
 - npm: [`@yedoma-labs/tierde-mail`](https://www.npmjs.com/package/@yedoma-labs/tierde-mail)
 - GitHub: [`yedoma-labs/tierde-mail`](https://github.com/yedoma-labs/tierde-mail)
-- Latest version: 0.8.0
+- Latest version: 0.8.1
 
 **Install core + peer dependencies:**
 
@@ -107,7 +107,7 @@ pnpm add @yedoma-labs/tierde-mail react react-dom resend
 pnpm add @yedoma-labs/tierde-mail react react-dom nodemailer
 
 # + AWS SES (high volume, lowest cost)
-pnpm add @yedoma-labs/tierde-mail react react-dom @aws-sdk/client-sesv2
+pnpm add @yedoma-labs/tierde-mail react react-dom @aws-sdk/client-ses
 
 # + Postmark (excellent docs, good for transactional)
 pnpm add @yedoma-labs/tierde-mail react react-dom postmark
@@ -121,7 +121,7 @@ Or with **npm**:
 npm install @yedoma-labs/tierde-mail react react-dom
 npm install @yedoma-labs/tierde-mail react react-dom resend
 npm install @yedoma-labs/tierde-mail react react-dom nodemailer
-npm install @yedoma-labs/tierde-mail react react-dom @aws-sdk/client-sesv2
+npm install @yedoma-labs/tierde-mail react react-dom @aws-sdk/client-ses
 npm install @yedoma-labs/tierde-mail react react-dom postmark
 npm install @yedoma-labs/tierde-mail react react-dom @sendgrid/mail
 ```
@@ -131,7 +131,7 @@ Or with **yarn**:
 yarn add @yedoma-labs/tierde-mail react react-dom
 yarn add @yedoma-labs/tierde-mail react react-dom resend
 yarn add @yedoma-labs/tierde-mail react react-dom nodemailer
-yarn add @yedoma-labs/tierde-mail react react-dom @aws-sdk/client-sesv2
+yarn add @yedoma-labs/tierde-mail react react-dom @aws-sdk/client-ses
 yarn add @yedoma-labs/tierde-mail react react-dom postmark
 yarn add @yedoma-labs/tierde-mail react react-dom @sendgrid/mail
 ```
@@ -141,12 +141,12 @@ Or with **bun**:
 bun add @yedoma-labs/tierde-mail react react-dom
 bun add @yedoma-labs/tierde-mail react react-dom resend
 bun add @yedoma-labs/tierde-mail react react-dom nodemailer
-bun add @yedoma-labs/tierde-mail react react-dom @aws-sdk/client-sesv2
+bun add @yedoma-labs/tierde-mail react react-dom @aws-sdk/client-ses
 bun add @yedoma-labs/tierde-mail react react-dom postmark
 bun add @yedoma-labs/tierde-mail react react-dom @sendgrid/mail
 ```
 
-**Node version:** Node 18+. TypeScript 5.0+ recommended (strict mode works).
+**Node version:** Node 20+. TypeScript 5.0+ recommended (strict mode works).
 
 ## Getting started
 
@@ -290,6 +290,8 @@ const mailer = createMailer({
 });
 // Send anything — open http://localhost:8025 to see it
 ```
+
+Bare-hostname addresses like `test@localhost` and `inbox@mailpit` are valid per RFC 5321 and accepted by the validator. No dot in the domain is fine for local development.
 
 **Resend → WireMock**
 
@@ -631,7 +633,7 @@ console.log(html); // Full rendered email - paste into email client to preview
 
 ## Production checklist
 
-- [ ] **Email address validation is automatic.** tierde-mail validates every address against RFC 5321 before any provider call — invalid characters, malformed local parts, and control characters (header injection) all throw `TypeError` before a network request is made. No extra sanitization step needed.
+- [ ] **Email address validation is automatic.** tierde-mail validates every address against RFC 5321 before any provider call — full `atext` character class, quoted-string locals, domain label rules, address literals (`[127.0.0.1]`), bare hostnames (`localhost`), and control-character (header-injection) rejection all enforced. Throws `TypeError` before any network request. No extra sanitization step needed.
 - [ ] **Provider secrets in env vars.** Never commit API keys; use `.env.local` (git-ignored).
 - [ ] **Test email rendering.** Run `npx tierde dev` and preview every email variant in dark mode.
 - [ ] **Local mock smoke test.** Run `docker compose up -d` and fire `npx tierde send` against WireMock/LocalStack before touching real credentials.
