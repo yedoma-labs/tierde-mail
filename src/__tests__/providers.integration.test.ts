@@ -22,6 +22,8 @@
  *              (SES does not support attachments via SendEmailCommand —
  *               attachment / CID tests are skipped for SES)
  */
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import React from 'react';
 import { describe, expect, it } from 'vitest';
 import { htmlToPlainText } from '../plain-text.js';
@@ -32,21 +34,17 @@ import type { Attachment, EmailMessage } from '../types.js';
 const FROM = process.env.TIERDE_TEST_FROM;
 const TO = process.env.TIERDE_TEST_TO;
 
-// Minimal 1×1 transparent PNG — used for CID inline tests.
-const TINY_PNG = Buffer.from(
-  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
-  'base64',
-);
+// Real smoketest image from the repo — used for CID inline attachment tests.
+const SMOKETEST_PNG = readFileSync(join(process.cwd(), 'assets/smoketest-resized.png'));
 
 // Minimal valid PDF stub — providers validate magic bytes; fake-but-valid header.
 const TINY_PDF = Buffer.from(
   '%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\nxref\n0 0\ntrailer<<>>\n%%EOF',
 );
 
-// Public 1×1 pixel PNG used in the external-image-src test.
-// We control this URL through GitHub raw content — if you need a different CDN, change it.
+// Repo-hosted image used in external-image-src tests (loaded by recipient's email client).
 const EXTERNAL_IMAGE_URL =
-  'https://raw.githubusercontent.com/yedoma-labs/tierde-mail/main/docs/assets/logo.png';
+  'https://raw.githubusercontent.com/yedoma-labs/tierde-mail/main/assets/smoketest-resized-mobile.png';
 
 function baseMessage(provider: string): EmailMessage {
   const props = {
@@ -136,7 +134,7 @@ describe.skipIf(!hasBaseEnv() || !process.env.RESEND_API_KEY)(
           ...testMessage('resend-cid'),
           html: `${baseMessage('resend-cid').html}\n<img src="cid:${cid}" alt="logo">`,
         },
-        { filename: 'logo.png', content: TINY_PNG, contentType: 'image/png', cid },
+        { filename: 'logo.png', content: SMOKETEST_PNG, contentType: 'image/png', cid },
       );
       const result = await provider.send(msg);
       expect(result.provider).toBe('resend');
@@ -191,7 +189,7 @@ describe.skipIf(!hasBaseEnv() || !process.env.SENDGRID_API_KEY)(
           ...testMessage('sendgrid-cid'),
           html: `${baseMessage('sendgrid-cid').html}\n<img src="cid:${cid}" alt="logo">`,
         },
-        { filename: 'logo.png', content: TINY_PNG, contentType: 'image/png', cid },
+        { filename: 'logo.png', content: SMOKETEST_PNG, contentType: 'image/png', cid },
       );
       const result = await provider.send(msg);
       expect(result.provider).toBe('sendgrid');
@@ -246,7 +244,7 @@ describe.skipIf(!hasBaseEnv() || !process.env.POSTMARK_SERVER_TOKEN)(
           ...testMessage('postmark-cid'),
           html: `${baseMessage('postmark-cid').html}\n<img src="cid:${cid}" alt="logo">`,
         },
-        { filename: 'logo.png', content: TINY_PNG, contentType: 'image/png', cid },
+        { filename: 'logo.png', content: SMOKETEST_PNG, contentType: 'image/png', cid },
       );
       const result = await provider.send(msg);
       expect(result.provider).toBe('postmark');
@@ -309,7 +307,7 @@ describe.skipIf(!hasBaseEnv() || !process.env.SMTP_HOST)('smtp provider (integra
         ...testMessage('smtp-cid'),
         html: `${baseMessage('smtp-cid').html}\n<img src="cid:${cid}" alt="logo">`,
       },
-      { filename: 'logo.png', content: TINY_PNG, contentType: 'image/png', cid },
+      { filename: 'logo.png', content: SMOKETEST_PNG, contentType: 'image/png', cid },
     );
     const result = await provider.send(msg);
     expect(result.provider).toBe('smtp');
@@ -372,7 +370,7 @@ describe.skipIf(!hasBaseEnv() || !process.env.TIERDE_TEST_MAILPIT)(
           ...testMessage('mailpit-cid'),
           html: `${baseMessage('mailpit-cid').html}\n<img src="cid:${cid}" alt="logo">`,
         },
-        { filename: 'logo.png', content: TINY_PNG, contentType: 'image/png', cid },
+        { filename: 'logo.png', content: SMOKETEST_PNG, contentType: 'image/png', cid },
       );
       const result = await provider.send(msg);
       expect(result.provider).toBe('mailpit');
