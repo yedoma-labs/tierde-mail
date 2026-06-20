@@ -1,34 +1,41 @@
 import { createEnv, eg } from '@yedoma-labs/bylyt-env-guard';
 import { createMailer } from './mailer.js';
+import { brevo } from './providers/brevo.js';
+import { mailersend } from './providers/mailersend.js';
 import { mailgun } from './providers/mailgun.js';
 import { mailpit } from './providers/mailpit.js';
+import { mandrill } from './providers/mandrill.js';
 import { postmark } from './providers/postmark.js';
 import { resend } from './providers/resend.js';
 import { sendgrid } from './providers/sendgrid.js';
 import { ses } from './providers/ses.js';
 import { smtp } from './providers/smtp.js';
+import { sparkpost } from './providers/sparkpost.js';
 import type { Mailer } from './types.js';
 
 /**
  * Creates a Mailer from environment variables.
  *
  * Required:
- *   TIERDE_PROVIDER   resend | smtp | ses | sendgrid | postmark | mailgun | mailpit
+ *   TIERDE_PROVIDER   resend | smtp | ses | sendgrid | postmark | mailgun | brevo | mailersend | sparkpost | mandrill | mailpit
  *   TIERDE_FROM_EMAIL sender address
  *
  * Optional:
  *   TIERDE_FROM_NAME  sender display name
  *
  * Per-provider:
- *   resend:   RESEND_API_KEY, RESEND_BASE_URL (optional, e.g. http://localhost:8080 for WireMock)
- *   smtp:     SMTP_HOST, SMTP_PORT (default 587), SMTP_USER, SMTP_PASS, SMTP_SECURE
- *   ses:      AWS_REGION (or SES_REGION), SES_ENDPOINT (optional, e.g. http://localhost:4566 for LocalStack),
- *             AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY (optional, for mock/explicit creds)
- *   sendgrid: SENDGRID_API_KEY, SENDGRID_BASE_URL (optional, e.g. http://localhost:8080 for WireMock)
- *   postmark: POSTMARK_SERVER_TOKEN, POSTMARK_BASE_URL (optional, e.g. http://localhost:8080 for WireMock)
- *   mailgun:  MAILGUN_API_KEY, MAILGUN_DOMAIN, MAILGUN_REGION (optional: us|eu, default us),
- *             MAILGUN_BASE_URL (optional, e.g. http://localhost:8080 for WireMock)
- *   mailpit:  MAILPIT_HOST (default localhost), MAILPIT_PORT (default 1025)
+ *   resend:      RESEND_API_KEY, RESEND_BASE_URL (optional, e.g. http://localhost:8080 for WireMock)
+ *   smtp:        SMTP_HOST, SMTP_PORT (default 587), SMTP_USER, SMTP_PASS, SMTP_SECURE
+ *   ses:         AWS_REGION (or SES_REGION), SES_ENDPOINT (optional, e.g. http://localhost:4566 for LocalStack),
+ *                AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY (optional, for mock/explicit creds)
+ *   sendgrid:    SENDGRID_API_KEY, SENDGRID_BASE_URL (optional)
+ *   postmark:    POSTMARK_SERVER_TOKEN, POSTMARK_BASE_URL (optional)
+ *   mailgun:     MAILGUN_API_KEY, MAILGUN_DOMAIN, MAILGUN_REGION (optional: us|eu), MAILGUN_BASE_URL (optional)
+ *   brevo:       BREVO_API_KEY, BREVO_BASE_URL (optional)
+ *   mailersend:  MAILERSEND_API_TOKEN, MAILERSEND_BASE_URL (optional)
+ *   sparkpost:   SPARKPOST_API_KEY, SPARKPOST_BASE_URL (optional, e.g. https://api.eu.sparkpost.com for EU)
+ *   mandrill:    MANDRILL_API_KEY, MANDRILL_BASE_URL (optional)
+ *   mailpit:     MAILPIT_HOST (default localhost), MAILPIT_PORT (default 1025)
  */
 export function createMailerFromEnv(): Mailer {
   const env = createEnv({
@@ -40,6 +47,10 @@ export function createMailerFromEnv(): Mailer {
         'sendgrid',
         'postmark',
         'mailgun',
+        'brevo',
+        'mailersend',
+        'sparkpost',
+        'mandrill',
         'mailpit',
       ] as const),
       TIERDE_FROM_EMAIL: eg.string().required(),
@@ -76,6 +87,22 @@ export function createMailerFromEnv(): Mailer {
       MAILGUN_DOMAIN: eg.string().optional(),
       MAILGUN_REGION: eg.enum(['us', 'eu'] as const).optional(),
       MAILGUN_BASE_URL: eg.string().optional(),
+
+      // brevo (sendinblue)
+      BREVO_API_KEY: eg.string().sensitive().optional(),
+      BREVO_BASE_URL: eg.string().optional(),
+
+      // mailersend
+      MAILERSEND_API_TOKEN: eg.string().sensitive().optional(),
+      MAILERSEND_BASE_URL: eg.string().optional(),
+
+      // sparkpost
+      SPARKPOST_API_KEY: eg.string().sensitive().optional(),
+      SPARKPOST_BASE_URL: eg.string().optional(),
+
+      // mandrill (mailchimp transactional)
+      MANDRILL_API_KEY: eg.string().sensitive().optional(),
+      MANDRILL_BASE_URL: eg.string().optional(),
 
       // mailpit / mailhog
       MAILPIT_HOST: eg.string().default('localhost'),
@@ -155,6 +182,49 @@ export function createMailerFromEnv(): Mailer {
         provider: postmark({
           serverToken: env.POSTMARK_SERVER_TOKEN,
           ...(env.POSTMARK_BASE_URL ? { baseUrl: env.POSTMARK_BASE_URL } : {}),
+        }),
+        from,
+      });
+    }
+    case 'brevo': {
+      if (!env.BREVO_API_KEY) throw new Error('BREVO_API_KEY is required for brevo provider');
+      return createMailer({
+        provider: brevo({
+          apiKey: env.BREVO_API_KEY,
+          ...(env.BREVO_BASE_URL ? { baseUrl: env.BREVO_BASE_URL } : {}),
+        }),
+        from,
+      });
+    }
+    case 'mailersend': {
+      if (!env.MAILERSEND_API_TOKEN)
+        throw new Error('MAILERSEND_API_TOKEN is required for mailersend provider');
+      return createMailer({
+        provider: mailersend({
+          apiToken: env.MAILERSEND_API_TOKEN,
+          ...(env.MAILERSEND_BASE_URL ? { baseUrl: env.MAILERSEND_BASE_URL } : {}),
+        }),
+        from,
+      });
+    }
+    case 'sparkpost': {
+      if (!env.SPARKPOST_API_KEY)
+        throw new Error('SPARKPOST_API_KEY is required for sparkpost provider');
+      return createMailer({
+        provider: sparkpost({
+          apiKey: env.SPARKPOST_API_KEY,
+          ...(env.SPARKPOST_BASE_URL ? { baseUrl: env.SPARKPOST_BASE_URL } : {}),
+        }),
+        from,
+      });
+    }
+    case 'mandrill': {
+      if (!env.MANDRILL_API_KEY)
+        throw new Error('MANDRILL_API_KEY is required for mandrill provider');
+      return createMailer({
+        provider: mandrill({
+          apiKey: env.MANDRILL_API_KEY,
+          ...(env.MANDRILL_BASE_URL ? { baseUrl: env.MANDRILL_BASE_URL } : {}),
         }),
         from,
       });

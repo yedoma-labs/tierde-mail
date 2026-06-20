@@ -5,8 +5,12 @@ import dts from 'vite-plugin-dts';
 
 const entries = {
   index: resolve(__dirname, 'src/index.ts'),
+  'providers/brevo': resolve(__dirname, 'src/providers/brevo.ts'),
+  'providers/mailersend': resolve(__dirname, 'src/providers/mailersend.ts'),
   'providers/mailgun': resolve(__dirname, 'src/providers/mailgun.ts'),
+  'providers/mandrill': resolve(__dirname, 'src/providers/mandrill.ts'),
   'providers/resend': resolve(__dirname, 'src/providers/resend.ts'),
+  'providers/sparkpost': resolve(__dirname, 'src/providers/sparkpost.ts'),
   'providers/smtp': resolve(__dirname, 'src/providers/smtp.ts'),
   'providers/mailpit': resolve(__dirname, 'src/providers/mailpit.ts'),
   'providers/ses': resolve(__dirname, 'src/providers/ses.ts'),

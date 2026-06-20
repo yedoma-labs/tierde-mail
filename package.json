@@ -19,6 +19,26 @@
         "default": "./dist/index.cjs"
       }
     },
+    "./providers/brevo": {
+      "import": {
+        "types": "./dist/providers/brevo.d.ts",
+        "default": "./dist/providers/brevo.js"
+      },
+      "require": {
+        "types": "./dist/providers/brevo.d.cts",
+        "default": "./dist/providers/brevo.cjs"
+      }
+    },
+    "./providers/mailersend": {
+      "import": {
+        "types": "./dist/providers/mailersend.d.ts",
+        "default": "./dist/providers/mailersend.js"
+      },
+      "require": {
+        "types": "./dist/providers/mailersend.d.cts",
+        "default": "./dist/providers/mailersend.cjs"
+      }
+    },
     "./providers/mailgun": {
       "import": {
         "types": "./dist/providers/mailgun.d.ts",
@@ -29,6 +49,16 @@
         "default": "./dist/providers/mailgun.cjs"
       }
     },
+    "./providers/mandrill": {
+      "import": {
+        "types": "./dist/providers/mandrill.d.ts",
+        "default": "./dist/providers/mandrill.js"
+      },
+      "require": {
+        "types": "./dist/providers/mandrill.d.cts",
+        "default": "./dist/providers/mandrill.cjs"
+      }
+    },
     "./providers/resend": {
       "import": {
         "types": "./dist/providers/resend.d.ts",
@@ -37,6 +67,16 @@
       "require": {
         "types": "./dist/providers/resend.d.cts",
         "default": "./dist/providers/resend.cjs"
+      }
+    },
+    "./providers/sparkpost": {
+      "import": {
+        "types": "./dist/providers/sparkpost.d.ts",
+        "default": "./dist/providers/sparkpost.js"
+      },
+      "require": {
+        "types": "./dist/providers/sparkpost.d.cts",
+        "default": "./dist/providers/sparkpost.cjs"
       }
     },
     "./providers/smtp": {

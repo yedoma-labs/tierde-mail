@@ -60,13 +60,17 @@ await mailer.send(WelcomeEmail, {
 Import each provider from its subpath:
 
 ```ts
-import { resend }    from '@yedoma-labs/tierde-mail/providers/resend';
-import { smtp }      from '@yedoma-labs/tierde-mail/providers/smtp';
-import { mailpit }   from '@yedoma-labs/tierde-mail/providers/mailpit';
-import { ses }       from '@yedoma-labs/tierde-mail/providers/ses';
-import { sendgrid }  from '@yedoma-labs/tierde-mail/providers/sendgrid';
-import { postmark }  from '@yedoma-labs/tierde-mail/providers/postmark';
-import { mailgun }   from '@yedoma-labs/tierde-mail/providers/mailgun';
+import { resend }      from '@yedoma-labs/tierde-mail/providers/resend';
+import { smtp }        from '@yedoma-labs/tierde-mail/providers/smtp';
+import { mailpit }     from '@yedoma-labs/tierde-mail/providers/mailpit';
+import { ses }         from '@yedoma-labs/tierde-mail/providers/ses';
+import { sendgrid }    from '@yedoma-labs/tierde-mail/providers/sendgrid';
+import { postmark }    from '@yedoma-labs/tierde-mail/providers/postmark';
+import { mailgun }     from '@yedoma-labs/tierde-mail/providers/mailgun';
+import { brevo }       from '@yedoma-labs/tierde-mail/providers/brevo';
+import { mailersend }  from '@yedoma-labs/tierde-mail/providers/mailersend';
+import { sparkpost }   from '@yedoma-labs/tierde-mail/providers/sparkpost';
+import { mandrill }    from '@yedoma-labs/tierde-mail/providers/mandrill';
 ```
 
 ### Resend
@@ -123,14 +127,50 @@ mailgun({ apiKey: 'key-...', domain: 'mg.example.com' })
 mailgun({ apiKey: 'key-...', domain: 'mg.example.com', region: 'eu' })  // EU region
 ```
 
-Or via environment variables:
+```bash
+TIERDE_PROVIDER=mailgun  MAILGUN_API_KEY=key-...  MAILGUN_DOMAIN=mg.example.com
+```
+
+### Brevo (formerly Sendinblue)
+
+```ts
+brevo({ apiKey: 'xkeysib-...' })
+```
 
 ```bash
-TIERDE_PROVIDER=mailgun
-TIERDE_FROM_EMAIL=noreply@example.com
-MAILGUN_API_KEY=key-...
-MAILGUN_DOMAIN=mg.example.com
-MAILGUN_REGION=us        # optional: us (default) or eu
+TIERDE_PROVIDER=brevo  BREVO_API_KEY=xkeysib-...
+```
+
+### MailerSend
+
+```ts
+mailersend({ apiToken: 'mlsn.abc...' })
+```
+
+```bash
+TIERDE_PROVIDER=mailersend  MAILERSEND_API_TOKEN=mlsn.abc...
+```
+
+### SparkPost
+
+```ts
+sparkpost({ apiKey: 'sp-key' })
+sparkpost({ apiKey: 'sp-key', baseUrl: 'https://api.eu.sparkpost.com' })  // EU tenant
+sparkpost({ apiKey: 'sp-key', sandbox: true })                             // sandbox
+```
+
+```bash
+TIERDE_PROVIDER=sparkpost  SPARKPOST_API_KEY=sp-key
+```
+
+### Mandrill (Mailchimp Transactional)
+
+```ts
+mandrill({ apiKey: 'mc-key' })
+```
+
+```bash
+TIERDE_PROVIDER=mandrill  MANDRILL_API_KEY=mc-key
 ```
 
 ---
