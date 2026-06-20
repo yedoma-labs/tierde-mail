@@ -66,6 +66,7 @@ import { mailpit }   from '@yedoma-labs/tierde-mail/providers/mailpit';
 import { ses }       from '@yedoma-labs/tierde-mail/providers/ses';
 import { sendgrid }  from '@yedoma-labs/tierde-mail/providers/sendgrid';
 import { postmark }  from '@yedoma-labs/tierde-mail/providers/postmark';
+import { mailgun }   from '@yedoma-labs/tierde-mail/providers/mailgun';
 ```
 
 ### Resend
@@ -113,6 +114,23 @@ sendgrid({ apiKey: 'SG...' })
 
 ```ts
 postmark({ serverToken: '...' })
+```
+
+### Mailgun
+
+```ts
+mailgun({ apiKey: 'key-...', domain: 'mg.example.com' })
+mailgun({ apiKey: 'key-...', domain: 'mg.example.com', region: 'eu' })  // EU region
+```
+
+Or via environment variables:
+
+```bash
+TIERDE_PROVIDER=mailgun
+TIERDE_FROM_EMAIL=noreply@example.com
+MAILGUN_API_KEY=key-...
+MAILGUN_DOMAIN=mg.example.com
+MAILGUN_REGION=us        # optional: us (default) or eu
 ```
 
 ---
@@ -300,6 +318,34 @@ TIERDE_FROM_EMAIL=dev@example.com \
   --props '{"name":"Alice","loginUrl":"https://example.com"}'
 # exits 0 = LocalStack accepted the call
 ```
+
+---
+
+## Retry / backoff
+
+`createMailer` retries transient HTTP errors with exponential backoff. Disabled by default (`maxRetries: 0`).
+
+```ts
+const mailer = createMailer({
+  provider: resend({ apiKey: '...' }),
+  from: 'hello@example.com',
+  maxRetries: 3,              // max attempts after the first failure
+  initialRetryDelayMs: 500,   // first retry after 500 ms; doubles each attempt
+});
+```
+
+Default retry predicate retries HTTP 429 (rate-limited), 502, 503, 504 responses. Override with `retryOn`:
+
+```ts
+const mailer = createMailer({
+  provider: sendgrid({ apiKey: '...' }),
+  from: 'hello@example.com',
+  maxRetries: 2,
+  retryOn: (err) => err instanceof Error && err.message.includes('429'),
+});
+```
+
+In failover mode, each provider is retried independently before the next failover target is tried.
 
 ---
 
@@ -666,6 +712,7 @@ import {
   RegistrationConfirmation, EmailChangeVerification, PhoneVerification,
   ProfileUpdated, PasswordChangedConfirmation, LoginActivity,
   DataExportRequest, AccountDeletionConfirmation, NewsletterConfirmation,
+  AppointmentReminder, EventInvitation, ApiKeyCreated, GiftCard,
 } from '@yedoma-labs/tierde-mail/templates';
 ```
 
@@ -713,6 +760,10 @@ All templates accept `theme?: Theme`, `locale?: string`, `dir?: 'ltr' | 'rtl'`, 
 | `DataExportRequest` | `name`, `event`, `actionUrl` |
 | `AccountDeletionConfirmation` | `name`, `event` |
 | `NewsletterConfirmation` | `email`, `confirmUrl` |
+| `AppointmentReminder` | `name`, `providerName`, `appointmentDate`, `appointmentTime` |
+| `EventInvitation` | `name`, `eventName`, `eventDate`, `eventTime`, `registerUrl` |
+| `ApiKeyCreated` | `keyName`, `event` (`created`\|`revoked`\|`expiring`), `manageUrl` |
+| `GiftCard` | `recipientName`, `senderName`, `amount`, `code`, `redeemUrl` |
 | `Notification` | `title`, `body` |
 
 ### String overrides (i18n)
@@ -742,7 +793,7 @@ await mailer.send(Welcome, {
 
 ### `tierde dev`
 
-Start the preview server with all 41 built-in templates and sample data:
+Start the preview server with all 45 built-in templates and sample data:
 
 ```bash
 npx tierde dev
@@ -855,12 +906,13 @@ await mailer.sendBatch(NewsletterEmail, {
 
 ## Webhooks
 
-Verify and parse inbound event payloads from Resend and Postmark:
+Verify and parse inbound event payloads from Resend, Postmark, and SendGrid:
 
 ```ts
 import {
   createResendWebhookHandler,
   createPostmarkWebhookHandler,
+  createSendGridWebhookHandler,
 } from '@yedoma-labs/tierde-mail/webhooks';
 
 // Resend (Svix HMAC-SHA256)
@@ -869,14 +921,21 @@ const resendWebhooks = createResendWebhookHandler({ secret: process.env.RESEND_W
 // Postmark (HMAC-SHA256)
 const postmarkWebhooks = createPostmarkWebhookHandler({ token: process.env.POSTMARK_WEBHOOK_TOKEN! });
 
-// In your HTTP handler:
+// SendGrid (ECDSA P-256) — public key from SendGrid Dashboard → Settings → Mail Settings → Event Webhook
+const sendgridWebhooks = createSendGridWebhookHandler({ publicKey: process.env.SENDGRID_WEBHOOK_PUBLIC_KEY! });
+
+// In your HTTP handler (use express.raw() / Next.js route with { bodyParser: false }):
 const event = resendWebhooks.verify(rawBody, req.headers);
 // event.type: 'email.sent' | 'email.delivered' | 'email.bounced' | ...
 // event.email: { id, to[], from, subject, timestamp }
 // event.raw: original payload
+
+// SendGrid delivers events as a batch array — use verifyBatch() to get all events:
+const events = sendgridWebhooks.verifyBatch(rawBody, req.headers);
+for (const event of events) { ... }
 ```
 
-`WebhookVerificationError` is thrown on invalid signature or expired timestamp. Resend uses a ±300 second tolerance by default (configurable via `toleranceSeconds`).
+`WebhookVerificationError` is thrown on invalid signature or expired timestamp. Default tolerance is 300 seconds (configurable via `toleranceSeconds`).
 
 ---
 

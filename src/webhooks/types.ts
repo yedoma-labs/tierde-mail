@@ -20,7 +20,7 @@ export interface WebhookEmail {
 
 export interface WebhookEvent {
   type: WebhookEventType;
-  provider: 'resend' | 'postmark';
+  provider: 'resend' | 'postmark' | 'sendgrid' | 'mailgun';
   email: WebhookEmail;
   /** Original parsed payload — use for provider-specific fields */
   raw: unknown;

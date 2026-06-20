@@ -46,6 +46,10 @@ import LoginActivityRaw from '../src/templates/LoginActivity.tsx?raw';
 import DataExportRequestRaw from '../src/templates/DataExportRequest.tsx?raw';
 import AccountDeletionConfirmationRaw from '../src/templates/AccountDeletionConfirmation.tsx?raw';
 import NewsletterConfirmationRaw from '../src/templates/NewsletterConfirmation.tsx?raw';
+import AppointmentReminderRaw from '../src/templates/AppointmentReminder.tsx?raw';
+import EventInvitationRaw from '../src/templates/EventInvitation.tsx?raw';
+import ApiKeyCreatedRaw from '../src/templates/ApiKeyCreated.tsx?raw';
+import GiftCardRaw from '../src/templates/GiftCard.tsx?raw';
 
 const TEMPLATES: Record<string, string> = {
   welcome: WelcomeRaw,
@@ -89,6 +93,10 @@ const TEMPLATES: Record<string, string> = {
   'data-export-request': DataExportRequestRaw,
   'account-deletion-confirmation': AccountDeletionConfirmationRaw,
   'newsletter-confirmation': NewsletterConfirmationRaw,
+  'appointment-reminder': AppointmentReminderRaw,
+  'event-invitation': EventInvitationRaw,
+  'api-key-created': ApiKeyCreatedRaw,
+  'gift-card': GiftCardRaw,
 };
 
 /**

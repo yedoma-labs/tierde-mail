@@ -473,3 +473,86 @@ describe('ses provider', () => {
     expect(result.id).toMatch(/^ses-/);
   });
 });
+
+// ─── Mailgun ───────────────────────────────────────────────────────────────
+
+describe('mailgun provider', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn());
+  });
+
+  it('sends POST to v3/{domain}/messages with Basic auth', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ id: '<mg.123@mg.example.com>' }),
+    } as Response);
+
+    const { mailgun } = await import('../providers/mailgun.js');
+    const result = await mailgun({ apiKey: 'key-abc', domain: 'mg.example.com' }).send(baseMessage);
+
+    const [url, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
+    expect(url).toBe('https://api.mailgun.net/v3/mg.example.com/messages');
+    const auth = (init.headers as Record<string, string>)['Authorization'] ?? '';
+    expect(auth).toMatch(/^Basic /);
+    const decoded = Buffer.from(auth.slice('Basic '.length), 'base64').toString();
+    expect(decoded).toBe('api:key-abc');
+    expect(result).toEqual({ id: 'mg.123@mg.example.com', provider: 'mailgun' });
+  });
+
+  it('uses EU base URL when region is eu', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ id: 'eu-msg' }),
+    } as Response);
+
+    const { mailgun } = await import('../providers/mailgun.js');
+    await mailgun({ apiKey: 'k', domain: 'd.eu', region: 'eu' }).send(baseMessage);
+
+    const [url] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
+    expect(url).toMatch(/api\.eu\.mailgun\.net/);
+  });
+
+  it('uses custom baseUrl', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ id: 'x' }),
+    } as Response);
+
+    const { mailgun } = await import('../providers/mailgun.js');
+    await mailgun({ apiKey: 'k', domain: 'd', baseUrl: 'http://localhost:8080' }).send(baseMessage);
+
+    const [url] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
+    expect(url).toBe('http://localhost:8080/v3/d/messages');
+  });
+
+  it('sends FormData body', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ id: 'y' }),
+    } as Response);
+
+    const { mailgun } = await import('../providers/mailgun.js');
+    await mailgun({ apiKey: 'k', domain: 'd' }).send(baseMessage);
+
+    const [, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
+    expect(init.body).toBeInstanceOf(FormData);
+  });
+
+  it('throws on non-ok response', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: false,
+      status: 401,
+      text: async () => 'Unauthorized',
+    } as Response);
+
+    const { mailgun } = await import('../providers/mailgun.js');
+    await expect(mailgun({ apiKey: 'bad', domain: 'd' }).send(baseMessage)).rejects.toThrow(
+      'Mailgun API error 401',
+    );
+  });
+
+  it('returns provider name mailgun', async () => {
+    const { mailgun } = await import('../providers/mailgun.js');
+    expect(mailgun({ apiKey: 'k', domain: 'd' }).name).toBe('mailgun');
+  });
+});

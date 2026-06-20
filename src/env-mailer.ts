@@ -1,5 +1,6 @@
 import { createEnv, eg } from '@yedoma-labs/bylyt-env-guard';
 import { createMailer } from './mailer.js';
+import { mailgun } from './providers/mailgun.js';
 import { mailpit } from './providers/mailpit.js';
 import { postmark } from './providers/postmark.js';
 import { resend } from './providers/resend.js';
@@ -12,7 +13,7 @@ import type { Mailer } from './types.js';
  * Creates a Mailer from environment variables.
  *
  * Required:
- *   TIERDE_PROVIDER   resend | smtp | ses | sendgrid | postmark | mailpit
+ *   TIERDE_PROVIDER   resend | smtp | ses | sendgrid | postmark | mailgun | mailpit
  *   TIERDE_FROM_EMAIL sender address
  *
  * Optional:
@@ -25,6 +26,8 @@ import type { Mailer } from './types.js';
  *             AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY (optional, for mock/explicit creds)
  *   sendgrid: SENDGRID_API_KEY, SENDGRID_BASE_URL (optional, e.g. http://localhost:8080 for WireMock)
  *   postmark: POSTMARK_SERVER_TOKEN, POSTMARK_BASE_URL (optional, e.g. http://localhost:8080 for WireMock)
+ *   mailgun:  MAILGUN_API_KEY, MAILGUN_DOMAIN, MAILGUN_REGION (optional: us|eu, default us),
+ *             MAILGUN_BASE_URL (optional, e.g. http://localhost:8080 for WireMock)
  *   mailpit:  MAILPIT_HOST (default localhost), MAILPIT_PORT (default 1025)
  */
 export function createMailerFromEnv(): Mailer {
@@ -36,6 +39,7 @@ export function createMailerFromEnv(): Mailer {
         'ses',
         'sendgrid',
         'postmark',
+        'mailgun',
         'mailpit',
       ] as const),
       TIERDE_FROM_EMAIL: eg.string().required(),
@@ -66,6 +70,12 @@ export function createMailerFromEnv(): Mailer {
       // postmark
       POSTMARK_SERVER_TOKEN: eg.string().sensitive().optional(),
       POSTMARK_BASE_URL: eg.string().optional(),
+
+      // mailgun
+      MAILGUN_API_KEY: eg.string().sensitive().optional(),
+      MAILGUN_DOMAIN: eg.string().optional(),
+      MAILGUN_REGION: eg.enum(['us', 'eu'] as const).optional(),
+      MAILGUN_BASE_URL: eg.string().optional(),
 
       // mailpit / mailhog
       MAILPIT_HOST: eg.string().default('localhost'),
@@ -145,6 +155,19 @@ export function createMailerFromEnv(): Mailer {
         provider: postmark({
           serverToken: env.POSTMARK_SERVER_TOKEN,
           ...(env.POSTMARK_BASE_URL ? { baseUrl: env.POSTMARK_BASE_URL } : {}),
+        }),
+        from,
+      });
+    }
+    case 'mailgun': {
+      if (!env.MAILGUN_API_KEY) throw new Error('MAILGUN_API_KEY is required for mailgun provider');
+      if (!env.MAILGUN_DOMAIN) throw new Error('MAILGUN_DOMAIN is required for mailgun provider');
+      return createMailer({
+        provider: mailgun({
+          apiKey: env.MAILGUN_API_KEY,
+          domain: env.MAILGUN_DOMAIN,
+          ...(env.MAILGUN_REGION ? { region: env.MAILGUN_REGION } : {}),
+          ...(env.MAILGUN_BASE_URL ? { baseUrl: env.MAILGUN_BASE_URL } : {}),
         }),
         from,
       });

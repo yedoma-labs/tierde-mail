@@ -1,8 +1,9 @@
-import { createHmac } from 'node:crypto';
+import { createHmac, createSign, generateKeyPairSync } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import {
   createPostmarkWebhookHandler,
   createResendWebhookHandler,
+  createSendGridWebhookHandler,
   WebhookVerificationError,
 } from '../webhooks/index.js';
 
@@ -178,5 +179,136 @@ describe('createPostmarkWebhookHandler', () => {
     } catch (e) {
       expect((e as Error).name).toBe('WebhookVerificationError');
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// SendGrid helpers
+// ---------------------------------------------------------------------------
+const { privateKey: sgPrivateKey, publicKey: sgPublicKey } = generateKeyPairSync('ec', {
+  namedCurve: 'P-256',
+});
+const SENDGRID_PUBLIC_KEY = sgPublicKey
+  .export({ type: 'spki', format: 'der' })
+  .toString('base64');
+
+function sgSign(body: string, ts: string): string {
+  const sign = createSign('SHA256');
+  sign.update(ts);
+  sign.update(body);
+  return sign.sign(sgPrivateKey, 'base64');
+}
+
+function sgHeaders(body: string, timestamp?: string) {
+  const ts = timestamp ?? String(Math.floor(Date.now() / 1000));
+  return {
+    'X-Twilio-Email-Event-Webhook-Timestamp': ts,
+    'X-Twilio-Email-Event-Webhook-Signature': sgSign(body, ts),
+  };
+}
+
+const sgDeliveryPayload = JSON.stringify([
+  {
+    event: 'delivered',
+    email: 'recipient@example.com',
+    sg_message_id: 'sg.abc.def',
+    subject: 'Hello',
+    timestamp: 1718539200,
+  },
+]);
+
+const sgBouncePayload = JSON.stringify([
+  { event: 'bounce', email: 'bad@example.com', sg_message_id: 'sg.bounce.1', timestamp: 1718539200 },
+  { event: 'spamreport', email: 'spam@example.com', sg_message_id: 'sg.spam.1', timestamp: 1718539201 },
+]);
+
+// ---------------------------------------------------------------------------
+// SendGrid tests
+// ---------------------------------------------------------------------------
+describe('createSendGridWebhookHandler', () => {
+  it('verifies valid ECDSA signature and returns first event', () => {
+    const handler = createSendGridWebhookHandler({ publicKey: SENDGRID_PUBLIC_KEY });
+    const event = handler.verify(sgDeliveryPayload, sgHeaders(sgDeliveryPayload));
+
+    expect(event.provider).toBe('sendgrid');
+    expect(event.type).toBe('email.delivered');
+    expect(event.email.to).toEqual(['recipient@example.com']);
+    expect(event.email.id).toBe('sg.abc.def');
+    expect(event.email.subject).toBe('Hello');
+    expect(event.email.timestamp).toBe('2024-06-16T12:00:00.000Z');
+  });
+
+  it('verifyBatch returns all events', () => {
+    const handler = createSendGridWebhookHandler({ publicKey: SENDGRID_PUBLIC_KEY });
+    const events = handler.verifyBatch(sgBouncePayload, sgHeaders(sgBouncePayload));
+
+    expect(events).toHaveLength(2);
+    expect(events[0]?.type).toBe('email.bounced');
+    expect(events[1]?.type).toBe('email.complained');
+  });
+
+  it('maps all known event types', () => {
+    const handler = createSendGridWebhookHandler({ publicKey: SENDGRID_PUBLIC_KEY });
+
+    const typeMap: Record<string, string> = {
+      delivered: 'email.delivered',
+      bounce: 'email.bounced',
+      dropped: 'email.bounced',
+      deferred: 'email.delivery_delayed',
+      spamreport: 'email.complained',
+      unsubscribe: 'email.subscription_changed',
+      open: 'email.opened',
+      click: 'email.clicked',
+    };
+
+    for (const [sgEvent, expectedType] of Object.entries(typeMap)) {
+      const body = JSON.stringify([{ event: sgEvent, email: 'u@e.com', timestamp: 1718539200 }]);
+      const events = handler.verifyBatch(body, sgHeaders(body));
+      expect(events[0]?.type).toBe(expectedType);
+    }
+  });
+
+  it('accepts Buffer body', () => {
+    const handler = createSendGridWebhookHandler({ publicKey: SENDGRID_PUBLIC_KEY });
+    const buf = Buffer.from(sgDeliveryPayload);
+    const event = handler.verify(buf, sgHeaders(sgDeliveryPayload));
+    expect(event.provider).toBe('sendgrid');
+  });
+
+  it('accepts PEM public key directly', () => {
+    const pem = sgPublicKey.export({ type: 'spki', format: 'pem' }) as string;
+    const handler = createSendGridWebhookHandler({ publicKey: pem });
+    const event = handler.verify(sgDeliveryPayload, sgHeaders(sgDeliveryPayload));
+    expect(event.type).toBe('email.delivered');
+  });
+
+  it('throws WebhookVerificationError on invalid signature', () => {
+    const handler = createSendGridWebhookHandler({ publicKey: SENDGRID_PUBLIC_KEY });
+    const headers = {
+      ...sgHeaders(sgDeliveryPayload),
+      'X-Twilio-Email-Event-Webhook-Signature': 'invalidsig==',
+    };
+    expect(() => handler.verify(sgDeliveryPayload, headers)).toThrow(WebhookVerificationError);
+  });
+
+  it('throws on missing headers', () => {
+    const handler = createSendGridWebhookHandler({ publicKey: SENDGRID_PUBLIC_KEY });
+    expect(() => handler.verify(sgDeliveryPayload, {})).toThrow(WebhookVerificationError);
+  });
+
+  it('throws on expired timestamp', () => {
+    const handler = createSendGridWebhookHandler({
+      publicKey: SENDGRID_PUBLIC_KEY,
+      toleranceSeconds: 60,
+    });
+    const oldTs = String(Math.floor(Date.now() / 1000) - 120);
+    const headers = sgHeaders(sgDeliveryPayload, oldTs);
+    expect(() => handler.verify(sgDeliveryPayload, headers)).toThrow(WebhookVerificationError);
+  });
+
+  it('exposes raw payload', () => {
+    const handler = createSendGridWebhookHandler({ publicKey: SENDGRID_PUBLIC_KEY });
+    const event = handler.verify(sgDeliveryPayload, sgHeaders(sgDeliveryPayload));
+    expect((event.raw as Record<string, unknown>)['event']).toBe('delivered');
   });
 });

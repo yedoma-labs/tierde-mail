@@ -8,6 +8,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Added
+
+- **Mailgun provider** — `mailgun({ apiKey, domain, region?, baseUrl? })` sends via the Mailgun v3 REST API using FormData. Supports US (default) and EU regions, attachments, inline (CID) attachments, cc/bcc/replyTo, and custom headers. Available as `@yedoma-labs/tierde-mail/providers/mailgun`.
+- **`createMailerFromEnv()` supports `mailgun`** — set `TIERDE_PROVIDER=mailgun` with `MAILGUN_API_KEY`, `MAILGUN_DOMAIN`, and optional `MAILGUN_REGION` (`us`|`eu`) / `MAILGUN_BASE_URL`.
+- **SendGrid Event Webhook handler** — `createSendGridWebhookHandler({ publicKey })` verifies ECDSA P-256 signatures (`X-Twilio-Email-Event-Webhook-Timestamp` + `X-Twilio-Email-Event-Webhook-Signature`). Accepts raw base64 DER SPKI key or PEM string. `verify()` returns the first event; `verifyBatch()` returns all events in the batch. Both normalise to the shared `WebhookEvent` schema. Exported from `@yedoma-labs/tierde-mail/webhooks`.
+- **Retry / exponential backoff** — `createMailer` accepts `maxRetries?`, `initialRetryDelayMs?` (default 1 000 ms), and `retryOn?` on `MailerConfig`. Default predicate retries HTTP 429, 502, 503, 504 responses. Delay formula: `initialRetryDelayMs × 2ⁿ`. Each provider in failover mode retries independently before the next failover target is tried.
+- **New email templates** — `AppointmentReminder`, `EventInvitation`, `ApiKeyCreated`, `GiftCard` (see v0.5.0 for props). All four are included in `tierde eject`.
+
 ## [0.8.1] — 2026-06-20
 
 ### Added

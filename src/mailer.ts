@@ -22,12 +22,30 @@ function isMultiProvider(config: CreateMailerConfig): config is MultiProviderMai
   return 'providers' in config;
 }
 
+function extractHttpStatus(error: unknown): number | undefined {
+  if (!(error instanceof Error)) return undefined;
+  const match = error.message.match(/\serror\s(\d{3}):/i);
+  return match ? Number(match[1]) : undefined;
+}
+
+function defaultRetryOn(error: unknown): boolean {
+  const status = extractHttpStatus(error);
+  return status === 429 || status === 502 || status === 503 || status === 504;
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 class MailerImpl implements Mailer {
   readonly #from;
   readonly #defaultReplyTo;
   readonly #providers: EmailProvider[];
   readonly #strategy: 'failover' | 'round-robin';
   readonly #middleware: MailMiddleware[];
+  readonly #maxRetries: number;
+  readonly #initialRetryDelayMs: number;
+  readonly #retryOn: (error: unknown) => boolean;
   #roundRobinIndex = 0;
 
   constructor(config: CreateMailerConfig) {
@@ -36,6 +54,9 @@ class MailerImpl implements Mailer {
       ? normalizeAddress(config.defaultReplyTo)
       : undefined;
     this.#middleware = config.middleware ?? [];
+    this.#maxRetries = config.maxRetries ?? 0;
+    this.#initialRetryDelayMs = config.initialRetryDelayMs ?? 1000;
+    this.#retryOn = config.retryOn ?? defaultRetryOn;
 
     if (isMultiProvider(config)) {
       if (!config.providers || config.providers.length === 0) {
@@ -100,14 +121,14 @@ class MailerImpl implements Mailer {
       this.#roundRobinIndex++;
       const provider = this.#providers[idx];
       if (!provider) throw new Error('No provider available for round-robin slot');
-      return provider.send(message);
+      return this.#sendWithRetry(provider, message);
     }
 
-    // failover: try each provider in order
+    // failover: try each provider in order (with per-provider retry)
     let lastError: unknown;
     for (const provider of this.#providers) {
       try {
-        return await provider.send(message);
+        return await this.#sendWithRetry(provider, message);
       } catch (err) {
         lastError = err;
       }
@@ -125,6 +146,19 @@ class MailerImpl implements Mailer {
     );
   }
 
+  async #sendWithRetry(provider: EmailProvider, message: EmailMessage): Promise<SendResult> {
+    let attempt = 0;
+    while (true) {
+      try {
+        return await provider.send(message);
+      } catch (err) {
+        if (attempt >= this.#maxRetries || !this.#retryOn(err)) throw err;
+        await delay(this.#initialRetryDelayMs * Math.pow(2, attempt));
+        attempt++;
+      }
+    }
+  }
+
   async sendBatch<Props>(
     template: EmailTemplate<Props>,
     options: BatchSendOptions<Props>,
@@ -135,10 +169,6 @@ class MailerImpl implements Mailer {
   toString(): string {
     return `Mailer(providers=[${this.#providers.map((p) => p.name).join(', ')}])`;
   }
-}
-
-function delay(ms: number): Promise<void> {
-  return new Promise<void>((resolve) => setTimeout(resolve, ms));
 }
 
 function buildSendOptions<Props>(

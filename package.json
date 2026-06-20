@@ -19,6 +19,16 @@
         "default": "./dist/index.cjs"
       }
     },
+    "./providers/mailgun": {
+      "import": {
+        "types": "./dist/providers/mailgun.d.ts",
+        "default": "./dist/providers/mailgun.js"
+      },
+      "require": {
+        "types": "./dist/providers/mailgun.d.cts",
+        "default": "./dist/providers/mailgun.cjs"
+      }
+    },
     "./providers/resend": {
       "import": {
         "types": "./dist/providers/resend.d.ts",

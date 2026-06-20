@@ -70,6 +70,15 @@ export interface MailerConfig {
   from: EmailAddressInput;
   defaultReplyTo?: EmailAddressInput;
   middleware?: MailMiddleware[];
+  /**
+   * Max number of retry attempts per provider on retryable errors (429, 502, 503, 504).
+   * Default: 0 (no retries). Retries use exponential backoff starting at `initialRetryDelayMs`.
+   */
+  maxRetries?: number;
+  /** Initial delay in ms before the first retry. Doubles on each subsequent attempt. Default: 1000 */
+  initialRetryDelayMs?: number;
+  /** Override the default retry predicate. Receives the thrown error; return true to retry. */
+  retryOn?: (error: unknown) => boolean;
 }
 
 export interface SingleProviderMailerConfig extends MailerConfig {
