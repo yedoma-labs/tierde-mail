@@ -68,9 +68,9 @@ Three design decisions matter.
 
 **Props are typed end to end.** `defineEmail<Props>()` creates a branded type that ties the subject function, the component, and `mailer.send()` together. The type parameter flows through all call sites: if you pass `{ name: 'Alice' }` to `mailer.send()` but the template expects `{ name, loginUrl }`, TypeScript fails at build time, not inbox time. This catches 90% of template bugs before they ship.
 
-**Providers implement one interface.** Every provider (Resend, SMTP, SES, SendGrid, Postmark, Mailpit) conforms to the same contract: a function returning `{ name: string; send(message: EmailMessage): Promise<SendResult> }`. The mailer only knows that interface. Swapping providers is a one-line change. Failover and round-robin strategies wrap multiple providers, so you can fail over to SMTP if Resend is down.
+**Providers implement one interface.** Every provider — Resend, SMTP, SES, SendGrid, Postmark, Mailgun, Brevo, MailerSend, SparkPost, Mandrill, Mailpit — conforms to the same contract: a function returning `{ name: string; send(message: EmailMessage): Promise<SendResult> }`. The mailer only knows that interface. Swapping providers is a one-line change. Failover and round-robin strategies wrap multiple providers, so you can fail over to SMTP if Resend is down.
 
-**Theme context for consistency.** Theme values (colors, radius, fonts, spacing) flow through React context via `<ThemeProvider>`. One `createTheme()` call restyles every email component at render time, so a rebrand means updating theme, not 41 templates.
+**Theme context for consistency.** Theme values (colors, radius, fonts, spacing) flow through React context via `<ThemeProvider>`. One `createTheme()` call restyles every email component at render time, so a rebrand means updating theme, not 45 templates.
 
 ### Render pipeline
 
@@ -91,62 +91,36 @@ Under the hood, the render phase is synchronous - no network I/O. Providers hand
 **Where to get it:**
 - npm: [`@yedoma-labs/tierde-mail`](https://www.npmjs.com/package/@yedoma-labs/tierde-mail)
 - GitHub: [`yedoma-labs/tierde-mail`](https://github.com/yedoma-labs/tierde-mail)
-- Latest version: 0.8.1
+- Latest version: 0.9.0
 
 **Install core + peer dependencies:**
 
+Most providers (Resend, SendGrid, Postmark, Mailgun, Brevo, MailerSend, SparkPost, Mandrill) use native `fetch` — no extra peer dependencies. Only three providers need additional packages:
+
 With **pnpm** (recommended):
 ```bash
-# Minimum (uses built-in test provider)
+# Core + all HTTP providers (Resend, SendGrid, Postmark, Mailgun, Brevo, MailerSend, SparkPost, Mandrill)
 pnpm add @yedoma-labs/tierde-mail react react-dom
 
-# + Resend (the easy way for SaaS)
-pnpm add @yedoma-labs/tierde-mail react react-dom resend
-
-# + SMTP (self-hosted, most control)
+# + SMTP / Mailpit (self-hosted, most control)
 pnpm add @yedoma-labs/tierde-mail react react-dom nodemailer
 
 # + AWS SES (high volume, lowest cost)
 pnpm add @yedoma-labs/tierde-mail react react-dom @aws-sdk/client-ses
 
-# + Postmark (excellent docs, good for transactional)
+# + Postmark (uses the official Postmark SDK)
 pnpm add @yedoma-labs/tierde-mail react react-dom postmark
-
-# + SendGrid
-pnpm add @yedoma-labs/tierde-mail react react-dom @sendgrid/mail
 ```
 
 Or with **npm**:
 ```bash
 npm install @yedoma-labs/tierde-mail react react-dom
-npm install @yedoma-labs/tierde-mail react react-dom resend
 npm install @yedoma-labs/tierde-mail react react-dom nodemailer
 npm install @yedoma-labs/tierde-mail react react-dom @aws-sdk/client-ses
 npm install @yedoma-labs/tierde-mail react react-dom postmark
-npm install @yedoma-labs/tierde-mail react react-dom @sendgrid/mail
 ```
 
-Or with **yarn**:
-```bash
-yarn add @yedoma-labs/tierde-mail react react-dom
-yarn add @yedoma-labs/tierde-mail react react-dom resend
-yarn add @yedoma-labs/tierde-mail react react-dom nodemailer
-yarn add @yedoma-labs/tierde-mail react react-dom @aws-sdk/client-ses
-yarn add @yedoma-labs/tierde-mail react react-dom postmark
-yarn add @yedoma-labs/tierde-mail react react-dom @sendgrid/mail
-```
-
-Or with **bun**:
-```bash
-bun add @yedoma-labs/tierde-mail react react-dom
-bun add @yedoma-labs/tierde-mail react react-dom resend
-bun add @yedoma-labs/tierde-mail react react-dom nodemailer
-bun add @yedoma-labs/tierde-mail react react-dom @aws-sdk/client-ses
-bun add @yedoma-labs/tierde-mail react react-dom postmark
-bun add @yedoma-labs/tierde-mail react react-dom @sendgrid/mail
-```
-
-**Node version:** Node 20+. TypeScript 5.0+ recommended (strict mode works).
+**Node version:** Node 22+. TypeScript 5.0+ recommended (strict mode works).
 
 ## Getting started
 
@@ -182,7 +156,7 @@ For local development without real credentials, see **Local testing with Docker*
 
 ## Usage examples
 
-**1. Preview every built-in template in the browser.** 41 ready-made templates ship with the package. Start the preview server with sample data:
+**1. Preview every built-in template in the browser.** 45 ready-made templates ship with the package. Start the preview server with sample data:
 
 ```bash
 npx tierde dev --port 3000
@@ -190,7 +164,7 @@ npx tierde dev --port 3000
 
 ```
 tierde dev → http://localhost:3000
-  41 templates loaded · dark-mode toggle · compare view · live reload
+  45 templates loaded · dark-mode toggle · compare view · live reload
 ```
 
 Open it, flip dark mode, resize to 375px to check mobile. No boilerplate.
@@ -272,7 +246,7 @@ Services and ports:
 | Service | Port | Purpose |
 |---------|------|---------|
 | Mailpit | `1025` (SMTP), `8025` (UI) | Catches all mail; browse at http://localhost:8025 |
-| WireMock | `8080` | HTTP stubs for Resend, SendGrid, Postmark |
+| WireMock | `8080` | HTTP stubs for all HTTP providers (Resend, SendGrid, Postmark, Mailgun, Brevo, MailerSend, SparkPost, Mandrill) |
 | LocalStack | `4566` | SES-compatible AWS endpoint |
 
 The LocalStack container auto-verifies your sender address on startup via the bundled `scripts/localstack/init-ses.sh` ready-hook — no manual `aws ses verify-email-identity` step.
@@ -338,6 +312,70 @@ const mailer = createMailer({
 // WireMock stubs POST /email → 200
 ```
 
+**Mailgun → WireMock**
+
+```ts
+import { mailgun } from '@yedoma-labs/tierde-mail/providers/mailgun';
+
+const mailer = createMailer({
+  provider: mailgun({
+    apiKey: 'test-key',
+    domain: 'mg.example.com',
+    baseUrl: 'http://localhost:8080',
+  }),
+  from: 'hello@example.com',
+});
+// WireMock stubs POST /v3/mg.example.com/messages → 200
+```
+
+**Brevo → WireMock**
+
+```ts
+import { brevo } from '@yedoma-labs/tierde-mail/providers/brevo';
+
+const mailer = createMailer({
+  provider: brevo({ apiKey: 'test-key', baseUrl: 'http://localhost:8080' }),
+  from: 'hello@example.com',
+});
+// WireMock stubs POST /v3/smtp/email → 201
+```
+
+**MailerSend → WireMock**
+
+```ts
+import { mailersend } from '@yedoma-labs/tierde-mail/providers/mailersend';
+
+const mailer = createMailer({
+  provider: mailersend({ apiToken: 'test-token', baseUrl: 'http://localhost:8080' }),
+  from: 'hello@example.com',
+});
+// WireMock stubs POST /v1/email → 202
+```
+
+**SparkPost → WireMock**
+
+```ts
+import { sparkpost } from '@yedoma-labs/tierde-mail/providers/sparkpost';
+
+const mailer = createMailer({
+  provider: sparkpost({ apiKey: 'test-key', baseUrl: 'http://localhost:8080' }),
+  from: 'hello@example.com',
+});
+// WireMock stubs POST /api/v1/transmissions → 200
+```
+
+**Mandrill → WireMock**
+
+```ts
+import { mandrill } from '@yedoma-labs/tierde-mail/providers/mandrill';
+
+const mailer = createMailer({
+  provider: mandrill({ apiKey: 'test-key', baseUrl: 'http://localhost:8080' }),
+  from: 'hello@example.com',
+});
+// WireMock stubs POST /api/1.0/messages/send → 200
+```
+
 **SES → LocalStack**
 
 ```ts
@@ -386,6 +424,32 @@ TIERDE_PROVIDER=postmark
 POSTMARK_SERVER_TOKEN=test-token
 POSTMARK_BASE_URL=http://localhost:8080
 
+# Mailgun → WireMock
+TIERDE_PROVIDER=mailgun
+MAILGUN_API_KEY=test-key
+MAILGUN_DOMAIN=mg.example.com
+MAILGUN_BASE_URL=http://localhost:8080
+
+# Brevo → WireMock
+TIERDE_PROVIDER=brevo
+BREVO_API_KEY=test-key
+BREVO_BASE_URL=http://localhost:8080
+
+# MailerSend → WireMock
+TIERDE_PROVIDER=mailersend
+MAILERSEND_API_TOKEN=test-token
+MAILERSEND_BASE_URL=http://localhost:8080
+
+# SparkPost → WireMock
+TIERDE_PROVIDER=sparkpost
+SPARKPOST_API_KEY=test-key
+SPARKPOST_BASE_URL=http://localhost:8080
+
+# Mandrill → WireMock
+TIERDE_PROVIDER=mandrill
+MANDRILL_API_KEY=test-key
+MANDRILL_BASE_URL=http://localhost:8080
+
 # SES → LocalStack
 TIERDE_PROVIDER=ses
 SES_REGION=us-east-1
@@ -431,6 +495,32 @@ const mailer = createMailer({
 ```
 
 Or use `mailpit()` if you want to read the email in a browser rather than assert on a mock response.
+
+### Retry / exponential backoff
+
+Transient failures (rate limits, intermittent 5xx) are retried automatically with exponential backoff. Disabled by default — enable per mailer:
+
+```ts
+const mailer = createMailer({
+  provider: resend({ apiKey: '...' }),
+  from: 'hello@example.com',
+  maxRetries: 3,             // retry up to 3 times after the first failure
+  initialRetryDelayMs: 500,  // first retry after 500ms, then 1s, 2s
+});
+```
+
+Default predicate retries HTTP 429 (rate-limited), 502, 503, and 504. Override with `retryOn`:
+
+```ts
+const mailer = createMailer({
+  provider: sendgrid({ apiKey: '...' }),
+  from: 'hello@example.com',
+  maxRetries: 2,
+  retryOn: (err) => err instanceof Error && err.message.includes('503'),
+});
+```
+
+In failover mode each provider is retried independently before the next failover target is tried.
 
 ### Multi-provider failover
 
@@ -638,7 +728,7 @@ console.log(html); // Full rendered email - paste into email client to preview
 - [ ] **Test email rendering.** Run `npx tierde dev` and preview every email variant in dark mode.
 - [ ] **Local mock smoke test.** Run `docker compose up -d` and fire `npx tierde send` against WireMock/LocalStack before touching real credentials.
 - [ ] **`SES_ENDPOINT` guard.** If using SES locally, always set `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY`; `createMailerFromEnv` will throw if you forget.
-- [ ] **Webhook handlers.** Set up bounce/complaint/delivery handlers for Resend/Postmark to clean your list.
+- [ ] **Webhook handlers.** Set up bounce/complaint/delivery handlers for Resend, Postmark, SendGrid, and Mailgun to clean your list. All four have built-in webhook verification via `@yedoma-labs/tierde-mail/webhooks`.
 - [ ] **Rate limits.** If batch-sending, honor provider limits (Resend: 100/sec free tier, SES: 14 per second base).
 - [ ] **Monitoring.** Log `result.id` for every send; wire that to observability (Sentry, DataDog) for delivery tracking.
 - [ ] **Unsubscribe footer.** GDPR/CAN-SPAM requires unsubscribe link. `<Footer unsubscribeUrl={...} />` handles it.
@@ -649,17 +739,17 @@ console.log(html); // Full rendered email - paste into email client to preview
 - **Docs**: See `README.md` in the repo for full API reference, all providers, and examples.
 - **GitHub**: [`yedoma-labs/tierde-mail`](https://github.com/yedoma-labs/tierde-mail) - open issues, contribute templates.
 - **npm**: [`@yedoma-labs/tierde-mail`](https://www.npmjs.com/package/@yedoma-labs/tierde-mail) - version history, package info.
-- **Built-in templates**: Run `npx tierde list` to see all 41 ready-made templates. Eject any with `npx tierde eject welcome --output src/emails/`.
+- **Built-in templates**: Run `npx tierde list` to see all 45 ready-made templates. Eject any with `npx tierde eject welcome --output src/emails/`.
 - **TypeScript types**: Full type definitions ship with the package; autocomplete works in VS Code/JetBrains.
 
 ## Closing
 
-`tierde-mail` exists because email rendering and email delivery should be two separate concerns, and neither should require hand-maintained table HTML. The 41 built-in templates are WCAG AA contrast-checked in CI and you can `tierde eject` any of them into your repo to own the source.
+`tierde-mail` exists because email rendering and email delivery should be two separate concerns, and neither should require hand-maintained table HTML. The 45 built-in templates are WCAG AA contrast-checked in CI and you can `tierde eject` any of them into your repo to own the source.
 
 **Limitations to know:**
 - Node-only (server-side render needs Node; no edge runtime rendering yet, but delivery can be edge-triggered).
 - React 19 is a hard peer dependency (controls your version independently).
-- Webhook verification covers Resend and Postmark; SMTP, SES, SendGrid, and `nodemailer` are optional peers you install yourself.
+- Webhook verification covers Resend, Postmark, SendGrid, and Mailgun; SMTP, SES, and `nodemailer` are optional peers you install yourself.
 - CSS support is email-safe subset (no flexbox, limited grid); table-based layouts are automatic.
 - Plain-text fallback is auto-derived; customize with `textFallback` option if needed.
 
