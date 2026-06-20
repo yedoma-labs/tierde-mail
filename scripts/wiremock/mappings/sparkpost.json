@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/api/v1/transmissions"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "results": {
+        "id": "wiremock-sparkpost-transmission-id",
+        "total_accepted_recipients": 1,
+        "total_rejected_recipients": 0
+      }
+    }
+  }
+}

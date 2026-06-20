@@ -1,0 +1,11 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPattern": "/v3/.+/messages"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": { "id": "<wiremock-mailgun-message-id@mg.example.com>", "message": "Queued. Thank you." }
+  }
+}

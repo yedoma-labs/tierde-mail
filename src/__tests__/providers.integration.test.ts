@@ -12,15 +12,22 @@
  *   TIERDE_TEST_FROM   verified sender address
  *   TIERDE_TEST_TO     recipient address (use a sandbox / catch-all)
  *
- * Per-provider:
- *   resend:    RESEND_API_KEY
- *   sendgrid:  SENDGRID_API_KEY
- *   postmark:  POSTMARK_SERVER_TOKEN
- *   smtp:      SMTP_HOST (+ optional SMTP_PORT, SMTP_USER, SMTP_PASS)
- *   mailpit:   TIERDE_TEST_MAILPIT=true  (assumes localhost:1025)
- *   ses:       SES_REGION or AWS_REGION
- *              (SES does not support attachments via SendEmailCommand —
- *               attachment / CID tests are skipped for SES)
+ * Per-provider (real API):
+ *   resend:      RESEND_API_KEY
+ *   sendgrid:    SENDGRID_API_KEY
+ *   postmark:    POSTMARK_SERVER_TOKEN
+ *   smtp:        SMTP_HOST (+ optional SMTP_PORT, SMTP_USER, SMTP_PASS)
+ *   mailpit:     TIERDE_TEST_MAILPIT=true  (assumes localhost:1025)
+ *   ses:         SES_REGION or AWS_REGION (no attachment/CID support)
+ *   mailgun:     MAILGUN_API_KEY + MAILGUN_DOMAIN (+ optional MAILGUN_REGION=eu)
+ *   brevo:       BREVO_API_KEY
+ *   mailersend:  MAILERSEND_API_TOKEN
+ *   sparkpost:   SPARKPOST_API_KEY (paid only — use WireMock for free)
+ *   mandrill:    MANDRILL_API_KEY  (paid only — use WireMock for free)
+ *
+ * WireMock (docker compose up -d → localhost:8080):
+ *   TIERDE_TEST_WIREMOCK=true  runs mock suites for all HTTP providers
+ *   WIREMOCK_URL=http://localhost:8080  (default)
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -415,6 +422,509 @@ describe.skipIf(!hasBaseEnv() || !(process.env.SES_REGION ?? process.env.AWS_REG
         withExternalImage(testMessage('ses-img'), EXTERNAL_IMAGE_URL),
       );
       expect(result.provider).toBe('ses');
+      expect(result.id).toBeTruthy();
+    });
+  },
+);
+
+// ---------------------------------------------------------------------------
+// Mailgun — real API (free tier: 5k emails/mo)
+//   MAILGUN_API_KEY=key-...  MAILGUN_DOMAIN=mg.example.com
+// Mailgun via WireMock (docker compose up -d)
+//   TIERDE_TEST_WIREMOCK=true
+// ---------------------------------------------------------------------------
+describe.skipIf(!hasBaseEnv() || !process.env.MAILGUN_API_KEY)(
+  'mailgun provider (integration)',
+  () => {
+    async function mg() {
+      const { mailgun } = await import('../providers/mailgun.js');
+      return mailgun({
+        apiKey: process.env.MAILGUN_API_KEY!,
+        domain: process.env.MAILGUN_DOMAIN!,
+        ...(process.env.MAILGUN_REGION === 'eu' ? { region: 'eu' as const } : {}),
+      });
+    }
+
+    it('sends email and returns id', async () => {
+      const result = await (await mg()).send(testMessage('mailgun'));
+      expect(result.provider).toBe('mailgun');
+      expect(result.id).toBeTruthy();
+    });
+
+    it('sends email with PDF attachment', async () => {
+      const msg = withAttachment(testMessage('mailgun-attachment'), {
+        filename: 'report.pdf',
+        content: TINY_PDF,
+        contentType: 'application/pdf',
+      });
+      const result = await (await mg()).send(msg);
+      expect(result.provider).toBe('mailgun');
+      expect(result.id).toBeTruthy();
+    });
+
+    it('sends email with CID inline image', async () => {
+      const cid = 'logo@mailgun-ci';
+      const msg = withAttachment(
+        {
+          ...testMessage('mailgun-cid'),
+          html: `${baseMessage('mailgun-cid').html}\n<img src="cid:${cid}" alt="logo">`,
+        },
+        { filename: 'logo.png', content: SMOKETEST_PNG, contentType: 'image/png', cid },
+      );
+      const result = await (await mg()).send(msg);
+      expect(result.provider).toBe('mailgun');
+      expect(result.id).toBeTruthy();
+    });
+
+    it('sends email with external image src', async () => {
+      const result = await (await mg()).send(
+        withExternalImage(testMessage('mailgun-img'), EXTERNAL_IMAGE_URL),
+      );
+      expect(result.provider).toBe('mailgun');
+      expect(result.id).toBeTruthy();
+    });
+  },
+);
+
+describe.skipIf(!hasBaseEnv() || !process.env.TIERDE_TEST_WIREMOCK)(
+  'mailgun provider (WireMock)',
+  () => {
+    const WIREMOCK = process.env.WIREMOCK_URL ?? 'http://localhost:8080';
+
+    it('sends via WireMock and returns stubbed id', async () => {
+      const { mailgun } = await import('../providers/mailgun.js');
+      const result = await mailgun({
+        apiKey: 'test',
+        domain: 'mg.example.com',
+        baseUrl: WIREMOCK,
+      }).send(testMessage('mailgun-wiremock'));
+      expect(result.provider).toBe('mailgun');
+      expect(result.id).toContain('wiremock-mailgun');
+    });
+
+    it('sends with PDF attachment', async () => {
+      const { mailgun } = await import('../providers/mailgun.js');
+      const provider = mailgun({ apiKey: 'test', domain: 'mg.example.com', baseUrl: WIREMOCK });
+      const result = await provider.send(
+        withAttachment(testMessage('mailgun-wm-attach'), {
+          filename: 'doc.pdf',
+          content: TINY_PDF,
+          contentType: 'application/pdf',
+        }),
+      );
+      expect(result.provider).toBe('mailgun');
+      expect(result.id).toBeTruthy();
+    });
+
+    it('sends with CID inline image', async () => {
+      const { mailgun } = await import('../providers/mailgun.js');
+      const cid = 'logo@mailgun-wm';
+      const provider = mailgun({ apiKey: 'test', domain: 'mg.example.com', baseUrl: WIREMOCK });
+      const result = await provider.send(
+        withAttachment(
+          {
+            ...testMessage('mailgun-wm-cid'),
+            html: `${baseMessage('mailgun-wm-cid').html}\n<img src="cid:${cid}" alt="logo">`,
+          },
+          { filename: 'logo.png', content: SMOKETEST_PNG, contentType: 'image/png', cid },
+        ),
+      );
+      expect(result.provider).toBe('mailgun');
+      expect(result.id).toBeTruthy();
+    });
+  },
+);
+
+// ---------------------------------------------------------------------------
+// Brevo — real API (free tier: 300 emails/day)
+//   BREVO_API_KEY=xkeysib-...
+// Brevo via WireMock
+//   TIERDE_TEST_WIREMOCK=true
+// ---------------------------------------------------------------------------
+describe.skipIf(!hasBaseEnv() || !process.env.BREVO_API_KEY)('brevo provider (integration)', () => {
+  async function bp() {
+    const { brevo } = await import('../providers/brevo.js');
+    return brevo({ apiKey: process.env.BREVO_API_KEY! });
+  }
+
+  it('sends email and returns id', async () => {
+    const result = await (await bp()).send(testMessage('brevo'));
+    expect(result.provider).toBe('brevo');
+    expect(result.id).toBeTruthy();
+  });
+
+  it('sends email with PDF attachment', async () => {
+    const msg = withAttachment(testMessage('brevo-attachment'), {
+      filename: 'report.pdf',
+      content: TINY_PDF,
+      contentType: 'application/pdf',
+    });
+    const result = await (await bp()).send(msg);
+    expect(result.provider).toBe('brevo');
+    expect(result.id).toBeTruthy();
+  });
+
+  it('sends email with CID inline image', async () => {
+    const cid = 'logo@brevo-ci';
+    const msg = withAttachment(
+      {
+        ...testMessage('brevo-cid'),
+        html: `${baseMessage('brevo-cid').html}\n<img src="cid:${cid}" alt="logo">`,
+      },
+      { filename: 'logo.png', content: SMOKETEST_PNG, contentType: 'image/png', cid },
+    );
+    const result = await (await bp()).send(msg);
+    expect(result.provider).toBe('brevo');
+    expect(result.id).toBeTruthy();
+  });
+
+  it('sends email with external image src', async () => {
+    const result = await (await bp()).send(
+      withExternalImage(testMessage('brevo-img'), EXTERNAL_IMAGE_URL),
+    );
+    expect(result.provider).toBe('brevo');
+    expect(result.id).toBeTruthy();
+  });
+});
+
+describe.skipIf(!hasBaseEnv() || !process.env.TIERDE_TEST_WIREMOCK)(
+  'brevo provider (WireMock)',
+  () => {
+    const WIREMOCK = process.env.WIREMOCK_URL ?? 'http://localhost:8080';
+
+    it('sends via WireMock and returns stubbed id', async () => {
+      const { brevo } = await import('../providers/brevo.js');
+      const result = await brevo({ apiKey: 'test', baseUrl: WIREMOCK }).send(
+        testMessage('brevo-wiremock'),
+      );
+      expect(result.provider).toBe('brevo');
+      expect(result.id).toContain('wiremock-brevo');
+    });
+
+    it('sends with PDF attachment', async () => {
+      const { brevo } = await import('../providers/brevo.js');
+      const result = await brevo({ apiKey: 'test', baseUrl: WIREMOCK }).send(
+        withAttachment(testMessage('brevo-wm-attach'), {
+          filename: 'doc.pdf',
+          content: TINY_PDF,
+          contentType: 'application/pdf',
+        }),
+      );
+      expect(result.provider).toBe('brevo');
+      expect(result.id).toBeTruthy();
+    });
+
+    it('sends with CID inline image', async () => {
+      const { brevo } = await import('../providers/brevo.js');
+      const cid = 'logo@brevo-wm';
+      const result = await brevo({ apiKey: 'test', baseUrl: WIREMOCK }).send(
+        withAttachment(
+          {
+            ...testMessage('brevo-wm-cid'),
+            html: `${baseMessage('brevo-wm-cid').html}\n<img src="cid:${cid}" alt="logo">`,
+          },
+          { filename: 'logo.png', content: SMOKETEST_PNG, contentType: 'image/png', cid },
+        ),
+      );
+      expect(result.provider).toBe('brevo');
+      expect(result.id).toBeTruthy();
+    });
+  },
+);
+
+// ---------------------------------------------------------------------------
+// MailerSend — real API (free tier: 3k emails/mo)
+//   MAILERSEND_API_TOKEN=mlsn.abc...
+// MailerSend via WireMock
+//   TIERDE_TEST_WIREMOCK=true
+// ---------------------------------------------------------------------------
+describe.skipIf(!hasBaseEnv() || !process.env.MAILERSEND_API_TOKEN)(
+  'mailersend provider (integration)',
+  () => {
+    async function ms() {
+      const { mailersend } = await import('../providers/mailersend.js');
+      return mailersend({ apiToken: process.env.MAILERSEND_API_TOKEN! });
+    }
+
+    it('sends email and returns id', async () => {
+      const result = await (await ms()).send(testMessage('mailersend'));
+      expect(result.provider).toBe('mailersend');
+      expect(result.id).toBeTruthy();
+    });
+
+    it('sends email with PDF attachment', async () => {
+      const msg = withAttachment(testMessage('mailersend-attachment'), {
+        filename: 'report.pdf',
+        content: TINY_PDF,
+        contentType: 'application/pdf',
+      });
+      const result = await (await ms()).send(msg);
+      expect(result.provider).toBe('mailersend');
+      expect(result.id).toBeTruthy();
+    });
+
+    it('sends email with CID inline image', async () => {
+      const cid = 'logo@mailersend-ci';
+      const msg = withAttachment(
+        {
+          ...testMessage('mailersend-cid'),
+          html: `${baseMessage('mailersend-cid').html}\n<img src="cid:${cid}" alt="logo">`,
+        },
+        { filename: 'logo.png', content: SMOKETEST_PNG, contentType: 'image/png', cid },
+      );
+      const result = await (await ms()).send(msg);
+      expect(result.provider).toBe('mailersend');
+      expect(result.id).toBeTruthy();
+    });
+
+    it('sends email with external image src', async () => {
+      const result = await (await ms()).send(
+        withExternalImage(testMessage('mailersend-img'), EXTERNAL_IMAGE_URL),
+      );
+      expect(result.provider).toBe('mailersend');
+      expect(result.id).toBeTruthy();
+    });
+  },
+);
+
+describe.skipIf(!hasBaseEnv() || !process.env.TIERDE_TEST_WIREMOCK)(
+  'mailersend provider (WireMock)',
+  () => {
+    const WIREMOCK = process.env.WIREMOCK_URL ?? 'http://localhost:8080';
+
+    it('sends via WireMock and returns stubbed id', async () => {
+      const { mailersend } = await import('../providers/mailersend.js');
+      const result = await mailersend({ apiToken: 'test', baseUrl: WIREMOCK }).send(
+        testMessage('mailersend-wiremock'),
+      );
+      expect(result.provider).toBe('mailersend');
+      expect(result.id).toContain('wiremock-mailersend');
+    });
+
+    it('sends with PDF attachment', async () => {
+      const { mailersend } = await import('../providers/mailersend.js');
+      const result = await mailersend({ apiToken: 'test', baseUrl: WIREMOCK }).send(
+        withAttachment(testMessage('mailersend-wm-attach'), {
+          filename: 'doc.pdf',
+          content: TINY_PDF,
+          contentType: 'application/pdf',
+        }),
+      );
+      expect(result.provider).toBe('mailersend');
+      expect(result.id).toBeTruthy();
+    });
+
+    it('sends with CID inline image', async () => {
+      const { mailersend } = await import('../providers/mailersend.js');
+      const cid = 'logo@ms-wm';
+      const result = await mailersend({ apiToken: 'test', baseUrl: WIREMOCK }).send(
+        withAttachment(
+          {
+            ...testMessage('ms-wm-cid'),
+            html: `${baseMessage('ms-wm-cid').html}\n<img src="cid:${cid}" alt="logo">`,
+          },
+          { filename: 'logo.png', content: SMOKETEST_PNG, contentType: 'image/png', cid },
+        ),
+      );
+      expect(result.provider).toBe('mailersend');
+      expect(result.id).toBeTruthy();
+    });
+  },
+);
+
+// ---------------------------------------------------------------------------
+// SparkPost — no free tier; WireMock only
+//   TIERDE_TEST_WIREMOCK=true
+// Real API: SPARKPOST_API_KEY=sp-key (requires paid account)
+// ---------------------------------------------------------------------------
+describe.skipIf(!hasBaseEnv() || !process.env.SPARKPOST_API_KEY)(
+  'sparkpost provider (integration)',
+  () => {
+    async function sp() {
+      const { sparkpost } = await import('../providers/sparkpost.js');
+      return sparkpost({ apiKey: process.env.SPARKPOST_API_KEY! });
+    }
+
+    it('sends email and returns id', async () => {
+      const result = await (await sp()).send(testMessage('sparkpost'));
+      expect(result.provider).toBe('sparkpost');
+      expect(result.id).toBeTruthy();
+    });
+
+    it('sends email with PDF attachment', async () => {
+      const msg = withAttachment(testMessage('sparkpost-attachment'), {
+        filename: 'report.pdf',
+        content: TINY_PDF,
+        contentType: 'application/pdf',
+      });
+      const result = await (await sp()).send(msg);
+      expect(result.provider).toBe('sparkpost');
+      expect(result.id).toBeTruthy();
+    });
+
+    it('sends email with CID inline image', async () => {
+      const cid = 'logo@sparkpost-ci';
+      const msg = withAttachment(
+        {
+          ...testMessage('sparkpost-cid'),
+          html: `${baseMessage('sparkpost-cid').html}\n<img src="cid:${cid}" alt="logo">`,
+        },
+        { filename: 'logo.png', content: SMOKETEST_PNG, contentType: 'image/png', cid },
+      );
+      const result = await (await sp()).send(msg);
+      expect(result.provider).toBe('sparkpost');
+      expect(result.id).toBeTruthy();
+    });
+
+    it('sends email with external image src', async () => {
+      const result = await (await sp()).send(
+        withExternalImage(testMessage('sparkpost-img'), EXTERNAL_IMAGE_URL),
+      );
+      expect(result.provider).toBe('sparkpost');
+      expect(result.id).toBeTruthy();
+    });
+  },
+);
+
+describe.skipIf(!hasBaseEnv() || !process.env.TIERDE_TEST_WIREMOCK)(
+  'sparkpost provider (WireMock)',
+  () => {
+    const WIREMOCK = process.env.WIREMOCK_URL ?? 'http://localhost:8080';
+
+    it('sends via WireMock and returns stubbed id', async () => {
+      const { sparkpost } = await import('../providers/sparkpost.js');
+      const result = await sparkpost({ apiKey: 'test', baseUrl: WIREMOCK }).send(
+        testMessage('sparkpost-wiremock'),
+      );
+      expect(result.provider).toBe('sparkpost');
+      expect(result.id).toContain('wiremock-sparkpost');
+    });
+
+    it('sends with PDF attachment', async () => {
+      const { sparkpost } = await import('../providers/sparkpost.js');
+      const result = await sparkpost({ apiKey: 'test', baseUrl: WIREMOCK }).send(
+        withAttachment(testMessage('sparkpost-wm-attach'), {
+          filename: 'doc.pdf',
+          content: TINY_PDF,
+          contentType: 'application/pdf',
+        }),
+      );
+      expect(result.provider).toBe('sparkpost');
+      expect(result.id).toBeTruthy();
+    });
+
+    it('sends with CID inline image', async () => {
+      const { sparkpost } = await import('../providers/sparkpost.js');
+      const cid = 'logo@sp-wm';
+      const result = await sparkpost({ apiKey: 'test', baseUrl: WIREMOCK }).send(
+        withAttachment(
+          {
+            ...testMessage('sp-wm-cid'),
+            html: `${baseMessage('sp-wm-cid').html}\n<img src="cid:${cid}" alt="logo">`,
+          },
+          { filename: 'logo.png', content: SMOKETEST_PNG, contentType: 'image/png', cid },
+        ),
+      );
+      expect(result.provider).toBe('sparkpost');
+      expect(result.id).toBeTruthy();
+    });
+  },
+);
+
+// ---------------------------------------------------------------------------
+// Mandrill — no free tier; WireMock only
+//   TIERDE_TEST_WIREMOCK=true
+// Real API: MANDRILL_API_KEY=mc-key (requires paid Mailchimp account)
+// ---------------------------------------------------------------------------
+describe.skipIf(!hasBaseEnv() || !process.env.MANDRILL_API_KEY)(
+  'mandrill provider (integration)',
+  () => {
+    async function md() {
+      const { mandrill } = await import('../providers/mandrill.js');
+      return mandrill({ apiKey: process.env.MANDRILL_API_KEY! });
+    }
+
+    it('sends email and returns id', async () => {
+      const result = await (await md()).send(testMessage('mandrill'));
+      expect(result.provider).toBe('mandrill');
+      expect(result.id).toBeTruthy();
+    });
+
+    it('sends email with PDF attachment', async () => {
+      const msg = withAttachment(testMessage('mandrill-attachment'), {
+        filename: 'report.pdf',
+        content: TINY_PDF,
+        contentType: 'application/pdf',
+      });
+      const result = await (await md()).send(msg);
+      expect(result.provider).toBe('mandrill');
+      expect(result.id).toBeTruthy();
+    });
+
+    it('sends email with CID inline image', async () => {
+      const cid = 'logo@mandrill-ci';
+      const msg = withAttachment(
+        {
+          ...testMessage('mandrill-cid'),
+          html: `${baseMessage('mandrill-cid').html}\n<img src="cid:${cid}" alt="logo">`,
+        },
+        { filename: 'logo.png', content: SMOKETEST_PNG, contentType: 'image/png', cid },
+      );
+      const result = await (await md()).send(msg);
+      expect(result.provider).toBe('mandrill');
+      expect(result.id).toBeTruthy();
+    });
+
+    it('sends email with external image src', async () => {
+      const result = await (await md()).send(
+        withExternalImage(testMessage('mandrill-img'), EXTERNAL_IMAGE_URL),
+      );
+      expect(result.provider).toBe('mandrill');
+      expect(result.id).toBeTruthy();
+    });
+  },
+);
+
+describe.skipIf(!hasBaseEnv() || !process.env.TIERDE_TEST_WIREMOCK)(
+  'mandrill provider (WireMock)',
+  () => {
+    const WIREMOCK = process.env.WIREMOCK_URL ?? 'http://localhost:8080';
+
+    it('sends via WireMock and returns stubbed id', async () => {
+      const { mandrill } = await import('../providers/mandrill.js');
+      const result = await mandrill({ apiKey: 'test', baseUrl: WIREMOCK }).send(
+        testMessage('mandrill-wiremock'),
+      );
+      expect(result.provider).toBe('mandrill');
+      expect(result.id).toContain('wiremock-mandrill');
+    });
+
+    it('sends with PDF attachment', async () => {
+      const { mandrill } = await import('../providers/mandrill.js');
+      const result = await mandrill({ apiKey: 'test', baseUrl: WIREMOCK }).send(
+        withAttachment(testMessage('mandrill-wm-attach'), {
+          filename: 'doc.pdf',
+          content: TINY_PDF,
+          contentType: 'application/pdf',
+        }),
+      );
+      expect(result.provider).toBe('mandrill');
+      expect(result.id).toBeTruthy();
+    });
+
+    it('sends with CID inline image', async () => {
+      const { mandrill } = await import('../providers/mandrill.js');
+      const cid = 'logo@md-wm';
+      const result = await mandrill({ apiKey: 'test', baseUrl: WIREMOCK }).send(
+        withAttachment(
+          {
+            ...testMessage('md-wm-cid'),
+            html: `${baseMessage('md-wm-cid').html}\n<img src="cid:${cid}" alt="logo">`,
+          },
+          { filename: 'logo.png', content: SMOKETEST_PNG, contentType: 'image/png', cid },
+        ),
+      );
+      expect(result.provider).toBe('mandrill');
       expect(result.id).toBeTruthy();
     });
   },

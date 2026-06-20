@@ -19,6 +19,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 - **SendGrid Event Webhook handler** — `createSendGridWebhookHandler({ publicKey })` verifies ECDSA P-256 signatures (`X-Twilio-Email-Event-Webhook-Timestamp` + `X-Twilio-Email-Event-Webhook-Signature`). Accepts raw base64 DER SPKI key or PEM string. `verify()` returns the first event; `verifyBatch()` returns all events in the batch. Both normalise to the shared `WebhookEvent` schema. Exported from `@yedoma-labs/tierde-mail/webhooks`.
 - **Retry / exponential backoff** — `createMailer` accepts `maxRetries?`, `initialRetryDelayMs?` (default 1 000 ms), and `retryOn?` on `MailerConfig`. Default predicate retries HTTP 429, 502, 503, 504 responses. Delay formula: `initialRetryDelayMs × 2ⁿ`. Each provider in failover mode retries independently before the next failover target is tried.
 - **New email templates** — `AppointmentReminder`, `EventInvitation`, `ApiKeyCreated`, `GiftCard` (see v0.5.0 for props). All four are included in `tierde eject`.
+- **Integration tests for all new providers** — real-API suites (gated by env vars) + WireMock mock suites for all 4 new HTTP providers (Mailgun, Brevo, MailerSend, SparkPost, Mandrill). WireMock stubs cover plain send, PDF attachment, and CID inline image. Run with `TIERDE_TEST_WIREMOCK=true` after `docker compose up -d`. SparkPost and Mandrill are WireMock-only (no free tier).
+- **WireMock stub mappings** — `scripts/wiremock/mappings/{mailgun,brevo,mailersend,sparkpost,mandrill}.json`.
 
 ## [0.8.1] — 2026-06-20
 

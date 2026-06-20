@@ -1,0 +1,18 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/api/1.0/messages/send"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": [
+      {
+        "_id": "wiremock-mandrill-message-id",
+        "email": "recipient@example.com",
+        "status": "sent",
+        "reject_reason": null
+      }
+    ]
+  }
+}

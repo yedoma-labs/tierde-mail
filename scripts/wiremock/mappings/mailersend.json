@@ -1,0 +1,10 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/v1/email"
+  },
+  "response": {
+    "status": 202,
+    "headers": { "X-Message-Id": "wiremock-mailersend-message-id" }
+  }
+}
