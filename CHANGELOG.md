@@ -8,19 +8,27 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+---
+
+## [0.9.0] — 2026-06-20
+
 ### Added
 
-- **Brevo provider** (formerly Sendinblue) — `brevo({ apiKey, baseUrl? })` sends via the Brevo v3 SMTP API. Supports attachments and inline (CID) attachments (`inlineAttachment` field). Available as `@yedoma-labs/tierde-mail/providers/brevo`. Env var: `BREVO_API_KEY`.
-- **MailerSend provider** — `mailersend({ apiToken, baseUrl? })` sends via the MailerSend v1 API (202 Accepted; message ID in `X-Message-Id` header). Headers serialised as `[{ name, value }]` array per API spec. Available as `@yedoma-labs/tierde-mail/providers/mailersend`. Env var: `MAILERSEND_API_TOKEN`.
+- **Brevo provider** (formerly Sendinblue) — `brevo({ apiKey, baseUrl? })` sends via the Brevo v3 SMTP API. Supports attachments and inline (CID) attachments. Available as `@yedoma-labs/tierde-mail/providers/brevo`. Env var: `BREVO_API_KEY`.
+- **MailerSend provider** — `mailersend({ apiToken, baseUrl? })` sends via the MailerSend v1 API (202 Accepted; message ID in `X-Message-Id` response header). Headers serialised as `[{ name, value }]` array per API spec. Available as `@yedoma-labs/tierde-mail/providers/mailersend`. Env var: `MAILERSEND_API_TOKEN`.
 - **SparkPost provider** — `sparkpost({ apiKey, baseUrl?, sandbox? })` sends via the SparkPost Transmissions API. Supports EU region override (`baseUrl: 'https://api.eu.sparkpost.com'`), sandbox mode, cc/bcc as `header_to` recipients, inline images. Available as `@yedoma-labs/tierde-mail/providers/sparkpost`. Env var: `SPARKPOST_API_KEY`.
 - **Mandrill provider** (Mailchimp Transactional) — `mandrill({ apiKey, baseUrl? })` sends via the Mandrill messages/send API. Key in request body per Mandrill convention. Throws on `rejected`/`invalid` status. Available as `@yedoma-labs/tierde-mail/providers/mandrill`. Env var: `MANDRILL_API_KEY`.
-- **Mailgun provider** — `mailgun({ apiKey, domain, region?, baseUrl? })` sends via the Mailgun v3 REST API using FormData. Supports US (default) and EU regions, attachments, inline (CID) attachments, cc/bcc/replyTo, and custom headers. Available as `@yedoma-labs/tierde-mail/providers/mailgun`.
-- **`createMailerFromEnv()` supports `mailgun`** — set `TIERDE_PROVIDER=mailgun` with `MAILGUN_API_KEY`, `MAILGUN_DOMAIN`, and optional `MAILGUN_REGION` (`us`|`eu`) / `MAILGUN_BASE_URL`.
-- **SendGrid Event Webhook handler** — `createSendGridWebhookHandler({ publicKey })` verifies ECDSA P-256 signatures (`X-Twilio-Email-Event-Webhook-Timestamp` + `X-Twilio-Email-Event-Webhook-Signature`). Accepts raw base64 DER SPKI key or PEM string. `verify()` returns the first event; `verifyBatch()` returns all events in the batch. Both normalise to the shared `WebhookEvent` schema. Exported from `@yedoma-labs/tierde-mail/webhooks`.
+- **Mailgun provider** — `mailgun({ apiKey, domain, region?, baseUrl? })` sends via the Mailgun v3 REST API using FormData. Supports US (default) and EU regions, attachments, inline (CID) attachments, cc/bcc/replyTo, and custom headers. Available as `@yedoma-labs/tierde-mail/providers/mailgun`. Env vars: `MAILGUN_API_KEY`, `MAILGUN_DOMAIN`, `MAILGUN_REGION`.
+- **`createMailerFromEnv()` supports all new providers** — set `TIERDE_PROVIDER` to `mailgun`, `brevo`, `mailersend`, `sparkpost`, or `mandrill` with the corresponding env vars (see README).
+- **SendGrid Event Webhook handler** — `createSendGridWebhookHandler({ publicKey })` verifies ECDSA P-256 signatures (`X-Twilio-Email-Event-Webhook-Timestamp` + `X-Twilio-Email-Event-Webhook-Signature`). Accepts raw base64 DER SPKI key or PEM string. `verify()` returns the first event; `verifyBatch()` returns all events in the batch. Normalises to the shared `WebhookEvent` schema. Exported from `@yedoma-labs/tierde-mail/webhooks`.
 - **Retry / exponential backoff** — `createMailer` accepts `maxRetries?`, `initialRetryDelayMs?` (default 1 000 ms), and `retryOn?` on `MailerConfig`. Default predicate retries HTTP 429, 502, 503, 504 responses. Delay formula: `initialRetryDelayMs × 2ⁿ`. Each provider in failover mode retries independently before the next failover target is tried.
-- **New email templates** — `AppointmentReminder`, `EventInvitation`, `ApiKeyCreated`, `GiftCard` (see v0.5.0 for props). All four are included in `tierde eject`.
-- **Integration tests for all new providers** — real-API suites (gated by env vars) + WireMock mock suites for all 4 new HTTP providers (Mailgun, Brevo, MailerSend, SparkPost, Mandrill). WireMock stubs cover plain send, PDF attachment, and CID inline image. Run with `TIERDE_TEST_WIREMOCK=true` after `docker compose up -d`. SparkPost and Mandrill are WireMock-only (no free tier).
+- **New email templates** — `AppointmentReminder`, `EventInvitation`, `ApiKeyCreated`, `GiftCard`. All four are included in `tierde eject`. Total: 45 templates.
+- **Integration and WireMock tests for all new providers** — real-API suites (gated by env vars) and WireMock mock suites for Mailgun, Brevo, MailerSend, SparkPost, Mandrill. WireMock stubs cover plain send, PDF attachment, and CID inline image. Run with `TIERDE_TEST_WIREMOCK=true` after `docker compose up -d`. SparkPost and Mandrill are WireMock-only (no free tier).
 - **WireMock stub mappings** — `scripts/wiremock/mappings/{mailgun,brevo,mailersend,sparkpost,mandrill}.json`.
+
+### Fixed
+
+- **Mandrill empty-response guard** — sending to an address that Mandrill removes from the recipient list before delivery caused the provider to return a fake timestamp-based ID instead of throwing. Now throws `'Mandrill returned empty response'` when the API returns an empty array.
 
 ## [0.8.1] — 2026-06-20
 
