@@ -379,6 +379,7 @@ const mailer = createMailer({
 ```
 
 **Notes:**
+- **tierde-mail ships zero tracking.** The middleware pipeline is a user-supplied hook — the library has no knowledge of or control over what you inject. Any open/click tracking you implement is your code, running under your own GDPR, CASL, and CAN-SPAM obligations; tierde-mail is not the data controller or processor for that data.
 - Middleware runs per-recipient — each send gets its own pixel URL.
 - Keep middleware synchronous when possible. Async middleware (e.g., DB writes) adds latency per send and is felt at batch scale. Record tracking events in `onResult` after the send confirms instead.
 - Middleware does not run on the plain-text part. Link rewriting applies to HTML only.

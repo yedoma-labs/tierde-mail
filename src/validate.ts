@@ -29,7 +29,14 @@ export function validateEmail(email: string): void {
   const atIdx = email.lastIndexOf('@');
   const local = email.slice(0, atIdx);
   const domain = email.slice(atIdx + 1);
-  if (!local || !domain?.includes('.') || domain.startsWith('.') || domain.endsWith('.')) {
+  // RFC 5321 allows bare hostnames (e.g. localhost) — dot not required in domain.
+  // Still reject empty domain, leading/trailing dots, and dotted domains where a
+  // segment is empty (e.g. "foo..bar").
+  if (
+    !local ||
+    !domain ||
+    (domain.includes('.') && (domain.startsWith('.') || domain.endsWith('.')))
+  ) {
     throw new TypeError(`Invalid email address: ${email}`);
   }
   // Reject spaces in local or domain part

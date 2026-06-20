@@ -20,8 +20,15 @@ describe('validateEmail', () => {
     expect(() => validateEmail('user@')).toThrow(TypeError);
   });
 
-  it('rejects domain without dot', () => {
-    expect(() => validateEmail('user@localhost')).toThrow(TypeError);
+  it('accepts bare-hostname domain (RFC 5321 — used by Mailpit/MailHog)', () => {
+    expect(() => validateEmail('user@localhost')).not.toThrow();
+    expect(() => validateEmail('test@mailpit')).not.toThrow();
+    expect(() => validateEmail('dev@mail')).not.toThrow();
+  });
+
+  it('rejects domain with leading/trailing dot', () => {
+    expect(() => validateEmail('user@.example.com')).toThrow(TypeError);
+    expect(() => validateEmail('user@example.com.')).toThrow(TypeError);
   });
 
   it('rejects CRLF injection in email', () => {

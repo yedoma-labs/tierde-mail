@@ -639,6 +639,7 @@ console.log(html); // Full rendered email - paste into email client to preview
 - [ ] **Rate limits.** If batch-sending, honor provider limits (Resend: 100/sec free tier, SES: 14 per second base).
 - [ ] **Monitoring.** Log `result.id` for every send; wire that to observability (Sentry, DataDog) for delivery tracking.
 - [ ] **Unsubscribe footer.** GDPR/CAN-SPAM requires unsubscribe link. `<Footer unsubscribeUrl={...} />` handles it.
+- [ ] **Tracking compliance.** tierde-mail ships zero tracking — the middleware pipeline is a user hook. If you add open/click tracking via middleware, consent, data retention, and regulatory obligations (GDPR, CASL, CAN-SPAM) are your responsibility as the implementer.
 
 ## Resources
 
