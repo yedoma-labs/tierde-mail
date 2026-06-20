@@ -19,7 +19,6 @@ const BLOCKED_IMAGE_TYPES = new Set(['image/svg+xml', 'image/svg']);
 
 // RFC 5321 §4.1.2 / RFC 5322 §3.2.3 — printable US-ASCII excluding specials.
 // Used in dot-atom local parts.
-// biome-ignore lint/suspicious/noControlCharactersInRegex: intentional
 const ATEXT_RE = /^[-a-zA-Z0-9!#$%&'*+/=?^_`{|}~]+$/;
 
 // RFC 5321 §4.1.2 — sub-domain label: starts and ends with letter/digit,
