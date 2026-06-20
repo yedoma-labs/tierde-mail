@@ -35,7 +35,7 @@ const FROM = process.env.TIERDE_TEST_FROM;
 const TO = process.env.TIERDE_TEST_TO;
 
 // Real smoketest image from the repo — used for CID inline attachment tests.
-const SMOKETEST_PNG = readFileSync(join(process.cwd(), 'assets/smoketest-resized.png'));
+const SMOKETEST_PNG = readFileSync(join(process.cwd(), 'assets/smoketest-resized-mobile.png'));
 
 // Minimal valid PDF stub — providers validate magic bytes; fake-but-valid header.
 const TINY_PDF = Buffer.from(
