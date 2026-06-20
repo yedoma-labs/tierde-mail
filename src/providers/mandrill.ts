@@ -89,6 +89,9 @@ class MandrillProvider implements EmailProvider {
       status?: string;
       reject_reason?: string;
     }>;
+    if (!Array.isArray(data) || data.length === 0) {
+      throw new Error('Mandrill returned empty response');
+    }
     const first = data[0];
     if (first?.status === 'rejected' || first?.status === 'invalid') {
       throw new Error(`Mandrill rejected message: ${first.reject_reason ?? first.status}`);

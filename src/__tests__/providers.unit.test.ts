@@ -723,6 +723,51 @@ describe('mailersend provider', () => {
     const { mailersend } = await import('../providers/mailersend.js');
     expect(mailersend({ apiToken: 't' }).name).toBe('mailersend');
   });
+
+  it('sends attachment with correct disposition and id', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      status: 202,
+      headers: new Headers({ 'X-Message-Id': 'ms-att-1' }),
+    } as Response);
+
+    const { mailersend } = await import('../providers/mailersend.js');
+    await mailersend({ apiToken: 't' }).send({
+      ...baseMessage,
+      attachments: [
+        { filename: 'doc.pdf', content: Buffer.from('pdf'), contentType: 'application/pdf' },
+        {
+          filename: 'logo.png',
+          content: Buffer.from('img'),
+          contentType: 'image/png',
+          cid: 'logo',
+        },
+      ],
+    });
+
+    const [, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
+    const body = JSON.parse(init.body as string) as {
+      attachments: { filename: string; disposition: string; id?: string }[];
+    };
+    expect(body.attachments[0]).toMatchObject({ filename: 'doc.pdf', disposition: 'attachment' });
+    expect(body.attachments[1]).toMatchObject({
+      filename: 'logo.png',
+      disposition: 'inline',
+      id: 'logo',
+    });
+  });
+
+  it('falls back to generated id when X-Message-Id header absent', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      status: 202,
+      headers: new Headers(),
+    } as Response);
+
+    const { mailersend } = await import('../providers/mailersend.js');
+    const result = await mailersend({ apiToken: 't' }).send(baseMessage);
+    expect(result.id).toMatch(/^ms-\d+$/);
+  });
 });
 
 // ─── SparkPost ─────────────────────────────────────────────────────────────
@@ -790,6 +835,53 @@ describe('sparkpost provider', () => {
   it('returns provider name sparkpost', async () => {
     const { sparkpost } = await import('../providers/sparkpost.js');
     expect(sparkpost({ apiKey: 'k' }).name).toBe('sparkpost');
+  });
+
+  it('sends regular attachment in content.attachments', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ results: { id: 'sp-att-1' } }),
+    } as Response);
+
+    const { sparkpost } = await import('../providers/sparkpost.js');
+    await sparkpost({ apiKey: 'k' }).send({
+      ...baseMessage,
+      attachments: [
+        { filename: 'doc.pdf', content: Buffer.from('pdf'), contentType: 'application/pdf' },
+      ],
+    });
+
+    const [, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
+    const body = JSON.parse(init.body as string) as {
+      content: { attachments: { name: string; type: string }[] };
+    };
+    expect(body.content.attachments[0]).toMatchObject({ name: 'doc.pdf', type: 'application/pdf' });
+  });
+
+  it('sends CID attachment in content.inline_images', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ results: { id: 'sp-cid-1' } }),
+    } as Response);
+
+    const { sparkpost } = await import('../providers/sparkpost.js');
+    await sparkpost({ apiKey: 'k' }).send({
+      ...baseMessage,
+      attachments: [
+        {
+          filename: 'logo.png',
+          content: Buffer.from('img'),
+          contentType: 'image/png',
+          cid: 'logo',
+        },
+      ],
+    });
+
+    const [, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
+    const body = JSON.parse(init.body as string) as {
+      content: { inline_images: { name: string; type: string }[] };
+    };
+    expect(body.content.inline_images[0]).toMatchObject({ name: 'logo', type: 'image/png' });
   });
 });
 
@@ -870,5 +962,67 @@ describe('mandrill provider', () => {
 
     const [url] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
     expect(url).toBe('http://localhost:8080/api/1.0/messages/send');
+  });
+
+  it('sends attachments in message.attachments and CIDs in message.images', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => [{ _id: 'mdrl-att', status: 'sent' }],
+    } as Response);
+
+    const { mandrill } = await import('../providers/mandrill.js');
+    await mandrill({ apiKey: 'k' }).send({
+      ...baseMessage,
+      attachments: [
+        { filename: 'doc.pdf', content: Buffer.from('pdf'), contentType: 'application/pdf' },
+        {
+          filename: 'logo.png',
+          content: Buffer.from('img'),
+          contentType: 'image/png',
+          cid: 'logo',
+        },
+      ],
+    });
+
+    const [, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
+    const body = JSON.parse(init.body as string) as {
+      message: {
+        attachments: { name: string; type: string }[];
+        images: { name: string; type: string }[];
+      };
+    };
+    expect(body.message.attachments[0]).toMatchObject({ name: 'doc.pdf', type: 'application/pdf' });
+    expect(body.message.images[0]).toMatchObject({ name: 'logo', type: 'image/png' });
+  });
+
+  it('maps replyTo into message.headers Reply-To', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => [{ _id: 'x', status: 'sent' }],
+    } as Response);
+
+    const { mandrill } = await import('../providers/mandrill.js');
+    await mandrill({ apiKey: 'k' }).send({
+      ...baseMessage,
+      replyTo: { email: 'reply@example.com', name: 'Reply' },
+    });
+
+    const [, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
+    const body = JSON.parse(init.body as string) as {
+      message: { headers: Record<string, string> };
+    };
+    expect(body.message.headers['Reply-To']).toBe('Reply <reply@example.com>');
+  });
+
+  it('throws when Mandrill returns empty array', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => [],
+    } as Response);
+
+    const { mandrill } = await import('../providers/mandrill.js');
+    await expect(mandrill({ apiKey: 'k' }).send(baseMessage)).rejects.toThrow(
+      'Mandrill returned empty response',
+    );
   });
 });
