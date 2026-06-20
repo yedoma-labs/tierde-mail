@@ -8,6 +8,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+## [0.8.1] — 2026-06-20
+
 ### Fixed
 
 - **RFC 5321-compliant email validation** — `validateEmail` now enforces the full RFC 5321 / RFC 5322 grammar instead of ad-hoc checks. Local part: full `atext` character class (`ALPHA / DIGIT / !#$%&'*+/=?^_\`{|}~-`), quoted-string local parts accepted, consecutive/leading/trailing dots rejected, 64-character limit enforced. Domain: sub-domain labels must start and end with a letter or digit (hyphens allowed in the middle), 63-character label limit and 255-character domain limit enforced, address literals (`[127.0.0.1]`, `[IPv6:...]`) accepted, bare hostnames (no dot) accepted per RFC 5321. Header-injection control-character check is unchanged and still runs first.
