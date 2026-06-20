@@ -8,11 +8,13 @@
  */
 
 import { randomUUID } from 'node:crypto';
+import * as http from 'node:http';
 import { describe, expect, it } from 'vitest';
 import { Button } from '../components/Button.js';
 import { EmailTemplate } from '../components/EmailTemplate.js';
 import { Text } from '../components/Text.js';
 import { defineEmail } from '../define-email.js';
+import { embedImages } from '../embed-images.js';
 import { createMailer } from '../mailer.js';
 import { mailpit } from '../providers/mailpit.js';
 import type { MailMiddleware } from '../types.js';
@@ -22,7 +24,14 @@ interface MailpitMessage {
   Subject: string;
   HTML: string;
   Attachments?: Array<{ FileName: string; ContentType: string; Size: number }>;
+  Inline?: Array<{ FileName: string; ContentType: string; Size: number }>;
 }
+
+// Minimal 1×1 transparent PNG — used by CID inline and embedImages tests.
+const TINY_PNG = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+  'base64',
+);
 
 const MAILPIT_API = 'http://localhost:8025/api/v1';
 
@@ -227,5 +236,85 @@ describe.skipIf(!process.env.TIERDE_TEST_MAILPIT)('middleware e2e (Mailpit)', ()
 
     const meta = await getMailpitMessageMeta(`no-attach-${trackingId.slice(0, 8)}`);
     expect(meta.Attachments ?? []).toHaveLength(0);
+  });
+
+  it('embedImages rewrites src to cid and delivers image as inline attachment', async () => {
+    // Serve TINY_PNG from a local server — no external network dependency.
+    const server = http.createServer((_, res) => {
+      res.writeHead(200, { 'Content-Type': 'image/png' });
+      res.end(TINY_PNG);
+    });
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    const { port } = server.address() as { port: number };
+    const imageUrl = `http://127.0.0.1:${port}/banner.png`;
+    const trackingId = randomUUID();
+
+    const ImageEmail = defineEmail<{ name: string }>({
+      subject: ({ name }) => `embedImages e2e — ${name}`,
+      component: ({ name }) => (
+        <EmailTemplate>
+          <Text>{name}</Text>
+          <img src={imageUrl} alt="" />
+        </EmailTemplate>
+      ),
+    });
+
+    const mailer = createMailer({
+      provider: mailpit(),
+      from: 'test@localhost',
+      middleware: [embedImages([imageUrl])],
+    });
+
+    try {
+      await mailer.send(ImageEmail, {
+        to: 'inbox@localhost',
+        props: { name: `embed-img-${trackingId.slice(0, 8)}` },
+      });
+    } finally {
+      server.close();
+    }
+
+    const msg = await getMailpitMessageMeta(`embed-img-${trackingId.slice(0, 8)}`);
+    // src must be rewritten from the remote URL to the CID reference.
+    expect(msg.HTML).not.toContain(imageUrl);
+    expect(msg.HTML).toContain('cid:banner.png');
+    // Mailpit exposes CID parts in Inline; fall back to Attachments if the
+    // client or Mailpit version lumps them together.
+    const inlineCount =
+      (msg.Inline ?? []).length +
+      (msg.Attachments ?? []).filter((a) => a.FileName === 'banner.png').length;
+    expect(inlineCount).toBeGreaterThan(0);
+  });
+
+  it('manual CID inline attachment is delivered inline and HTML retains cid reference', async () => {
+    const trackingId = randomUUID();
+    const cid = `logo@${trackingId}`;
+
+    const CidEmail = defineEmail<{ name: string }>({
+      subject: ({ name }) => `CID inline e2e — ${name}`,
+      component: ({ name }) => (
+        <EmailTemplate>
+          <Text>{name}</Text>
+          <img src={`cid:${cid}`} alt="" />
+        </EmailTemplate>
+      ),
+    });
+
+    const mailer = createMailer({ provider: mailpit(), from: 'test@localhost' });
+
+    await mailer.send(CidEmail, {
+      to: 'inbox@localhost',
+      props: { name: `cid-inline-${trackingId.slice(0, 8)}` },
+      attachments: [{ filename: 'logo.png', content: TINY_PNG, contentType: 'image/png', cid }],
+    });
+
+    const msg = await getMailpitMessageMeta(`cid-inline-${trackingId.slice(0, 8)}`);
+    // HTML must retain the cid: src so the client can resolve it.
+    expect(msg.HTML).toContain(`cid:${cid}`);
+    // Mailpit should expose the CID part as an Inline entry.
+    const inlineParts = msg.Inline ?? [];
+    expect(inlineParts.length).toBeGreaterThan(0);
+    expect(inlineParts[0]!.FileName).toBe('logo.png');
+    expect(inlineParts[0]!.ContentType).toBe('image/png');
   });
 });
