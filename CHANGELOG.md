@@ -8,6 +8,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+### Fixed
+
+- **RFC 5321-compliant email validation** — `validateEmail` now enforces the full RFC 5321 / RFC 5322 grammar instead of ad-hoc checks. Local part: full `atext` character class (`ALPHA / DIGIT / !#$%&'*+/=?^_\`{|}~-`), quoted-string local parts accepted, consecutive/leading/trailing dots rejected, 64-character limit enforced. Domain: sub-domain labels must start and end with a letter or digit (hyphens allowed in the middle), 63-character label limit and 255-character domain limit enforced, address literals (`[127.0.0.1]`, `[IPv6:...]`) accepted, bare hostnames (no dot) accepted per RFC 5321. Header-injection control-character check is unchanged and still runs first.
+- **Bare-hostname email addresses** (`test@localhost`, `inbox@mailpit`) are now accepted. RFC 5321 does not require a dot in the domain, so rejecting them was incorrect and broke `mailpit()` provider e2e tests.
+- **Mailpit e2e HTML assertion** — the `/message/{ID}/body.html` API path does not exist in Mailpit; tests now fetch `/message/{ID}` (JSON) and read the `HTML` field, consistent with the attachment tests that already used that endpoint.
+
 ## [0.8.0] — 2026-06-19
 
 ### Added

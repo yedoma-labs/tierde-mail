@@ -631,6 +631,7 @@ console.log(html); // Full rendered email - paste into email client to preview
 
 ## Production checklist
 
+- [ ] **Email address validation is automatic.** tierde-mail validates every address against RFC 5321 before any provider call — invalid characters, malformed local parts, and control characters (header injection) all throw `TypeError` before a network request is made. No extra sanitization step needed.
 - [ ] **Provider secrets in env vars.** Never commit API keys; use `.env.local` (git-ignored).
 - [ ] **Test email rendering.** Run `npx tierde dev` and preview every email variant in dark mode.
 - [ ] **Local mock smoke test.** Run `docker compose up -d` and fire `npx tierde send` against WireMock/LocalStack before touching real credentials.

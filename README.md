@@ -524,9 +524,14 @@ attachments: [
 
 ### Security
 
-- Filenames are validated: no `..`, `/`, `\`, or control characters.
-- CID values are validated: no CR/LF or control characters (MIME header injection prevention).
-- Validation runs before the provider is called — invalid attachments throw `TypeError` without making a network request.
+**Email addresses** are validated against RFC 5321 before any provider call. The full `atext` character class is enforced in the local part; domain labels must start and end with a letter or digit (hyphens allowed in the middle); bare hostnames (`localhost`, `mailpit`) and address literals (`[127.0.0.1]`, `[IPv6:...]`) are accepted. Control characters (including CR and LF) are rejected to prevent header injection regardless of where they appear in the address.
+
+**Attachments:**
+- Filenames: no `..`, `/`, `\`, or control characters.
+- CID values: no CR/LF or control characters (MIME header injection prevention).
+- Content type is compared against an allowlist before the provider is called — disallowed types throw `TypeError` without a network request.
+- `image/svg+xml` is blocked even though it matches `image/*` — SVG is active content.
+- Attachments are re-validated after middleware runs, so middleware-generated attachments cannot bypass these checks.
 
 ---
 
