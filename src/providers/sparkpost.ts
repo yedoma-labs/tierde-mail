@@ -42,7 +42,9 @@ class SparkPostProvider implements EmailProvider {
           ...r,
           address: {
             ...r.address,
-            header_to: toAddr(message.to instanceof Array ? message.to[0]! : message.to),
+            header_to: toAddr(
+              Array.isArray(message.to) ? (message.to[0] as EmailAddress) : message.to,
+            ),
           },
         });
       }
@@ -53,7 +55,9 @@ class SparkPostProvider implements EmailProvider {
           ...r,
           address: {
             ...r.address,
-            header_to: toAddr(message.to instanceof Array ? message.to[0]! : message.to),
+            header_to: toAddr(
+              Array.isArray(message.to) ? (message.to[0] as EmailAddress) : message.to,
+            ),
           },
         });
       }

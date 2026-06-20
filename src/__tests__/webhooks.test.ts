@@ -317,6 +317,6 @@ describe('createSendGridWebhookHandler', () => {
   it('exposes raw payload', () => {
     const handler = createSendGridWebhookHandler({ publicKey: SENDGRID_PUBLIC_KEY });
     const event = handler.verify(sgDeliveryPayload, sgHeaders(sgDeliveryPayload));
-    expect((event.raw as Record<string, unknown>)['event']).toBe('delivered');
+    expect((event.raw as Record<string, unknown>).event).toBe('delivered');
   });
 });

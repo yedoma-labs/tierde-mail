@@ -48,12 +48,12 @@ function toPem(key: string): string {
 }
 
 function normalizeEvent(ev: Record<string, unknown>): WebhookEvent {
-  const sgEvent = String(ev['event'] ?? '');
+  const sgEvent = String(ev.event ?? '');
   const type: WebhookEventType = EVENT_MAP[sgEvent] ?? sgEvent;
-  const to = String(ev['email'] ?? '');
-  const msgId = String(ev['sg_message_id'] ?? ev['smtp_id'] ?? '');
-  const timestamp = ev['timestamp']
-    ? new Date(Number(ev['timestamp']) * 1000).toISOString()
+  const to = String(ev.email ?? '');
+  const msgId = String(ev.sg_message_id ?? ev.smtp_id ?? '');
+  const timestamp = ev.timestamp
+    ? new Date(Number(ev.timestamp) * 1000).toISOString()
     : new Date().toISOString();
 
   return {
@@ -62,8 +62,8 @@ function normalizeEvent(ev: Record<string, unknown>): WebhookEvent {
     email: {
       id: msgId,
       to: to ? [to] : [],
-      from: String(ev['from_email'] ?? ''),
-      subject: ev['subject'] ? String(ev['subject']) : undefined,
+      from: String(ev.from_email ?? ''),
+      subject: ev.subject ? String(ev.subject) : undefined,
       timestamp,
     },
     raw: ev,

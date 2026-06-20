@@ -492,7 +492,7 @@ describe('mailgun provider', () => {
 
     const [url, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
     expect(url).toBe('https://api.mailgun.net/v3/mg.example.com/messages');
-    const auth = (init.headers as Record<string, string>)['Authorization'] ?? '';
+    const auth = (init.headers as Record<string, string>).Authorization ?? '';
     expect(auth).toMatch(/^Basic /);
     const decoded = Buffer.from(auth.slice('Basic '.length), 'base64').toString();
     expect(decoded).toBe('api:key-abc');
