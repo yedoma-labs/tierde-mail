@@ -45,6 +45,7 @@ jobs:
           MAILGUN_API_KEY: ${{ secrets.MAILGUN_API_KEY }}
           MAILGUN_DOMAIN: ${{ vars.MAILGUN_DOMAIN }}
           MAILGUN_REGION: ${{ vars.MAILGUN_REGION }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
         run: |
           echo "TIERDE_TEST_FROM set: ${{ vars.TIERDE_TEST_FROM != '' }}"
           echo "TIERDE_TEST_TO set: ${{ vars.TIERDE_TEST_TO != '' }}"
@@ -54,6 +55,7 @@ jobs:
           echo "MAILGUN_API_KEY set: ${{ secrets.MAILGUN_API_KEY != '' }}"
           echo "MAILGUN_DOMAIN set: ${{ vars.MAILGUN_DOMAIN != '' }}"
           echo "MAILGUN_REGION set: ${{ vars.MAILGUN_REGION != '' }}"
+          echo "BREVO_API_KEY set: ${{ secrets.BREVO_API_KEY != '' }}"
       - name: Run provider smoketests
         env:
           TIERDE_TEST_FROM: ${{ vars.TIERDE_TEST_FROM }}
@@ -64,6 +66,7 @@ jobs:
           MAILGUN_API_KEY: ${{ secrets.MAILGUN_API_KEY }}
           MAILGUN_DOMAIN: ${{ vars.MAILGUN_DOMAIN }}
           MAILGUN_REGION: ${{ vars.MAILGUN_REGION }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           SES_REGION: ${{ secrets.SES_REGION }}
