@@ -57,6 +57,20 @@ await mailer.send(WelcomeEmail, {
 
 ## Providers
 
+| Provider | Package | Free tier | Notes |
+|---|---|---|---|
+| Resend | `providers/resend` | 3k/mo | |
+| SMTP | `providers/smtp` | — | requires `nodemailer` peer dep |
+| Mailpit / MailHog | `providers/mailpit` | local | SMTP catch-all for local dev |
+| AWS SES | `providers/ses` | 62k/mo (EC2) | requires `@aws-sdk/client-ses` peer dep |
+| SendGrid | `providers/sendgrid` | 100/day | |
+| Postmark | `providers/postmark` | 100/mo trial | |
+| Mailgun | `providers/mailgun` | 5k/mo | US/EU regions |
+| Brevo | `providers/brevo` | 300/day | formerly Sendinblue |
+| MailerSend | `providers/mailersend` | 3k/mo | |
+| SparkPost | `providers/sparkpost` | none | EU region + sandbox mode |
+| Mandrill | `providers/mandrill` | none | Mailchimp Transactional add-on |
+
 Import each provider from its subpath:
 
 ```ts
@@ -204,7 +218,7 @@ docker compose down
 |---|---|---|
 | Mailpit SMTP | `localhost:1025` | catch-all SMTP sink |
 | Mailpit UI | `http://localhost:8025` | browse captured emails |
-| WireMock | `http://localhost:8080` | HTTP mock — Resend, SendGrid, Postmark |
+| WireMock | `http://localhost:8080` | HTTP mock — all HTTP providers |
 | LocalStack | `http://localhost:4566` | AWS SES API mock |
 
 Every address you send to is accepted — no DNS, no deliverability concerns.
@@ -249,54 +263,50 @@ TIERDE_FROM_EMAIL=dev@example.com \
 # open http://localhost:8025 to see the email
 ```
 
-### Resend / SendGrid / Postmark (via WireMock)
+### HTTP providers via WireMock
 
-[WireMock](https://wiremock.org) stubs the HTTP APIs for Resend, SendGrid, and Postmark — calls succeed and return a mock message ID without touching the real provider. Stub mappings live in `scripts/wiremock/mappings/`.
+[WireMock](https://wiremock.org) stubs all HTTP provider APIs — calls succeed and return a mock message ID without touching any real provider. Stub mappings live in `scripts/wiremock/mappings/`.
 
-Use `*_BASE_URL` to redirect each provider at WireMock:
+Every HTTP provider accepts an optional `baseUrl` (or `PROVIDER_BASE_URL` env var) to redirect at WireMock:
 
 ```ts
-import { resend }   from '@yedoma-labs/tierde-mail/providers/resend';
-import { sendgrid } from '@yedoma-labs/tierde-mail/providers/sendgrid';
-import { postmark } from '@yedoma-labs/tierde-mail/providers/postmark';
+import { resend }      from '@yedoma-labs/tierde-mail/providers/resend';
+import { sendgrid }    from '@yedoma-labs/tierde-mail/providers/sendgrid';
+import { postmark }    from '@yedoma-labs/tierde-mail/providers/postmark';
+import { mailgun }     from '@yedoma-labs/tierde-mail/providers/mailgun';
+import { brevo }       from '@yedoma-labs/tierde-mail/providers/brevo';
+import { mailersend }  from '@yedoma-labs/tierde-mail/providers/mailersend';
+import { sparkpost }   from '@yedoma-labs/tierde-mail/providers/sparkpost';
+import { mandrill }    from '@yedoma-labs/tierde-mail/providers/mandrill';
 
-resend({   apiKey: 'test',  baseUrl: 'http://localhost:8080' })
-sendgrid({ apiKey: 'test',  baseUrl: 'http://localhost:8080' })
-postmark({ serverToken: 'test', baseUrl: 'http://localhost:8080' })
+const WM = 'http://localhost:8080';
+
+resend({     apiKey: 'test', baseUrl: WM })
+sendgrid({   apiKey: 'test', baseUrl: WM })
+postmark({   serverToken: 'test', baseUrl: WM })
+mailgun({    apiKey: 'test', domain: 'mg.example.com', baseUrl: WM })
+brevo({      apiKey: 'test', baseUrl: WM })
+mailersend({ apiToken: 'test', baseUrl: WM })
+sparkpost({  apiKey: 'test', baseUrl: WM })
+mandrill({   apiKey: 'test', baseUrl: WM })
 ```
 
-Or via environment variables:
+Or via environment variables (swap `TIERDE_PROVIDER` and the matching key):
 
 ```bash
-# resend
-RESEND_BASE_URL=http://localhost:8080
-
-# sendgrid
-SENDGRID_BASE_URL=http://localhost:8080
-
-# postmark
-POSTMARK_BASE_URL=http://localhost:8080
-```
-
-**Smoke-test via CLI:**
-
-```bash
-docker compose up -d
-
-# resend — users
 TIERDE_PROVIDER=resend RESEND_API_KEY=test RESEND_BASE_URL=http://localhost:8080 \
 TIERDE_FROM_EMAIL=dev@example.com \
   npx tierde send welcome --to anyone@example.com \
   --props '{"name":"Alice","loginUrl":"https://example.com"}'
-
-# resend — contributors (pnpm build first)
-TIERDE_PROVIDER=resend RESEND_API_KEY=test RESEND_BASE_URL=http://localhost:8080 \
-TIERDE_FROM_EMAIL=dev@example.com \
-  node dist/bin/tierde.js send welcome --to anyone@example.com \
-  --props '{"name":"Alice","loginUrl":"https://example.com"}'
 ```
 
-Swap `TIERDE_PROVIDER` and the matching `*_API_KEY` / `*_BASE_URL` pair for SendGrid or Postmark.
+**Run integration tests against WireMock:**
+
+```bash
+docker compose up -d
+TIERDE_TEST_FROM=dev@example.com TIERDE_TEST_TO=dev@example.com \
+TIERDE_TEST_WIREMOCK=true pnpm test
+```
 
 ### SES provider (via LocalStack)
 
@@ -634,20 +644,25 @@ Required variables:
 
 | Variable | Values |
 |---|---|
-| `TIERDE_PROVIDER` | `resend` \| `smtp` \| `mailpit` \| `ses` \| `sendgrid` \| `postmark` |
+| `TIERDE_PROVIDER` | see table below |
 | `TIERDE_FROM_EMAIL` | sender address |
 | `TIERDE_FROM_NAME` | sender display name (optional) |
 
 Provider-specific variables:
 
-| Provider | Variables |
-|---|---|
-| resend | `RESEND_API_KEY` |
-| smtp | `SMTP_HOST`, `SMTP_PORT` (default 587), `SMTP_USER`, `SMTP_PASS`, `SMTP_SECURE` |
-| mailpit | `MAILPIT_HOST` (default `localhost`), `MAILPIT_PORT` (default `1025`) |
-| ses | `SES_REGION` or `AWS_REGION`, `SES_ENDPOINT` (optional — setting this auto-uses dummy creds for mock servers), `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY` (optional override) |
-| sendgrid | `SENDGRID_API_KEY` |
-| postmark | `POSTMARK_SERVER_TOKEN` |
+| `TIERDE_PROVIDER` | Required variables | Optional |
+|---|---|---|
+| `resend` | `RESEND_API_KEY` | `RESEND_BASE_URL` |
+| `smtp` | `SMTP_HOST` | `SMTP_PORT` (587), `SMTP_USER`, `SMTP_PASS`, `SMTP_SECURE` |
+| `mailpit` | — | `MAILPIT_HOST` (`localhost`), `MAILPIT_PORT` (`1025`) |
+| `ses` | `SES_REGION` or `AWS_REGION` | `SES_ENDPOINT`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` |
+| `sendgrid` | `SENDGRID_API_KEY` | `SENDGRID_BASE_URL` |
+| `postmark` | `POSTMARK_SERVER_TOKEN` | `POSTMARK_BASE_URL` |
+| `mailgun` | `MAILGUN_API_KEY`, `MAILGUN_DOMAIN` | `MAILGUN_REGION` (`us`/`eu`), `MAILGUN_BASE_URL` |
+| `brevo` | `BREVO_API_KEY` | `BREVO_BASE_URL` |
+| `mailersend` | `MAILERSEND_API_TOKEN` | `MAILERSEND_BASE_URL` |
+| `sparkpost` | `SPARKPOST_API_KEY` | `SPARKPOST_BASE_URL` |
+| `mandrill` | `MANDRILL_API_KEY` | `MANDRILL_BASE_URL` |
 
 ---
 
