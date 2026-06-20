@@ -20,6 +20,7 @@ import type { MailMiddleware } from '../types.js';
 interface MailpitMessage {
   ID: string;
   Subject: string;
+  HTML: string;
   Attachments?: Array<{ FileName: string; ContentType: string; Size: number }>;
 }
 
@@ -46,11 +47,8 @@ async function findMailpitMessage(subjectFragment: string): Promise<MailpitMessa
 }
 
 async function getLatestMailpitMessage(subjectFragment: string): Promise<string> {
-  const match = await findMailpitMessage(subjectFragment);
-
-  const body = await fetch(`${MAILPIT_API}/message/${match.ID}/body.html`);
-  if (!body.ok) throw new Error(`Mailpit body.html returned ${body.status}`);
-  return body.text();
+  const msg = await getMailpitMessageMeta(subjectFragment);
+  return msg.HTML;
 }
 
 async function getMailpitMessageMeta(subjectFragment: string): Promise<MailpitMessage> {
