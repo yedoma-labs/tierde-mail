@@ -79,7 +79,8 @@ class MailerImpl implements Mailer {
     }
 
     const props = options.props;
-    const subject = template.subject(props);
+    const subject =
+      typeof template.subject === 'function' ? template.subject(props) : template.subject;
     // Prevent SMTP header injection via CRLF in subject
     if (/[\r\n]/.test(subject)) {
       throw new TypeError('Subject line contains invalid characters');

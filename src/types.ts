@@ -48,7 +48,7 @@ export interface SendOptions<Props> {
 }
 
 export interface EmailDefinition<Props> {
-  subject: (props: Props) => string;
+  subject: string | ((props: Props) => string);
   component: (props: Props) => React.ReactElement;
 }
 
