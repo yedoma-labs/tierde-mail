@@ -41,10 +41,11 @@ import { UsageAlert } from '../templates/UsageAlert.js';
 import { WeeklyDigest } from '../templates/WeeklyDigest.js';
 import { Welcome } from '../templates/Welcome.js';
 import { WinBack } from '../templates/WinBack.js';
+import { resolveSubject } from '../types.js';
 
 describe('built-in templates', () => {
   it('Welcome renders with required props', () => {
-    const subject = Welcome.subject({ name: 'Alice', loginUrl: 'https://app.com' });
+    const subject = resolveSubject(Welcome.subject, { name: 'Alice', loginUrl: 'https://app.com' });
     expect(subject).toContain('Alice');
 
     const html = renderEmail(Welcome.component({ name: 'Alice', loginUrl: 'https://app.com' }));

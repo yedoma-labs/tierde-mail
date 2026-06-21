@@ -1,17 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import { renderEmail } from '../render.js';
+import { resolveSubject } from '../types.js';
 import { Invoice } from '../templates/Invoice.js';
 import { PasswordReset } from '../templates/PasswordReset.js';
 import { WELCOME_STRINGS, Welcome } from '../templates/Welcome.js';
 
 describe('template i18n — string overrides', () => {
   it('Welcome uses English defaults with no strings prop', () => {
-    const subject = Welcome.subject({ name: 'Alice', loginUrl: 'https://app.com' });
+    const subject = resolveSubject(Welcome.subject, { name: 'Alice', loginUrl: 'https://app.com' });
     expect(subject).toBe('Welcome to Our App, Alice!');
   });
 
   it('Welcome overrides subject and heading', () => {
-    const subject = Welcome.subject({
+    const subject = resolveSubject(Welcome.subject, {
       name: 'Alice',
       loginUrl: 'https://app.com',
       strings: {

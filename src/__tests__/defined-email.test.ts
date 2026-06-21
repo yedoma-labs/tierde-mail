@@ -1,5 +1,6 @@
 import { describe, expect, expectTypeOf, it } from 'vitest';
 import { defineEmail } from '../define-email.js';
+import { resolveSubject } from '../types.js';
 import type { DefinedEmail, EmailTemplate } from '../types.js';
 
 interface Props {
@@ -18,6 +19,6 @@ describe('DefinedEmail type', () => {
     const asTemplate: EmailTemplate<Props> = asDefined;
 
     expectTypeOf<DefinedEmail<Props>>().toEqualTypeOf<EmailTemplate<Props>>();
-    expect(asTemplate.subject({ name: 'Ada' })).toBe('Hi Ada');
+    expect(resolveSubject(asTemplate.subject, { name: 'Ada' })).toBe('Hi Ada');
   });
 });

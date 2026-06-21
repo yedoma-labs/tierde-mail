@@ -2,6 +2,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import { createLogger } from '@yedoma-labs/suruk-logger';
 import { htmlToPlainText } from '../plain-text.js';
 import { renderEmail } from '../render.js';
+import { resolveSubject } from '../types.js';
 import type { EmailTemplate } from '../types.js';
 
 const logger = createLogger({ name: 'tierde-mail:preview' });
@@ -343,7 +344,7 @@ export function createPreviewServer(config: PreviewServerConfig): PreviewServer 
         let html = renderEmail(entry.template.component(entry.props));
         if (query.dark === '1') html = injectDarkMode(html);
         const text = htmlToPlainText(html);
-        const subject = entry.template.subject(entry.props);
+        const subject = resolveSubject(entry.template.subject, entry.props);
         sendJson(res, { name, subject, html, text });
       } catch (err) {
         logger.error(err instanceof Error ? err : new Error(String(err)), { email: name });

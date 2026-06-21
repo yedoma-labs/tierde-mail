@@ -36,6 +36,7 @@ import { describe, expect, it } from 'vitest';
 import { htmlToPlainText } from '../plain-text.js';
 import { renderEmail } from '../render.js';
 import { FeatureAnnouncement } from '../templates/FeatureAnnouncement.js';
+import { resolveSubject } from '../types.js';
 import type { Attachment, EmailMessage } from '../types.js';
 
 const FROM = process.env.TIERDE_TEST_FROM;
@@ -78,7 +79,7 @@ function baseMessage(provider: string): EmailMessage {
   return {
     from: { email: FROM! },
     to: { email: TO! },
-    subject: FeatureAnnouncement.subject({ ...props, appName: 'tierde-mail' }),
+    subject: resolveSubject(FeatureAnnouncement.subject, { ...props, appName: 'tierde-mail' }),
     html,
     text: htmlToPlainText(html),
     attachments: [],

@@ -64,6 +64,13 @@ export type EmailTemplate<Props> = EmailDefinition<Props> & {
  */
 export type DefinedEmail<Props> = EmailTemplate<Props>;
 
+export function resolveSubject<Props>(
+  subject: string | ((props: Props) => string),
+  props: Props,
+): string {
+  return typeof subject === 'function' ? subject(props) : subject;
+}
+
 export type MailMiddleware = (message: EmailMessage) => EmailMessage | Promise<EmailMessage>;
 
 export interface MailerConfig {

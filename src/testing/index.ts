@@ -1,6 +1,7 @@
 import { executeBatch } from '../mailer.js';
 import { htmlToPlainText } from '../plain-text.js';
 import { renderEmail } from '../render.js';
+import { resolveSubject } from '../types.js';
 import type {
   BatchSendOptions,
   BatchSendResult,
@@ -76,7 +77,7 @@ class CaptureMailer implements Mailer {
     options: SendOptions<Props>,
   ): Promise<SendResult> {
     const props = options.props;
-    const subject = template.subject(props);
+    const subject = resolveSubject(template.subject, props);
     const element = template.component(props);
     const html = renderEmail(element);
     const text = htmlToPlainText(html);
