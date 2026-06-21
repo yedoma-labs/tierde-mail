@@ -2,8 +2,8 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import { createLogger } from '@yedoma-labs/suruk-logger';
 import { htmlToPlainText } from '../plain-text.js';
 import { renderEmail } from '../render.js';
-import { resolveSubject } from '../types.js';
 import type { EmailTemplate } from '../types.js';
+import { resolveSubject } from '../types.js';
 
 const logger = createLogger({ name: 'tierde-mail:preview' });
 

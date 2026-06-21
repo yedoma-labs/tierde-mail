@@ -1,7 +1,6 @@
 import { executeBatch } from '../mailer.js';
 import { htmlToPlainText } from '../plain-text.js';
 import { renderEmail } from '../render.js';
-import { resolveSubject } from '../types.js';
 import type {
   BatchSendOptions,
   BatchSendResult,
@@ -14,6 +13,7 @@ import type {
   SendOptions,
   SendResult,
 } from '../types.js';
+import { resolveSubject } from '../types.js';
 import { normalizeAddress, normalizeAddresses } from '../validate.js';
 
 export interface CapturedEmail {

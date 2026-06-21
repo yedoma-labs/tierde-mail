@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { renderEmail } from '../render.js';
-import { resolveSubject } from '../types.js';
 import { Invoice } from '../templates/Invoice.js';
 import { PasswordReset } from '../templates/PasswordReset.js';
 import { WELCOME_STRINGS, Welcome } from '../templates/Welcome.js';
+import { resolveSubject } from '../types.js';
 
 describe('template i18n — string overrides', () => {
   it('Welcome uses English defaults with no strings prop', () => {

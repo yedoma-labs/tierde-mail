@@ -1,7 +1,7 @@
 import { describe, expect, expectTypeOf, it } from 'vitest';
 import { defineEmail } from '../define-email.js';
-import { resolveSubject } from '../types.js';
 import type { DefinedEmail, EmailTemplate } from '../types.js';
+import { resolveSubject } from '../types.js';
 
 interface Props {
   name: string;
