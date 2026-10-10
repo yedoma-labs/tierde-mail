@@ -203,9 +203,9 @@
   },
   "dependencies": {
     "@css-inline/css-inline": "^0.22.0",
-    "@yedoma-labs/bylyt-env-guard": "^0.3.5",
-    "@yedoma-labs/suruk-logger": "^0.2.0",
-    "@yedoma-labs/tuuru-chrono-tz": "^0.3.1",
+    "@yedoma-labs/bylyt-env-guard": "^0.3.7",
+    "@yedoma-labs/suruk-logger": "^0.3.1",
+    "@yedoma-labs/tuuru-chrono-tz": "^0.3.3",
     "html-to-text": "^10.0.1",
     "pino": "^10.4.0",
     "pino-pretty": "^13.2.0"
@@ -230,7 +230,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@typescript/typescript6": "^6.0.2",
-    "@vitest/coverage-v8": "^5.0.0",
+    "@vitest/coverage-v8": "^5.0.3",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "semantic-release": "^25.0.9",
@@ -239,7 +239,7 @@
     "typescript": "7.0.2",
     "vite": "^8.3.4",
     "vite-plugin-dts": "^5.1.2",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.3"
   },
   "bin": {
     "tierde": "./dist/bin/tierde.js"
