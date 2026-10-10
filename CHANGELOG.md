@@ -1,3 +1,10 @@
+## [0.9.2](https://github.com/yedoma-labs/tierde-mail/compare/v0.9.1...v0.9.2) (2026-10-10)
+
+
+### Bug Fixes
+
+* **deps:** override vulnerable transitive dependencies ([#9](https://github.com/yedoma-labs/tierde-mail/issues/9)) ([01b4369](https://github.com/yedoma-labs/tierde-mail/commit/01b436902c133b8693127a87b2a3cfb9c1ce7e7e))
+
 # Changelog
 
 All notable changes to `@yedoma-labs/tierde-mail` are documented here.
