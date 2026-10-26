@@ -1,3 +1,10 @@
+## [0.9.3](https://github.com/yedoma-labs/tierde-mail/compare/v0.9.2...v0.9.3) (2026-10-26)
+
+
+### Bug Fixes
+
+* **deps:** update dependencies to latest ([#17](https://github.com/yedoma-labs/tierde-mail/issues/17)) ([67f641b](https://github.com/yedoma-labs/tierde-mail/commit/67f641bc488c0785c4d42f9114239edce3c7f864))
+
 ## [0.9.2](https://github.com/yedoma-labs/tierde-mail/compare/v0.9.1...v0.9.2) (2026-10-10)
 
 
