@@ -27,13 +27,12 @@ jobs:
         run: pnpm run lint
 
   test:
-    name: Node ${{ matrix.node }} on ${{ matrix.os }}
+    name: Node 24 on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        node: [24]
 
     steps:
       - uses: actions/checkout@v7
@@ -43,7 +42,7 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 24
           cache: pnpm
 
       - name: Install dependencies
