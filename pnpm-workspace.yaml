@@ -10,6 +10,8 @@ minimumReleaseAgeExclude:
   - '@css-inline/*'
   - '@yedoma-labs/*'
   - '@types/node'
+  - '@smithy/core@3.37.0'
+  - '@smithy/node-http-handler@4.13.0'
 overrides:
   'postcss': '>=8.5.23'
   'source-map-js': '>=1.2.2'
