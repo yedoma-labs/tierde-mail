@@ -1,4 +1,5 @@
 import { htmlToPlainText } from './plain-text.js';
+import { ProviderHttpError } from './provider-error.js';
 import { renderEmail } from './render.js';
 import type {
   BatchItemResult,
@@ -23,6 +24,7 @@ function isMultiProvider(config: CreateMailerConfig): config is MultiProviderMai
 }
 
 function extractHttpStatus(error: unknown): number | undefined {
+  if (error instanceof ProviderHttpError) return error.status;
   if (!(error instanceof Error)) return undefined;
   const match = error.message.match(/\serror\s(\d{3}):/i);
   return match ? Number(match[1]) : undefined;
@@ -154,7 +156,9 @@ class MailerImpl implements Mailer {
         return await provider.send(message);
       } catch (err) {
         if (attempt >= this.#maxRetries || !this.#retryOn(err)) throw err;
-        await delay(this.#initialRetryDelayMs * 2 ** attempt);
+        // A server-supplied Retry-After takes precedence over the exponential backoff.
+        const retryAfterMs = err instanceof ProviderHttpError ? err.retryAfterMs : undefined;
+        await delay(retryAfterMs ?? this.#initialRetryDelayMs * 2 ** attempt);
         attempt++;
       }
     }

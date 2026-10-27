@@ -1,3 +1,4 @@
+import { providerHttpError } from '../provider-error.js';
 import type { EmailAddress, EmailMessage, EmailProvider, SendResult } from '../types.js';
 
 interface MandrillConfig {
@@ -81,7 +82,7 @@ class MandrillProvider implements EmailProvider {
 
     if (!response.ok) {
       const text = await response.text();
-      throw new Error(`Mandrill API error ${response.status}: ${text}`);
+      throw providerHttpError(response, 'Mandrill API error', text);
     }
 
     const data = (await response.json()) as Array<{

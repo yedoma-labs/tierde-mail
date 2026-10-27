@@ -1,3 +1,4 @@
+import { providerHttpError } from '../provider-error.js';
 import type { EmailAddress, EmailMessage, EmailProvider, SendResult } from '../types.js';
 
 interface ResendConfig {
@@ -60,7 +61,7 @@ class ResendProvider implements EmailProvider {
 
     if (!response.ok) {
       const text = await response.text();
-      throw new Error(`Resend API error ${response.status}: ${text}`);
+      throw providerHttpError(response, 'Resend API error', text);
     }
 
     const data = (await response.json()) as { id: string };

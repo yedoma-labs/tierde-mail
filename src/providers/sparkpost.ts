@@ -1,3 +1,4 @@
+import { providerHttpError } from '../provider-error.js';
 import type { EmailAddress, EmailMessage, EmailProvider, SendResult } from '../types.js';
 
 interface SparkPostConfig {
@@ -108,7 +109,7 @@ class SparkPostProvider implements EmailProvider {
 
     if (!response.ok) {
       const text = await response.text();
-      throw new Error(`SparkPost API error ${response.status}: ${text}`);
+      throw providerHttpError(response, 'SparkPost API error', text);
     }
 
     const data = (await response.json()) as { results?: { id?: string } };

@@ -395,6 +395,8 @@ const mailer = createMailer({
 });
 ```
 
+When an HTTP provider answers with `Retry-After` (delay-seconds or HTTP-date), that delay is used for the next retry instead of the exponential backoff. HTTP provider errors are `ProviderHttpError` instances exposing `status` and `retryAfterMs`, so a custom `retryOn` can inspect them without parsing the message.
+
 In failover mode, each provider is retried independently before the next failover target is tried.
 
 ---

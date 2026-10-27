@@ -20,6 +20,7 @@ export { defineEmail } from './define-email.js';
 export { embedImages } from './embed-images.js';
 export { createMailerFromEnv } from './env-mailer.js';
 export { createMailer } from './mailer.js';
+export { ProviderHttpError } from './provider-error.js';
 export type {
   BaseTemplateProps,
   ChangeRecord,

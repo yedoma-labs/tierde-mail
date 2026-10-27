@@ -82,9 +82,15 @@ export interface MailerConfig {
    * Default: 0 (no retries). Retries use exponential backoff starting at `initialRetryDelayMs`.
    */
   maxRetries?: number;
-  /** Initial delay in ms before the first retry. Doubles on each subsequent attempt. Default: 1000 */
+  /**
+   * Initial delay in ms before the first retry. Doubles on each subsequent attempt. Default: 1000.
+   * When the provider sent a `Retry-After` header, that delay is used for the retry instead.
+   */
   initialRetryDelayMs?: number;
-  /** Override the default retry predicate. Receives the thrown error; return true to retry. */
+  /**
+   * Override the default retry predicate. Receives the thrown error; return true to retry.
+   * HTTP provider errors are `ProviderHttpError` instances (`status`, `retryAfterMs`).
+   */
   retryOn?: (error: unknown) => boolean;
 }
 

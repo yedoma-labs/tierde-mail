@@ -1,3 +1,4 @@
+import { providerHttpError } from '../provider-error.js';
 import type { EmailAddress, EmailMessage, EmailProvider, SendResult } from '../types.js';
 
 interface SendGridConfig {
@@ -66,7 +67,7 @@ class SendGridProvider implements EmailProvider {
 
     if (!response.ok) {
       const text = await response.text();
-      throw new Error(`SendGrid API error ${response.status}: ${text}`);
+      throw providerHttpError(response, 'SendGrid API error', text);
     }
 
     const messageId = response.headers.get('X-Message-Id') ?? `sg-${Date.now()}`;

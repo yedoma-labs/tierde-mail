@@ -5,6 +5,7 @@ import { Heading } from '../components/Heading.js';
 import { Text } from '../components/Text.js';
 import { defineEmail } from '../define-email.js';
 import { createMailer } from '../mailer.js';
+import { ProviderHttpError } from '../provider-error.js';
 import type { EmailMessage, EmailProvider, MailMiddleware } from '../types.js';
 
 const TestEmail = defineEmail<{ name: string }>({
@@ -715,5 +716,63 @@ describe('mailer retry / backoff', () => {
       mailer.send(TestEmail, { to: 'b@example.com', props: { name: 'B' } }),
     ).rejects.toThrow('429');
     expect(provider.send).toHaveBeenCalledTimes(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Retry-After: server-supplied delay replaces the exponential backoff
+// ---------------------------------------------------------------------------
+describe('mailer Retry-After', () => {
+  it('retries a ProviderHttpError based on its status, not the message text', async () => {
+    let attempt = 0;
+    const provider: EmailProvider = {
+      name: 'rl',
+      send: vi.fn(async () => {
+        attempt++;
+        if (attempt === 1) throw new ProviderHttpError('rate limited', { status: 429 });
+        return { id: 'ok', provider: 'rl' };
+      }),
+    };
+    const mailer = createMailer({
+      provider,
+      from: 'a@example.com',
+      maxRetries: 1,
+      initialRetryDelayMs: 0,
+    });
+    const result = await mailer.send(TestEmail, { to: 'b@example.com', props: { name: 'B' } });
+    expect(result.id).toBe('ok');
+    expect(provider.send).toHaveBeenCalledTimes(2);
+  });
+
+  it('waits for the Retry-After delay instead of the backoff', async () => {
+    vi.useFakeTimers();
+    try {
+      let attempt = 0;
+      const provider: EmailProvider = {
+        name: 'rl',
+        send: vi.fn(async () => {
+          attempt++;
+          if (attempt === 1) {
+            throw new ProviderHttpError('slow down', { status: 429, retryAfterMs: 5000 });
+          }
+          return { id: 'ok', provider: 'rl' };
+        }),
+      };
+      const mailer = createMailer({
+        provider,
+        from: 'a@example.com',
+        maxRetries: 1,
+        initialRetryDelayMs: 100,
+      });
+      const pending = mailer.send(TestEmail, { to: 'b@example.com', props: { name: 'B' } });
+
+      await vi.advanceTimersByTimeAsync(4999);
+      expect(provider.send).toHaveBeenCalledTimes(1);
+      await vi.advanceTimersByTimeAsync(1);
+      expect(provider.send).toHaveBeenCalledTimes(2);
+      await expect(pending).resolves.toEqual({ id: 'ok', provider: 'rl' });
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

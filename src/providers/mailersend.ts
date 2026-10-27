@@ -1,3 +1,4 @@
+import { providerHttpError } from '../provider-error.js';
 import type { EmailAddress, EmailMessage, EmailProvider, SendResult } from '../types.js';
 
 interface MailerSendConfig {
@@ -60,7 +61,7 @@ class MailerSendProvider implements EmailProvider {
 
     if (!response.ok) {
       const text = await response.text();
-      throw new Error(`MailerSend API error ${response.status}: ${text}`);
+      throw providerHttpError(response, 'MailerSend API error', text);
     }
 
     // 202 Accepted — message ID is in the X-Message-Id response header

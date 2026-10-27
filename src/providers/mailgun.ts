@@ -1,3 +1,4 @@
+import { providerHttpError } from '../provider-error.js';
 import type { EmailAddress, EmailMessage, EmailProvider, SendResult } from '../types.js';
 
 interface MailgunConfig {
@@ -65,7 +66,7 @@ class MailgunProvider implements EmailProvider {
 
     if (!response.ok) {
       const text = await response.text();
-      throw new Error(`Mailgun API error ${response.status}: ${text}`);
+      throw providerHttpError(response, 'Mailgun API error', text);
     }
 
     const data = (await response.json()) as { id?: string };
