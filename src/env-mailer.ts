@@ -25,7 +25,7 @@ import type { Mailer } from './types.js';
  *
  * Per-provider:
  *   resend:      RESEND_API_KEY, RESEND_BASE_URL (optional, e.g. http://localhost:8080 for WireMock)
- *   smtp:        SMTP_HOST, SMTP_PORT (default 587), SMTP_USER, SMTP_PASS, SMTP_SECURE
+ *   smtp:        SMTP_HOST, SMTP_PORT (default 587), SMTP_USER, SMTP_PASS, SMTP_SECURE (optional: defaults to implicit TLS on port 465)
  *   ses:         AWS_REGION (or SES_REGION), SES_ENDPOINT (optional, e.g. http://localhost:4566 for LocalStack),
  *                AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY (optional, for mock/explicit creds)
  *   sendgrid:    SENDGRID_API_KEY, SENDGRID_BASE_URL (optional)
@@ -65,7 +65,7 @@ export function createMailerFromEnv(): Mailer {
       SMTP_PORT: eg.integer().default(587),
       SMTP_USER: eg.string().optional(),
       SMTP_PASS: eg.string().sensitive().optional(),
-      SMTP_SECURE: eg.boolean().default(false),
+      SMTP_SECURE: eg.boolean().optional(),
 
       // ses
       SES_REGION: eg.string().optional(),
@@ -131,7 +131,8 @@ export function createMailerFromEnv(): Mailer {
         provider: smtp({
           host: env.SMTP_HOST,
           port: env.SMTP_PORT,
-          secure: env.SMTP_SECURE,
+          // Unset: the smtp provider picks TLS mode from the port (465 = implicit TLS).
+          ...(env.SMTP_SECURE !== undefined ? { secure: env.SMTP_SECURE } : {}),
           ...(env.SMTP_USER && env.SMTP_PASS
             ? { auth: { user: env.SMTP_USER, pass: env.SMTP_PASS } }
             : {}),

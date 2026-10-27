@@ -1,4 +1,15 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { createElement } from 'react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { Text } from '../components/Text.js';
+import { defineEmail } from '../define-email.js';
+
+const mockSendMail = vi.fn(async () => ({ messageId: '<env@test>' }));
+const mockCreateTransport = vi.fn(() => ({ sendMail: mockSendMail }));
+
+vi.mock('nodemailer', () => ({
+  default: { createTransport: mockCreateTransport },
+  createTransport: mockCreateTransport,
+}));
 
 const _BASE_ENV = {
   TIERDE_FROM_EMAIL: 'sender@example.com',
@@ -174,5 +185,44 @@ describe('createMailerFromEnv', () => {
     });
     // mailer is created — from name wired through (no public API to inspect from, just verify no throw)
     expect(mailer).toBeDefined();
+  });
+
+  describe('smtp TLS mode', () => {
+    const Probe = defineEmail<Record<string, never>>({
+      subject: 'probe',
+      component: () => createElement(Text, null, 'probe'),
+    });
+
+    async function sendViaEnv(vars: Record<string, string>) {
+      mockCreateTransport.mockClear();
+      mockSendMail.mockClear();
+      const mailer = await make({
+        TIERDE_PROVIDER: 'smtp',
+        TIERDE_FROM_EMAIL: 'sender@example.com',
+        SMTP_HOST: 'smtp.example.com',
+        ...vars,
+      });
+      await mailer.send(Probe, { to: 'rcpt@example.com', props: {} });
+      const call = mockCreateTransport.mock.calls as unknown as [
+        { secure: boolean; port: number },
+      ][];
+      return call[0]?.[0] as { secure: boolean; port: number };
+    }
+
+    it('uses implicit TLS on port 465 when SMTP_SECURE is not set', async () => {
+      const opts = await sendViaEnv({ SMTP_PORT: '465' });
+      expect(opts.port).toBe(465);
+      expect(opts.secure).toBe(true);
+    });
+
+    it('uses STARTTLS on port 587 when SMTP_SECURE is not set', async () => {
+      const opts = await sendViaEnv({ SMTP_PORT: '587' });
+      expect(opts.secure).toBe(false);
+    });
+
+    it('honours an explicit SMTP_SECURE=false on port 465', async () => {
+      const opts = await sendViaEnv({ SMTP_PORT: '465', SMTP_SECURE: 'false' });
+      expect(opts.secure).toBe(false);
+    });
   });
 });
