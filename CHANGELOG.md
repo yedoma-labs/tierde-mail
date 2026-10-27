@@ -1,3 +1,15 @@
+# [0.10.0](https://github.com/yedoma-labs/tierde-mail/compare/v0.9.3...v0.10.0) (2026-10-27)
+
+
+### Bug Fixes
+
+* **env:** make SMTP_SECURE optional so port 465 uses implicit TLS ([a708206](https://github.com/yedoma-labs/tierde-mail/commit/a708206988f6d02309e3d90f0cb63b45c0a322aa))
+
+
+### Features
+
+* **retry:** honour Retry-After from HTTP providers ([24f7d1c](https://github.com/yedoma-labs/tierde-mail/commit/24f7d1c75187aeabbe70ba37ee574b091145579d))
+
 ## [0.9.3](https://github.com/yedoma-labs/tierde-mail/compare/v0.9.2...v0.9.3) (2026-10-26)
 
 
