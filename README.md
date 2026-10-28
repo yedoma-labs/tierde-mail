@@ -10,8 +10,6 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-6-blue.svg)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **тиэрдэ** (*tierde*) — Yakutian (Sakha) for "deliver / forward"
-
 Modern email library for Node.js — JSX templates, multi-provider sending, TypeScript-first.
 
 ```
